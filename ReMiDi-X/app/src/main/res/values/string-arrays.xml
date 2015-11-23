@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string-array name="specimen_array">
+        <item>Blood</item>
+        <item>Stool</item>
+        <item>Sputum</item>
+        <item>Skin slit</item>
+        <item>Reproductive tract specimen</item>
+    </string-array>
+
+    <string-array name="blood_disease_array">
+        <item>Malaria</item>
+        <item>Filariasis</item>
+    </string-array>
+
+    <string-array name="stool_disease_array">
+        <item>Ascariasis</item>
+        <item>Trichuriasis</item>
+        <item>Hookworm infection</item>
+        <item>Schistosomiasis</item>
+        <item>Taeniasis</item>
+        <item>Heterophyidiasis</item>
+        <item>Paragonimiasis</item>
+        <item>Echinostomiasis</item>
+        <item>Capillariasis</item>
+        <item>Giardiasis</item>
+    </string-array>
+
+    <string-array name="sputum_disease_array">
+        <item>Tuberculosis</item>
+    </string-array>
+
+    <string-array name="skinslit_disease_array">
+        <item>Leprosy</item>
+    </string-array>
+
+    <string-array name="reprotract_disease_array">
+        <item>Gonorrhea</item>
+        <item>Bacterial vaginosis</item>
+        <item>Candidiasis</item>
+    </string-array>
+
+</resources>

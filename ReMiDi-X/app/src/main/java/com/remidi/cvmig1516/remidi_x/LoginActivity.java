@@ -222,18 +222,6 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
 
      }
 
-     /*
-     private interface ProfileQuery {
-          String[] PROJECTION = {
-                  ContactsContract.CommonDataKinds.Email.ADDRESS,
-                  ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-          };
-
-          int ADDRESS = 0;
-          int IS_PRIMARY = 1;
-     }
-     */
-
      private interface ProfileQuery {
           String[] PROJECTION = {
                   ContactsContract.CommonDataKinds.Email.ADDRESS,
