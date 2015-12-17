@@ -1,11 +1,14 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class LabelerSettings extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
 
@@ -45,7 +48,6 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
      public void onNothingSelected(AdapterView<?> parent) {
           // Another interface callback
      }
-     //}
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,20 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
           ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
           adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
           disease_spinner.setAdapter(adapter2);
+     }
+
+     public void labelerSettingsOK(View view) {
+
+          Spinner disease_spinner = (Spinner) findViewById(R.id.disease_spinner);
+          if ((disease_spinner.getSelectedItem()).equals("Malaria")) {
+               Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
+               startActivity(intent);
+          }
+          else {
+               Toast toast = Toast.makeText(getApplicationContext(), "Feature not available", Toast.LENGTH_SHORT);
+               toast.show();
+          }
+
      }
 
 

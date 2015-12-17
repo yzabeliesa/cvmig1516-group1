@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:gravity="center_vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Diagnosis"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="10dp"/>
+
+    <RadioGroup
+        android:id="@+id/labeler_diagnosis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left">
+
+        <RadioButton
+            android:id="@+id/labeler_negative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Not infected with malaria"/>
+
+        <RadioButton
+            android:id="@+id/labeler_positive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Infected with malaria" />
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Species"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="15dp"/>
+
+    <RadioGroup
+        android:id="@+id/labeler_species"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Plasmodium falciparum"
+            />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Plasmodium vivax"/>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Plasmodium malariae"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/labeler_malaria_comments_label"
+        android:id="@+id/labeler_label"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="15dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/labeler_comments"
+        android:layout_gravity="center_horizontal"/>
+
+    <Button
+        android:id="@+id/labeler_send_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Send"
+        android:layout_marginTop="20dp"/>
+
+</LinearLayout>

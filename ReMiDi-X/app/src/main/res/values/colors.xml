@@ -5,4 +5,6 @@
     <color name="yellow">#ffcf56</color>
     <color name="green">#87d769</color>
     <color name="red">#ff4f54</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

@@ -16,7 +16,7 @@
     <string name="not_registered">"Not registered? Create an account."</string>
 
     <!-- Strings related to Main Menu -->
-    <string name="title_activity_main_menu">MainMenuActivity</string>
+    <string name="title_activity_main_menu">Menu</string>
 
     <string name="title_section1">Home</string>
     <string name="title_section2">Upload images</string>
@@ -38,6 +38,13 @@
     <string name="specimen_label">Specimen</string>
     <string name="labeler_setting_ok">OK</string>
 
-    <!-- Moar strings -->
+    <!-- String related to Labeler Malaria Main Activity -->
+    <string name="title_activity_labeler_malaria_main">Labeler: Malaria</string>
+    <string name="labeler_button">Label sample</string>
+    <string name="labeler_instructions">Tap on image to view in fullscreen.</string>
+
+    <!-- String related to Labeler Malaria Dialog Fragment -->
+    <string name="labeler_malaria_comments_label">Comments/Remarks</string>
+    <string name="title_activity_test">Test Activity</string>
 
 </resources>
