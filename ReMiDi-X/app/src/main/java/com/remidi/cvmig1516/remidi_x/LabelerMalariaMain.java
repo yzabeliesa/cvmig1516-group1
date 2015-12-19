@@ -14,15 +14,21 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import java.util.ArrayList;
+
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
+
+// File naming convention: img1234567_123
+
 public class LabelerMalariaMain extends ActionBarActivity {
 
      Drawable[] sample_images;
      Dialog labeldialog;
-     int pos;
+     int current_image = 0;
+     ArrayList patch_coordinates = new ArrayList<int[]>();
 
      /**
       * Whether or not the system UI should be auto-hidden after
@@ -53,7 +59,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           setContentView(R.layout.activity_labeler_malaria_main);
 
           sample_images = initializeImageArray();
-          pos = 0;
+          current_image = 0;
 
           mVisible = true;
           mControlsView = findViewById(R.id.fullscreen_content_controls);
@@ -204,6 +210,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public void labelImage(View view) {
+
           labeldialog = new Dialog(LabelerMalariaMain.this);
           labeldialog.setTitle("Label Image");
           labeldialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
@@ -213,13 +220,14 @@ public class LabelerMalariaMain extends ActionBarActivity {
                @Override
                public void onClick(View v) {
                     ImageView image = (ImageView)findViewById(R.id.fullscreen_content);
-                    pos++;
-                    pos%=5;
-                    image.setImageDrawable(sample_images[pos]);
+                    current_image++;
+                    current_image%=5;
+                    image.setImageDrawable(sample_images[current_image]);
                     labeldialog.hide();
                }
           });
           labeldialog.show();
+          updateProgress();
      }
 
      public Drawable[] initializeImageArray() {
@@ -234,8 +242,18 @@ public class LabelerMalariaMain extends ActionBarActivity {
           return images;
      }
 
-     public void createFile() {
-          
+     public void createXMLFile(String imgno, String patchno) {
+
+          XMLFileHandler xmlFile = new XMLFileHandler(getApplicationContext(),"img" + imgno + "_" + patchno + ".xml");
+          xmlFile.write("<?xml version=\"1.0\" encoding=\"utf-8\">");
+
+     }
+
+     public void updateProgress() {
+
+          XMLFileHandler progress_file = new XMLFileHandler(getApplicationContext(),"progress.txt");
+          progress_file.write(current_image + "");
+
      }
 
 

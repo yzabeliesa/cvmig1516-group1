@@ -25,7 +25,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Write to file"
+            android:text="Upload File 2"
             android:onClick="writeToFile"/>
 
         <Button
@@ -36,8 +36,26 @@
 
     </LinearLayout>
 
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal" >
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload file"
+            android:onClick="doUpload"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get status"
+            android:onClick="getStatus"/>
+
+    </LinearLayout>
 
     <TextView
+        android:id="@+id/some_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="File Contents"
@@ -50,5 +68,13 @@
         android:layout_height="wrap_content"
         android:text=""
         android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/exception_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="@color/red"
+        android:layout_marginTop="50dp" />
 
 </LinearLayout>

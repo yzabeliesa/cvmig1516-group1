@@ -17,11 +17,12 @@ import java.util.Scanner;
 public class XMLFileHandler {
 
      String filename;
+     String filepath;
      File file;
 
      public XMLFileHandler(Context context, String fn) {
-
           filename = fn;
+          filepath = context.getFilesDir() + "/" + filename;
           file = new File(context.getFilesDir(), filename);
           try {
                Log.d("FILE PROCESS", "CHECKING NEW FILE");
@@ -52,9 +53,7 @@ public class XMLFileHandler {
 
      }
 
-     public void append(String toWrite) {
-
-          toWrite = readContents() + toWrite;
+     public void write(String toWrite) {
 
           FileOutputStream fos = null;
           try {
@@ -67,6 +66,13 @@ public class XMLFileHandler {
           out.print(toWrite);
           out.flush();
           out.close();
+
+     }
+
+     public void append(String toWrite) {
+
+          toWrite = readContents() + toWrite;
+          write(toWrite);
 
      }
 
