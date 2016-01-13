@@ -24,13 +24,13 @@
             android:id="@+id/labeler_negative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Not infected with malaria"/>
+            android:text="Not infected"/>
 
         <RadioButton
             android:id="@+id/labeler_positive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Infected with malaria" />
+            android:text="Infected" />
 
     </RadioGroup>
 
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Species"
+        android:text="Parasites present"
         android:layout_gravity="center_horizontal"
         android:paddingTop="15dp"/>
 
@@ -81,12 +81,39 @@
         android:id="@+id/labeler_comments"
         android:layout_gravity="center_horizontal"/>
 
-    <Button
-        android:id="@+id/labeler_send_button"
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Send"
-        android:layout_marginTop="20dp"/>
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/labeler_dialog_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Cancel"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/labeler_dialog_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Delete"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/labeler_dialog_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Save"
+            android:layout_marginTop="20dp"/>
+
+    </LinearLayout>
+
+
 
 </LinearLayout>

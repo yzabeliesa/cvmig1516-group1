@@ -36,6 +36,13 @@ public class XMLFileHandler {
 
      }
 
+     public XMLFileHandler(Context context, String fn, String initMessage) {
+
+          new XMLFileHandler(context,fn);
+          write(initMessage);
+
+     }
+
      public String readContents() {
 
           StringBuilder sb = new StringBuilder();

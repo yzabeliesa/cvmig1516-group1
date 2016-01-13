@@ -40,7 +40,7 @@
 
     <!-- String related to Labeler Malaria Main Activity -->
     <string name="title_activity_labeler_malaria_main">Labeler: Malaria</string>
-    <string name="labeler_button">Label sample</string>
+    <string name="labeler_button">Send diagnosis</string>
     <string name="labeler_instructions">Tap on image to view in fullscreen.</string>
 
     <!-- String related to Labeler Malaria Dialog Fragment -->

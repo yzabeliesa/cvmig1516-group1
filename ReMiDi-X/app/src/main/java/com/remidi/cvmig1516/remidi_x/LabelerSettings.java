@@ -14,6 +14,7 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
 
      Spinner specimen_spinner;
      Spinner disease_spinner;
+     String validator = "";
 
      //public class SpecimenSpinnerActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
@@ -64,19 +65,20 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
           ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
           adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
           disease_spinner.setAdapter(adapter2);
+
+          validator = "Test";
      }
 
      public void labelerSettingsOK(View view) {
 
           Spinner disease_spinner = (Spinner) findViewById(R.id.disease_spinner);
-          if ((disease_spinner.getSelectedItem()).equals("Malaria")) {
-               Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
-               startActivity(intent);
-          }
-          else {
-               Toast toast = Toast.makeText(getApplicationContext(), "Feature not available", Toast.LENGTH_SHORT);
-               toast.show();
-          }
+          String disease = disease_spinner.getSelectedItem().toString();
+
+          Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
+          //disease = (disease.toLowerCase()).replace(' ', '_');
+          intent.putExtra("Disease", disease);
+          intent.putExtra("Validator", validator);
+          startActivity(intent);
 
      }
 

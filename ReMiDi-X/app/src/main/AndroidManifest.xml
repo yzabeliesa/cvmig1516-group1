@@ -9,40 +9,50 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name">
         </activity>
+
         <activity
             android:name=".MainMenuActivity"
             android:label="@string/app_name">
 
             <!-- insert intent and shit here -->
-
         </activity>
+
         <activity
             android:name=".LabelerSettings"
             android:label="Labeler Settings">
-        </activity>
-        <activity
-            android:name=".LabelerMalariaMain"
-            android:label="Labeler: Malaria">
-        </activity>
-        <activity
-            android:name=".TestActivity"
-            android:label="@string/title_activity_test">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
 
+        <activity
+            android:name=".LabelerMalariaMain"
+            android:label="Labeler: Malaria">
+        </activity>
+
+        <activity
+            android:name=".TestActivity"
+            android:label="@string/title_activity_test">
+        </activity>
+
+        <activity
+            android:name=".LabelerMalariaMainTest"
+            android:label="Labeler Main Test">
         </activity>
 
     </application>

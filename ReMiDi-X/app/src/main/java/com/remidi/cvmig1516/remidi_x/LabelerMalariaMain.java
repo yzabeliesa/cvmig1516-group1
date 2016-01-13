@@ -2,7 +2,9 @@ package com.remidi.cvmig1516.remidi_x;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -23,12 +26,57 @@ import java.util.ArrayList;
 
 // File naming convention: img1234567_123
 
+     /*
+
+     #0. Initialize
+          #- Get intent data
+          #- Load images
+          #- Load dialog box contents based on disease
+               - Set species RadioGroup dependency on diagnosis RadioGroup
+               - Set species contents based on disease
+               - Set diagnosis based on disease
+     1. Create box
+          - Touch listener: Action up & down
+          - Get 2 points from Action up & down
+          - Create box based on 2 points
+               - accessPatch(int patchno, boolean isNew)
+               - createPatch(float x1, float y1, float x2, float y2)
+               - Display patch number in middle
+          - Create new patch
+          - Show label dialog
+               - If tap + coors are within patches, show label dialog only (modify)
+     2. Show label dialog for patch
+          - Show patch number in title
+          - Cancel
+               - Close label dialog
+          - Delete
+               - Remove patch from patches
+               - Delete patch xml file if exists
+               - Reset patch numbers
+                    - Reset displayed patch numbers
+               - Close label dialog
+               - Toast: Patch deleted
+          - Save
+               - Save data in patch
+               - Close label dialog
+               - Toast: Patch created/modified
+     3. Send patches
+          - Create xml files for all patches
+          - Zip all xml files
+          - Send zip file
+
+      */
+
 public class LabelerMalariaMain extends ActionBarActivity {
 
      Drawable[] sample_images;
      Dialog labeldialog;
      int current_image = 0;
-     ArrayList patch_coordinates = new ArrayList<int[]>();
+
+     String disease = "";
+     String validator = "";
+     XMLFileHandler progress_file;
+     ArrayList<Patch> patches = new ArrayList<>();
 
      /**
       * Whether or not the system UI should be auto-hidden after
@@ -58,8 +106,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           setContentView(R.layout.activity_labeler_malaria_main);
 
-          sample_images = initializeImageArray();
-          current_image = 0;
+          // Get intent data
+          Bundle extras = getIntent().getExtras();
+
+          if (extras != null) {
+               disease = extras.getString("Disease");
+               validator = extras.getString("Validator");
+          }
+
+          // Create handler for progress file
+          progress_file = new XMLFileHandler(getApplicationContext(),"progress.txt");
+
+          // Initialize (turn into AsyncTask)
+          initialize();
+
+
+          // ----------------------------------------------
 
           mVisible = true;
           mControlsView = findViewById(R.id.fullscreen_content_controls);
@@ -67,7 +129,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
 
           // Set up the user interaction to manually show or hide the system UI.
-          mContentView.setOnClickListener(new View.OnClickListener() {
+          /*mContentView.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View view) {
                     toggle();
@@ -110,7 +172,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Trigger the initial hide() shortly after the activity has been
           // created, to briefly hint to the user that UI controls
           // are available.
-          delayedHide(100);
+          //delayedHide(100);
      }
 
      /**
@@ -118,6 +180,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
       * system UI. This is to prevent the jarring behavior of controls going away
       * while interacting with activity UI.
       */
+     /*
      private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
           @Override
           public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -199,22 +262,25 @@ public class LabelerMalariaMain extends ActionBarActivity {
                hide();
           }
      };
+     */
 
      /**
       * Schedules a call to hide() in [delay] milliseconds, canceling any
       * previously scheduled calls.
       */
+     /*
      private void delayedHide(int delayMillis) {
           mHideHandler.removeCallbacks(mHideRunnable);
           mHideHandler.postDelayed(mHideRunnable, delayMillis);
      }
+     */
 
      public void labelImage(View view) {
 
           labeldialog = new Dialog(LabelerMalariaMain.this);
           labeldialog.setTitle("Label Image");
           labeldialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
-          Button b = (Button)labeldialog.findViewById(R.id.labeler_send_button);
+          Button b = (Button)labeldialog.findViewById(R.id.labeler_dialog_save);
           b.setOnClickListener(new View.OnClickListener() {
 
                @Override
@@ -251,9 +317,171 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void updateProgress() {
 
-          XMLFileHandler progress_file = new XMLFileHandler(getApplicationContext(),"progress.txt");
           progress_file.write(current_image + "");
 
+     }
+
+     private class Patch extends XMLFileHandler{
+
+          int imgno;
+          int patchno;
+          float x1, y1, x2, y2;
+          String disease;
+          String analysis;
+          ArrayList<String> species = new ArrayList<>();
+          String remarks;
+
+          Patch(int imgno, int patchno, float x1, float y1, float x2, float y2) {
+
+               super(getApplicationContext(), "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
+               this.imgno = imgno;
+               this.patchno = patchno;
+               this.x1 = x1;
+               this.y1 = y1;
+               this.x2 = x2;
+               this.y2 = y2;
+               this.disease = "";
+               this.analysis = "";
+               this.remarks = "";
+
+          }
+
+          public String formatImgno() {
+               return String.format("%07d", imgno);
+          }
+
+          public String formatPatchno() {
+               return String.format("%03d", patchno);
+          }
+
+     }
+
+     // ------------------------------------------------------------------------------------------------------------------
+
+     public void initialize() {
+          // Load progress file data
+          current_image = Integer.parseInt(progress_file.readContents());
+
+          // Initialize images
+          sample_images = initializeImageArray();
+
+          // Set Activity title
+          this.setTitle("Labeler: " + disease);
+
+          // Load dialog box
+          labeldialog = new Dialog(LabelerMalariaMain.this);
+          labeldialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
+          final RadioButton positive = (RadioButton)findViewById(R.id.labeler_positive);
+          final RadioButton negative = (RadioButton)findViewById(R.id.labeler_negative);
+          positive.setText(disease + " Infected");
+          negative.setText("Not " + disease + " Infected");
+
+          String[] species;
+
+          switch (disease) {
+               case "Malaria":
+                    species = getResources().getStringArray(R.array.malaria_species);
+                    break;
+               case "Filariasis":
+                    species = getResources().getStringArray(R.array.filariasis_species);
+                    break;
+               case "Ascariasis":
+                    species = getResources().getStringArray(R.array.ascariasis_species);
+                    break;
+               case "Trichuriasis":
+                    species = getResources().getStringArray(R.array.trichuriasis_species);
+                    break;
+               case "Hookworm infection":
+                    species = getResources().getStringArray(R.array.hookworm_species);
+                    break;
+               case "Schistosomiasis":
+                    species = getResources().getStringArray(R.array.schistosomiasis_species);
+                    break;
+               case "Taeniasis":
+                    species = getResources().getStringArray(R.array.taeniasis_species);
+                    break;
+               case "Heterophyidiasis":
+                    species = getResources().getStringArray(R.array.heterophyidiasis_species);
+                    break;
+               case "Paragonimiasis":
+                    species = getResources().getStringArray(R.array.paragonimiasis_species);
+                    break;
+               case "Echinostomiasis":
+                    species = getResources().getStringArray(R.array.echinostomiasis_species);
+                    break;
+               case "Capillariasis":
+                    species = getResources().getStringArray(R.array.capillariasis_species);
+                    break;
+               case "Giardiasis":
+                    species = getResources().getStringArray(R.array.giardiasis_species);
+                    break;
+               case "Tuberculosis":
+                    species = getResources().getStringArray(R.array.tuberculosis_species);
+                    break;
+               case "Leprosy":
+                    species = getResources().getStringArray(R.array.leprosy_species);
+                    break;
+               case "Gonorrhea":
+                    species = getResources().getStringArray(R.array.gonorrhea_species);
+                    break;
+               case "Bacterial Vaginosis":
+                    species = getResources().getStringArray(R.array.vaginosis_species);
+                    break;
+               default:
+                    species = getResources().getStringArray(R.array.candidiasis_species);
+                    break;
+          }
+
+          final RadioGroup rg = (RadioGroup)findViewById(R.id.labeler_species);
+          rg.clearCheck();
+          for (int i = 0; i<species.length; i++) {
+               CheckBox cb = new CheckBox(getApplicationContext());
+               cb.setText(species[i]);
+               cb.setTextColor(getResources().getColor(R.color.black_overlay));
+          }
+
+          positive.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    if (positive.isChecked()) {
+                         for (int i = 0; i<rg.getChildCount(); i++) {
+                              rg.getChildAt(i).setEnabled(true);
+                         }
+                    }
+               }
+          });
+
+          negative.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    if (negative.isChecked()) {
+                         for (int i = 0; i<rg.getChildCount(); i++) {
+                              rg.getChildAt(i).setEnabled(false);
+                         }
+                    }
+               }
+          });
+
+          findViewById(R.id.labeler_dialog_cancel).setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    labeldialog.hide();
+               }
+          });
+
+     }
+
+     public void fetchPatchDataFromDialog(int patchno) {
+          Patch patch = patches.get(patchno);
+
+
+     }
+
+     public void createPatch(float x1, float y1, float x2, float y2) {
+          int patchno = patches.size();
+          Patch patch = new Patch(current_image, patchno,x1,y1,x2,y2);
+          patches.add(patch);
+          fetchPatchDataFromDialog(patchno);
      }
 
 
