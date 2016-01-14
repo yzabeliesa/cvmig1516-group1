@@ -1,6 +1,5 @@
 package com.remidi.cvmig1516.remidi_x;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,7 +21,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -341,16 +342,16 @@ public class LabelerMalariaMain extends ActionBarActivity {
           ArrayList<String> species = new ArrayList<>();
           String remarks;
 
-          Patch(int imgno, int patchno, float x1, float y1, float x2, float y2) {
+          Patch(int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
 
-               super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
+               super(context, disease + "-img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
                this.imgno = imgno;
                this.patchno = patchno;
                this.x1 = x1;
                this.y1 = y1;
                this.x2 = x2;
                this.y2 = y2;
-               this.disease = "";
+               this.disease = disease;
                this.analysis = "";
                this.remarks = "";
 
@@ -520,32 +521,20 @@ public class LabelerMalariaMain extends ActionBarActivity {
           Toast.makeText(context, "Fetch", Toast.LENGTH_SHORT).show();
           int patchno = current_patch;
           Patch patch = patches.get(patchno);
-          StringBuilder msg = new StringBuilder();
-
-          msg.append("Validator: " + validator);
-          msg.append("\nDisease: " + disease);
-          msg.append("\nImage No.: " + current_image);
-          msg.append("\nPatch No.: " + patchno);
-          msg.append("\nCoor 1: " + patch.x1 + ", " + patch.y1);
-          msg.append("\nCoor 2: " + patch.x2 + ", " + patch.y2);
 
           if (((RadioButton)labelDialog.findViewById(R.id.labeler_positive)).isChecked())
                patch.analysis = "Infected";
           else patch.analysis = "Not infected";
-          msg.append("\nAnalysis: " + patch.analysis);
 
-          msg.append("\nSpecies: ");
           RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
           for (int i = 0; i<rg.getChildCount(); i++) {
                CheckBox cb = (CheckBox)rg.getChildAt(i);
                if (cb.isChecked()) {
                     patch.species.add(cb.getText().toString());
-                    msg.append("\n\t" + cb.getText().toString());
                }
           }
 
           patch.remarks = ((EditText)labelDialog.findViewById(R.id.labeler_comments)).getText().toString();
-          msg.append("\nRemarks: " + patch.remarks);
 
           if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
           else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
@@ -566,7 +555,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void createPatch(float x1, float y1, float x2, float y2) {
           final int patchno = patches.size();
-          Patch patch = new Patch(current_image, patchno, x1, y1, x2, y2);
+          Patch patch = new Patch(current_image, patchno, x1, y1, x2, y2, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
@@ -574,40 +563,47 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void createPatchXML(int patchno) {
 
-          /*
-          <?xml version="1.0" encoding="utf-8"?>
-          <!-- this xml file contains the information of the diagnosis of a validator to a certain patch cell of a sample image of any diseases -->
+          Patch patch = patches.get(patchno);
 
-          <validation>
-               <patchno></patchno> <!-- patch number of the cell (patch) -->
-               <validator></validator> <!-- id of the validator -->
-               <imageno></imageno> <!-- image number of the source image -->
+          patch.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 
-               <ulcoordinate> <!-- upper left coordinate of the patch -->
-                    <item></item> <!-- x coordinate -->
-                    <item></item> <!-- y coordinate -->
-               </ulcoordinate>
+          patch.append("\n\n<validation>");
+          patch.append("\n\t<patchno>" + patch.patchno +"</patchno>");
+          patch.append("\n\t<validator>" + validator + "</validator>");
+          patch.append("\n\t<imageno>" + patch.imgno + "</imageno>");
 
-               <lrcoordinate> <!-- lower right coordinate of the patch -->
-                    <item></item> <!-- x coordinate -->
-                    <item></item> <!-- y coordinate -->
-               </lrcoordinate>
+          patch.append("\n\n\t<ulcoordinate>");
+          patch.append("\n\t\t<x>" + patch.x1 + "</x>");
+          patch.append("\n\t\t<y>" + patch.y1 + "</y>");
+          patch.append("\n\t</ulcoordinate>");
 
-               <disease></disease> <!-- name of the  disease the patch is tested -->
-               <diagnosis>
-                    <analysis></analysis>  <!-- positive or negative -->
-                    <species> <!-- If negative, this is empty. Else, this will contain what are the species present in this patch  -->
-                         <item></item>
-                    </species>
-                    <remarks></remarks> <!-- additional remarks -->
-               </diagnosis>
+          patch.append("\n\n\t<lrcoordinate>");
+          patch.append("\n\t\t<x>" + patch.x2 + "</x>");
+          patch.append("\n\t\t<y>" + patch.y2 + "</y>");
+          patch.append("\n\t</lrcoordinate>");
 
-               <timestamp></timestamp> <!-- timestamp validated -->
-          </validation>
-           */
+          patch.append("\n\n\t<disease>" + patch.disease + "</disease>");
+          patch.append("\n\t<diagnosis>");
+          patch.append("\n\t\t<analysis>");
+          for (int i = 0; i<patch.species.size(); i++) {
+               patch.append("\n\t\t\t<item>" + patch.species.get(i) + "</item>");
+          }
+          patch.append("\n\t\t</analysis>");
+          patch.append("\n\t\t<remarks>" + patch.remarks + "</remarks>");
+          patch.append("\n\t</diagnosis>");
+
+          patch.append("\n\t<timestamp>" + new Timestamp(Calendar.getInstance().getTime().getTime()) + "</timestamp>");
+          patch.append("\n</validation>");
 
           //XMLFileHandler xmlFile = new XMLFileHandler(context,"img" + imgno + "_" + patchno + ".xml");
           //xmlFile.write("<?xml version=\"1.0\" encoding=\"utf-8\">");
+          /*
+          java.util.Date date= new java.util.Date();
+	 System.out.println(new Timestamp(date.getTime()));
+	 new Timestamp(new Date().getTime());
+	 Date date = Timestamp(Calendar.getInstance().getTime().getTime());
+
+           */
 
      }
 
