@@ -1,9 +1,12 @@
 package com.remidi.cvmig1516.remidi_x;
 
-import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -13,9 +16,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -39,7 +44,7 @@ import java.util.ArrayList;
           - Touch listener: Action up & down
           - Get 2 points from Action up & down
           - Create box based on 2 points
-               - accessPatch(int patchno, boolean isNew)
+               - fetchDialogDataFromPatch(int patchno)
                - createPatch(float x1, float y1, float x2, float y2)
                - Display patch number in middle
           - Create new patch
@@ -57,9 +62,9 @@ import java.util.ArrayList;
                - Close label dialog
                - Toast: Patch deleted
           - Save
-               - Save data in patch
-               - Close label dialog
-               - Toast: Patch created/modified
+               #- Save data in patch
+               #- Close label dialog
+               #- Toast: Patch created/modified
      3. Send patches
           - Create xml files for all patches
           - Zip all xml files
@@ -70,8 +75,11 @@ import java.util.ArrayList;
 public class LabelerMalariaMain extends ActionBarActivity {
 
      Drawable[] sample_images;
-     Dialog labeldialog;
+     Dialog labelDialog;
      int current_image = 0;
+     int current_patch = 0;
+     boolean currently_new = true;
+     Context context;
 
      String disease = "";
      String validator = "";
@@ -103,8 +111,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
-
           setContentView(R.layout.activity_labeler_malaria_main);
+
+          context = getApplicationContext();
 
           // Get intent data
           Bundle extras = getIntent().getExtras();
@@ -115,10 +124,18 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Create handler for progress file
-          progress_file = new XMLFileHandler(getApplicationContext(),"progress.txt");
+          progress_file = new XMLFileHandler(context,"progress.txt");
+          if (progress_file.readContents() == "") progress_file.write("0");
+
+          // Set Activity title
+          this.setTitle("Labeler: " + disease);
+
+          // Load dialog box
+          labelDialog = new Dialog(LabelerMalariaMain.this);
+          labelDialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
 
           // Initialize (turn into AsyncTask)
-          initialize();
+          new Initializer().execute(disease);
 
 
           // ----------------------------------------------
@@ -277,10 +294,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void labelImage(View view) {
 
-          labeldialog = new Dialog(LabelerMalariaMain.this);
-          labeldialog.setTitle("Label Image");
-          labeldialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
-          Button b = (Button)labeldialog.findViewById(R.id.labeler_dialog_save);
+          labelDialog = new Dialog(LabelerMalariaMain.this);
+          labelDialog.setTitle("Label Image");
+          labelDialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
+          Button b = (Button)labelDialog.findViewById(R.id.labeler_dialog_save);
           b.setOnClickListener(new View.OnClickListener() {
 
                @Override
@@ -289,10 +306,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     current_image++;
                     current_image%=5;
                     image.setImageDrawable(sample_images[current_image]);
-                    labeldialog.hide();
+                    labelDialog.hide();
                }
           });
-          labeldialog.show();
+          labelDialog.show();
           updateProgress();
      }
 
@@ -306,13 +323,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           images[4] = getResources().getDrawable(R.drawable.img0000000_004);
 
           return images;
-     }
-
-     public void createXMLFile(String imgno, String patchno) {
-
-          XMLFileHandler xmlFile = new XMLFileHandler(getApplicationContext(),"img" + imgno + "_" + patchno + ".xml");
-          xmlFile.write("<?xml version=\"1.0\" encoding=\"utf-8\">");
-
      }
 
      public void updateProgress() {
@@ -333,7 +343,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           Patch(int imgno, int patchno, float x1, float y1, float x2, float y2) {
 
-               super(getApplicationContext(), "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
+               super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
                this.imgno = imgno;
                this.patchno = patchno;
                this.x1 = x1;
@@ -349,30 +359,43 @@ public class LabelerMalariaMain extends ActionBarActivity {
           public String formatImgno() {
                return String.format("%07d", imgno);
           }
-
           public String formatPatchno() {
                return String.format("%03d", patchno);
           }
 
      }
 
-     // ------------------------------------------------------------------------------------------------------------------
 
-     public void initialize() {
+     /*
+      ------------------------------------------------------------------------------------------------------------------
+                                                            METHODS
+      ------------------------------------------------------------------------------------------------------------------
+     */
+
+     public void showDialogBox(View view) { // For testing only
+          createPatch(1,2,3,4);
+          Toast.makeText(context, "New patch!", Toast.LENGTH_SHORT).show();
+          labelDialog.setTitle("Patch " + current_patch + 1);
+          /*Button b = (Button)labelDialog.findViewById(R.id.labeler_dialog_save);
+          b.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    fetchPatchDataFromDialog();
+                    labelDialog.hide();
+               }
+          });*/
+          labelDialog.show();
+     }
+
+     public void initialize(String disease) {
           // Load progress file data
           current_image = Integer.parseInt(progress_file.readContents());
 
           // Initialize images
           sample_images = initializeImageArray();
 
-          // Set Activity title
-          this.setTitle("Labeler: " + disease);
-
-          // Load dialog box
-          labeldialog = new Dialog(LabelerMalariaMain.this);
-          labeldialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
-          final RadioButton positive = (RadioButton)findViewById(R.id.labeler_positive);
-          final RadioButton negative = (RadioButton)findViewById(R.id.labeler_negative);
+          final RadioButton positive = (RadioButton)labelDialog.findViewById(R.id.labeler_positive);
+          final RadioButton negative = (RadioButton)labelDialog.findViewById(R.id.labeler_negative);
           positive.setText(disease + " Infected");
           negative.setText("Not " + disease + " Infected");
 
@@ -432,19 +455,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     break;
           }
 
-          final RadioGroup rg = (RadioGroup)findViewById(R.id.labeler_species);
-          rg.clearCheck();
+          final RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
+          rg.removeAllViews();
+
           for (int i = 0; i<species.length; i++) {
-               CheckBox cb = new CheckBox(getApplicationContext());
+               CheckBox cb = new CheckBox(context);
                cb.setText(species[i]);
                cb.setTextColor(getResources().getColor(R.color.black_overlay));
+               cb.setEnabled(false);
+               rg.addView(cb);
           }
 
           positive.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
                     if (positive.isChecked()) {
-                         for (int i = 0; i<rg.getChildCount(); i++) {
+                         for (int i = 0; i < rg.getChildCount(); i++) {
                               rg.getChildAt(i).setEnabled(true);
                          }
                     }
@@ -455,33 +481,160 @@ public class LabelerMalariaMain extends ActionBarActivity {
                @Override
                public void onClick(View v) {
                     if (negative.isChecked()) {
-                         for (int i = 0; i<rg.getChildCount(); i++) {
+                         for (int i = 0; i < rg.getChildCount(); i++) {
                               rg.getChildAt(i).setEnabled(false);
                          }
                     }
                }
           });
 
-          findViewById(R.id.labeler_dialog_cancel).setOnClickListener(new View.OnClickListener() {
+          labelDialog.findViewById(R.id.labeler_dialog_cancel).setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
-                    labeldialog.hide();
+                    labelDialog.hide();
                }
           });
 
+
+          labelDialog.findViewById(R.id.labeler_dialog_save).setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    fetchPatchDataFromDialog();
+                    labelDialog.hide();
+               }
+          });
+
+          labelDialog.findViewById(R.id.labeler_dialog_delete).setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    deletePatch(v);
+                    labelDialog.hide();
+               }
+          });
+
+
      }
 
-     public void fetchPatchDataFromDialog(int patchno) {
+     public void fetchPatchDataFromDialog() {
+
+          Toast.makeText(context, "Fetch", Toast.LENGTH_SHORT).show();
+          int patchno = current_patch;
           Patch patch = patches.get(patchno);
+          StringBuilder msg = new StringBuilder();
 
+          msg.append("Validator: " + validator);
+          msg.append("\nDisease: " + disease);
+          msg.append("\nImage No.: " + current_image);
+          msg.append("\nPatch No.: " + patchno);
+          msg.append("\nCoor 1: " + patch.x1 + ", " + patch.y1);
+          msg.append("\nCoor 2: " + patch.x2 + ", " + patch.y2);
 
+          if (((RadioButton)labelDialog.findViewById(R.id.labeler_positive)).isChecked())
+               patch.analysis = "Infected";
+          else patch.analysis = "Not infected";
+          msg.append("\nAnalysis: " + patch.analysis);
+
+          msg.append("\nSpecies: ");
+          RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
+          for (int i = 0; i<rg.getChildCount(); i++) {
+               CheckBox cb = (CheckBox)rg.getChildAt(i);
+               if (cb.isChecked()) {
+                    patch.species.add(cb.getText().toString());
+                    msg.append("\n\t" + cb.getText().toString());
+               }
+          }
+
+          patch.remarks = ((EditText)labelDialog.findViewById(R.id.labeler_comments)).getText().toString();
+          msg.append("\nRemarks: " + patch.remarks);
+
+          if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
+          else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
+
+     }
+
+     public void deletePatch(View view) {
+          Toast.makeText(context, "Delete", Toast.LENGTH_SHORT).show();
+          if (patches.size() != 0) {
+               int patchno = current_patch;
+               patches.remove(patchno);
+               for (int i = 0; i < patches.size(); i++) {
+                    patches.get(i).patchno = i;
+               }
+          }
+          // reset displayed patch number
      }
 
      public void createPatch(float x1, float y1, float x2, float y2) {
-          int patchno = patches.size();
-          Patch patch = new Patch(current_image, patchno,x1,y1,x2,y2);
+          final int patchno = patches.size();
+          Patch patch = new Patch(current_image, patchno, x1, y1, x2, y2);
           patches.add(patch);
-          fetchPatchDataFromDialog(patchno);
+          currently_new = true;
+          current_patch = patchno;
+     }
+
+     public void createPatchXML(int patchno) {
+
+          /*
+          <?xml version="1.0" encoding="utf-8"?>
+          <!-- this xml file contains the information of the diagnosis of a validator to a certain patch cell of a sample image of any diseases -->
+
+          <validation>
+               <patchno></patchno> <!-- patch number of the cell (patch) -->
+               <validator></validator> <!-- id of the validator -->
+               <imageno></imageno> <!-- image number of the source image -->
+
+               <ulcoordinate> <!-- upper left coordinate of the patch -->
+                    <item></item> <!-- x coordinate -->
+                    <item></item> <!-- y coordinate -->
+               </ulcoordinate>
+
+               <lrcoordinate> <!-- lower right coordinate of the patch -->
+                    <item></item> <!-- x coordinate -->
+                    <item></item> <!-- y coordinate -->
+               </lrcoordinate>
+
+               <disease></disease> <!-- name of the  disease the patch is tested -->
+               <diagnosis>
+                    <analysis></analysis>  <!-- positive or negative -->
+                    <species> <!-- If negative, this is empty. Else, this will contain what are the species present in this patch  -->
+                         <item></item>
+                    </species>
+                    <remarks></remarks> <!-- additional remarks -->
+               </diagnosis>
+
+               <timestamp></timestamp> <!-- timestamp validated -->
+          </validation>
+           */
+
+          //XMLFileHandler xmlFile = new XMLFileHandler(context,"img" + imgno + "_" + patchno + ".xml");
+          //xmlFile.write("<?xml version=\"1.0\" encoding=\"utf-8\">");
+
+     }
+
+
+
+     /*
+      ------------------------------------------------------------------------------------------------------------------
+                                                           ASYNCTASK
+      ------------------------------------------------------------------------------------------------------------------
+     */
+
+     private class Initializer extends AsyncTask<String, Void, Boolean> {
+
+          @Override
+          protected Boolean doInBackground(String... params) {
+               initialize(params[0]);
+               return true;
+          }
+
+          @Override
+          protected void onPostExecute(Boolean result) {
+          }
+
+          @Override
+          protected void onPreExecute() {
+          }
+
      }
 
 

@@ -46,5 +46,6 @@
     <!-- String related to Labeler Malaria Dialog Fragment -->
     <string name="labeler_malaria_comments_label">Comments/Remarks</string>
     <string name="title_activity_test">Test Activity</string>
+    <string name="title_activity_xmltest">XMLTest</string>
 
 </resources>

@@ -48,9 +48,15 @@ import java.util.Scanner;
 
 public class TestActivity extends ActionBarActivity {
 
-     public static final String FILE_NAME = "testfile.xml";
+     //public static final String FILE_NAME = "testfile.xml";
+     //public static final String FILE_NAME = "validation.xml";
+     public static final String FILE_NAME = "chunk_validation.xml";
+     //public String HTTP_HOST = "54.179.135.52";
+     //public String HOME = "/api/chunk/upload_chunk";
+     //public String HTTP_HOST = "10.40.107.82";
      public String HTTP_HOST = "192.168.1.26";
-     public String HOME = "/data/";
+     //public String HOME = "/data/";
+     public String HOME = "/chunk_data/";
      public int HTTP_PORT = 5000;
      public int ctr = 0;
      public String exception_message = "";
@@ -74,10 +80,42 @@ public class TestActivity extends ActionBarActivity {
 
      }
 
+     // ==========================================================================================
+     //                     UPLOAD TASK - This is the working one bitch!
+     // ==========================================================================================
+
      public void writeToFile(View view) {
 
           EditText field = (EditText) findViewById(R.id.test_message);
-          xmlfh.write("laman");
+          xmlfh.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                  "<!-- this xml file contains the information of the diagnosis of a validator to a certain patch cell of a sample image of any diseases -->\n" +
+                  "\n" +
+                  "<validation>\n" +
+                  "\t<patchno></patchno> <!-- patch number of the cell (patch) -->\n" +
+                  "\t<validator></validator> <!-- id of the validator -->\n" +
+                  "\t<imageno></imageno> <!-- image number of the source image -->\n" +
+                  "\n" +
+                  "\t<ulcoordinate> <!-- upper left coordinate of the patch -->\n" +
+                  "\t\t<x></x> <!-- x coordinate -->\n" +
+                  "\t\t<y></y> <!-- y coordinate -->\n" +
+                  "\t</ulcoordinate>\n" +
+                  "\n" +
+                  "\t<lrcoordinate> <!-- lower right coordinate of the patch -->\n" +
+                  "\t\t<x></x> <!-- x coordinate -->\n" +
+                  "\t\t<y></y> <!-- y coordinate -->\n" +
+                  "\t</lrcoordinate>\n" +
+                  "\n" +
+                  "\t<disease></disease> <!-- name of the  disease the patch is tested -->\n" +
+                  "\t<diagnosis>\n" +
+                  "\t\t<analysis></analysis>  <!-- positive or negative, specie present -->\n" +
+                  "\t\t<analysis></analysis> \n" +
+                  "\t\t<analysis></analysis> \n" +
+                  "\t</diagnosis>\n" +
+                  "\n" +
+                  "\t<remarks></remarks> <!-- additional remarks -->\n" +
+                  "\n" +
+                  "\t<timestamp></timestamp> <!-- timestamp validated -->\n" +
+                  "</validation>\n");
           field.setText("");
           new UploadTask().execute("http://" + HTTP_HOST + ":" + HTTP_PORT + HOME);
 
@@ -128,8 +166,12 @@ public class TestActivity extends ActionBarActivity {
      }
 
 
-     // ----------------------------------*******************---------------------------------------
-     // try this
+
+
+
+     // ==========================================================================================
+     //                                           DO UPLOAD
+     // ==========================================================================================
      public void doUpload(View view) {
 
           new Uploader().execute("");
@@ -179,7 +221,7 @@ public class TestActivity extends ActionBarActivity {
                     conn.setRequestProperty("ENCTYPE", "multipart/form-data");
                     conn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
                     conn.setRequestProperty("uploaded_file", filename);
-                    conn.setRequestProperty("Content-Length",String.valueOf(file.length()));
+                    //conn.setRequestProperty("Content-Length",String.valueOf(file.length()));
 
                     os = new DataOutputStream(conn.getOutputStream());
                     os.writeBytes(twoHyphens + boundary + lineEnd);
@@ -236,6 +278,115 @@ public class TestActivity extends ActionBarActivity {
           }
      }
 
+     // ==========================================================================================
+     //                                     Send File - Chunked
+     // ==========================================================================================
 
+     public void sendToFile(View view) {
+
+          EditText field = (EditText) findViewById(R.id.test_message);
+          xmlfh.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                  "<!-- this xml file contains the information of the diagnosis of a validator to a certain patch cell of a sample image of any diseases -->\n" +
+                  "\n" +
+                  "<validation>\n" +
+                  "\t<patchno></patchno> <!-- patch number of the cell (patch) -->\n" +
+                  "\t<validator></validator> <!-- id of the validator -->\n" +
+                  "\t<imageno></imageno> <!-- image number of the source image -->\n" +
+                  "\n" +
+                  "\t<ulcoordinate> <!-- upper left coordinate of the patch -->\n" +
+                  "\t\t<x></x> <!-- x coordinate -->\n" +
+                  "\t\t<y></y> <!-- y coordinate -->\n" +
+                  "\t</ulcoordinate>\n" +
+                  "\n" +
+                  "\t<lrcoordinate> <!-- lower right coordinate of the patch -->\n" +
+                  "\t\t<x></x> <!-- x coordinate -->\n" +
+                  "\t\t<y></y> <!-- y coordinate -->\n" +
+                  "\t</lrcoordinate>\n" +
+                  "\n" +
+                  "\t<disease></disease> <!-- name of the  disease the patch is tested -->\n" +
+                  "\t<diagnosis>\n" +
+                  "\t\t<analysis></analysis>  <!-- positive or negative, specie present -->\n" +
+                  "\t\t<analysis></analysis> \n" +
+                  "\t\t<analysis></analysis> \n" +
+                  "\t</diagnosis>\n" +
+                  "\n" +
+                  "\t<remarks></remarks> <!-- additional remarks -->\n" +
+                  "\n" +
+                  "\t<timestamp></timestamp> <!-- timestamp validated -->\n" +
+                  "</validation>\n");
+          field.setText("");
+          new SendTask().execute("http://" + HTTP_HOST + ":" + HTTP_PORT + HOME);
+
+     }
+
+     public String Send_File(String urlstr, String filepath) {
+          String result = null;
+          try {
+               final int cSize = 1024 * 1024; // size of chunk
+               File file = new File(filepath);
+               String filename=filepath.substring(filepath.lastIndexOf("/") + 1);
+               final long pieces = file.length()/cSize; // used to return file length.
+
+               HttpHost targetHost = null;
+               HttpClient hc = null;
+               HttpResponse hr = null;
+               HttpPost httpPost = new HttpPost(urlstr);
+               httpPost.setHeader("Accept", "text/xml");
+               httpPost.setHeader("Content-Type", "application/xml");
+
+               HttpParams params = new BasicHttpParams();
+               params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+
+               BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
+
+               for (int i= 0; i< pieces; i++) {
+                    byte[] buffer = new byte[cSize];
+
+                    if(stream.read(buffer) ==-1)
+                         break;
+
+                    ByteArrayInputStream arrayStream = new ByteArrayInputStream(buffer);
+
+                    String boundary = "-------------" + System.currentTimeMillis();
+                    MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
+                    multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+                    multipartEntity.setBoundary(boundary);
+
+                    multipartEntity.addPart("chunk_id", new StringBody(String.valueOf(i), ContentType.TEXT_PLAIN)); //Chunk Id used for identification.
+                    multipartEntity.addPart("chunk_data", new InputStreamBody(arrayStream, filename));
+
+                    httpPost.setEntity(multipartEntity.build());
+                    targetHost = new HttpHost(HTTP_HOST, HTTP_PORT, "http");
+                    hc = new DefaultHttpClient();
+                    hr = hc.execute(targetHost, httpPost);
+
+                    if (hr != null) {
+                         BasicResponseHandler responseHandler = new BasicResponseHandler();
+                         result = responseHandler.handleResponse(hr);
+                    } else {
+                         result = "Didn't work!";
+                    }
+               }
+
+               ((TextView)findViewById(R.id.exception_text)).setText(result);
+
+          } catch (Exception e) {
+               e.printStackTrace();
+               Log.d("OutputStream", e.getLocalizedMessage());
+          }
+
+          //Toast.makeText(getApplicationContext(), "Sent:\n" + result, Toast.LENGTH_LONG).show();
+          return result;
+     }
+
+     private class SendTask extends AsyncTask<String, Void, String> {
+          @Override
+          protected String doInBackground(String... params) {
+               return Send_File(params[0], xmlfh.filepath);
+          }
+          @Override
+          protected void onPostExecute(String result) {
+          }
+     }
 
 }
