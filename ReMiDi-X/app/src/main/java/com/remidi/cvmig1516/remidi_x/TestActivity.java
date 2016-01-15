@@ -54,9 +54,9 @@ public class TestActivity extends ActionBarActivity {
      //public String HTTP_HOST = "54.179.135.52";
      //public String HOME = "/api/chunk/upload_chunk";
      //public String HTTP_HOST = "10.40.107.82";
-     public String HTTP_HOST = "192.168.1.26";
-     //public String HOME = "/data/";
-     public String HOME = "/chunk_data/";
+     public String HTTP_HOST = "192.168.1.10";
+     public String HOME = "/data/";
+     //public String HOME = "/chunk_data/";
      public int HTTP_PORT = 5000;
      public int ctr = 0;
      public String exception_message = "";

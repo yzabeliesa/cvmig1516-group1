@@ -1,5 +1,6 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -87,6 +88,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
      XMLFileHandler progress_file;
      ArrayList<Patch> patches = new ArrayList<>();
 
+     float initX = 0;
+     float initY = 0;
+
      /**
       * Whether or not the system UI should be auto-hidden after
       * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -145,6 +149,45 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mControlsView = findViewById(R.id.fullscreen_content_controls);
           mContentView = findViewById(R.id.fullscreen_content);
 
+          // ----------------------------------------------
+
+          View.OnTouchListener patchBuilder = new View.OnTouchListener() {
+               @Override
+               public boolean onTouch(View v, MotionEvent event) {
+
+                    float currentX = event.getX();
+                    float currentY = event.getY();
+
+                    // Check if area is patched
+                    for (int i = 0; i<patches.size(); i++) {
+                         Patch patch = patches.get(i);
+                         if (isBetween(currentX,patch.x1,patch.x2) && isBetween(currentY,patch.y1,patch.y2)) {
+                              current_patch = i;
+                              currently_new = false;
+                              showDialogBox();
+                              Toast.makeText(context, "Patch existing", Toast.LENGTH_SHORT).show();
+                              return true;
+                         }
+                    }
+
+                    // If area is unpatched, create new patch
+                    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                         initX = currentX;
+                         initY = currentY;
+                    }
+                    else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                         float finalX = currentX;
+                         float finalY = currentY;
+                         if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
+                              createPatch(initX, initY, finalX, finalY);
+                         }
+                    }
+                    return true;
+               }
+          };
+
+          mContentView.setOnTouchListener(patchBuilder);
+
 
           // Set up the user interaction to manually show or hide the system UI.
           /*mContentView.setOnClickListener(new View.OnClickListener() {
@@ -158,10 +201,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // operations to prevent the jarring behavior of controls going away
           // while interacting with the UI.
           findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-          /*
-          final RadioGroup rg1 = (RadioGroup)findViewById(R.id.labeler_species);
-          for(int i = 0; i < rg1.getChildCount(); i++){
-               (rg1.getChildAt(i)).setEnabled(false);
+          rg1.getChildAt(i)).setEnabled(false);
           }
 
           RadioGroup radioGroup = (RadioGroup)findViewById(R.id.labeler_diagnosis);
@@ -332,14 +372,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
+     /*
+      ------------------------------------------------------------------------------------------------------------------
+                                                        PRIVATE CLASSES
+      ------------------------------------------------------------------------------------------------------------------
+     */
+
      private class Patch extends XMLFileHandler{
 
           int imgno;
           int patchno;
           float x1, y1, x2, y2;
           String disease;
-          String analysis;
-          ArrayList<String> species = new ArrayList<>();
+          ArrayList<String> analysis = new ArrayList<>();
           String remarks;
 
           Patch(int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
@@ -352,7 +397,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
                this.x2 = x2;
                this.y2 = y2;
                this.disease = disease;
-               this.analysis = "";
                this.remarks = "";
 
           }
@@ -369,24 +413,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      /*
       ------------------------------------------------------------------------------------------------------------------
-                                                            METHODS
+                                                         LOADER METHODS
       ------------------------------------------------------------------------------------------------------------------
      */
-
-     public void showDialogBox(View view) { // For testing only
-          createPatch(1,2,3,4);
-          Toast.makeText(context, "New patch!", Toast.LENGTH_SHORT).show();
-          labelDialog.setTitle("Patch " + current_patch + 1);
-          /*Button b = (Button)labelDialog.findViewById(R.id.labeler_dialog_save);
-          b.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View v) {
-                    fetchPatchDataFromDialog();
-                    labelDialog.hide();
-               }
-          });*/
-          labelDialog.show();
-     }
 
      public void initialize(String disease) {
           // Load progress file data
@@ -394,11 +423,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           // Initialize images
           sample_images = initializeImageArray();
-
-          final RadioButton positive = (RadioButton)labelDialog.findViewById(R.id.labeler_positive);
-          final RadioButton negative = (RadioButton)labelDialog.findViewById(R.id.labeler_negative);
-          positive.setText(disease + " Infected");
-          negative.setText("Not " + disease + " Infected");
 
           String[] species;
 
@@ -463,31 +487,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                CheckBox cb = new CheckBox(context);
                cb.setText(species[i]);
                cb.setTextColor(getResources().getColor(R.color.black_overlay));
-               cb.setEnabled(false);
                rg.addView(cb);
           }
-
-          positive.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View v) {
-                    if (positive.isChecked()) {
-                         for (int i = 0; i < rg.getChildCount(); i++) {
-                              rg.getChildAt(i).setEnabled(true);
-                         }
-                    }
-               }
-          });
-
-          negative.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View v) {
-                    if (negative.isChecked()) {
-                         for (int i = 0; i < rg.getChildCount(); i++) {
-                              rg.getChildAt(i).setEnabled(false);
-                         }
-                    }
-               }
-          });
 
           labelDialog.findViewById(R.id.labeler_dialog_cancel).setOnClickListener(new View.OnClickListener() {
                @Override
@@ -508,29 +509,82 @@ public class LabelerMalariaMain extends ActionBarActivity {
           labelDialog.findViewById(R.id.labeler_dialog_delete).setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
-                    deletePatch(v);
-                    labelDialog.hide();
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialog, int which) {
+                              switch (which){
+                                   case DialogInterface.BUTTON_POSITIVE:
+                                        deletePatch();
+                                        break;
+                                   case DialogInterface.BUTTON_NEGATIVE:
+                                        break;
+                              }
+                         }
+                    };
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                    builder.setMessage("Are you sure you want to permanently delete this patch?").setPositiveButton("Yes", dialogClickListener)
+                            .setNegativeButton("No", dialogClickListener).show();
                }
           });
 
+     }
+
+     public void initializeDialogBox() {
+
+          final RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
+          for (int i = 0; i<rg.getChildCount(); i++) {
+               ((CheckBox)rg.getChildAt(i)).setChecked(false);
+          }
+
+          ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText("");
+
+     }
+
+     public void loadDialogBox(int patchno) {
+
+          Patch patch = patches.get(patchno);
+          final RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
+          int j = 0;
+          for (int i = 0; i<rg.getChildCount(); i++) {
+               CheckBox cb = (CheckBox)rg.getChildAt(i);
+               if (patch.analysis.get(j).equals(cb.getText().toString())) {
+                    cb.setChecked(true);
+                    j++;
+               }
+               else cb.setChecked(false);
+          }
+
+          ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText("");
+
+     }
+
+
+     /*
+      ------------------------------------------------------------------------------------------------------------------
+                                                     FUNCTIONALITY METHODS
+      ------------------------------------------------------------------------------------------------------------------
+     */
+
+     public void showDialogBox() {
+
+          labelDialog.setTitle("Patch " + (current_patch+1));
+          if (currently_new) initializeDialogBox();
+          else loadDialogBox(current_patch);
+          labelDialog.show();
 
      }
 
      public void fetchPatchDataFromDialog() {
 
-          Toast.makeText(context, "Fetch", Toast.LENGTH_SHORT).show();
           int patchno = current_patch;
           Patch patch = patches.get(patchno);
-
-          if (((RadioButton)labelDialog.findViewById(R.id.labeler_positive)).isChecked())
-               patch.analysis = "Infected";
-          else patch.analysis = "Not infected";
 
           RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
           for (int i = 0; i<rg.getChildCount(); i++) {
                CheckBox cb = (CheckBox)rg.getChildAt(i);
                if (cb.isChecked()) {
-                    patch.species.add(cb.getText().toString());
+                    patch.analysis.add(cb.getText().toString());
                }
           }
 
@@ -541,16 +595,20 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
-     public void deletePatch(View view) {
-          Toast.makeText(context, "Delete", Toast.LENGTH_SHORT).show();
-          if (patches.size() != 0) {
+     public void deletePatch() {
+
+          if (patches.size() > 0) {
                int patchno = current_patch;
                patches.remove(patchno);
                for (int i = 0; i < patches.size(); i++) {
                     patches.get(i).patchno = i;
+                    // reset displayed patch number
                }
+               labelDialog.hide();
+               Toast.makeText(context, "Patch deleted!", Toast.LENGTH_SHORT).show();
           }
-          // reset displayed patch number
+          else Toast.makeText(context, "There are no patches to delete.", Toast.LENGTH_SHORT).show();
+
      }
 
      public void createPatch(float x1, float y1, float x2, float y2) {
@@ -559,6 +617,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
+          Toast.makeText(context, "Patch count: " + patches.size(), Toast.LENGTH_SHORT).show();
+          showDialogBox();
      }
 
      public void createPatchXML(int patchno) {
@@ -585,8 +645,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patch.append("\n\n\t<disease>" + patch.disease + "</disease>");
           patch.append("\n\t<diagnosis>");
           patch.append("\n\t\t<analysis>");
-          for (int i = 0; i<patch.species.size(); i++) {
-               patch.append("\n\t\t\t<item>" + patch.species.get(i) + "</item>");
+          for (int i = 0; i<patch.analysis.size(); i++) {
+               patch.append("\n\t\t\t<item>" + patch.analysis.get(i) + "</item>");
           }
           patch.append("\n\t\t</analysis>");
           patch.append("\n\t\t<remarks>" + patch.remarks + "</remarks>");
@@ -595,15 +655,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patch.append("\n\t<timestamp>" + new Timestamp(Calendar.getInstance().getTime().getTime()) + "</timestamp>");
           patch.append("\n</validation>");
 
-          //XMLFileHandler xmlFile = new XMLFileHandler(context,"img" + imgno + "_" + patchno + ".xml");
-          //xmlFile.write("<?xml version=\"1.0\" encoding=\"utf-8\">");
-          /*
-          java.util.Date date= new java.util.Date();
-	 System.out.println(new Timestamp(date.getTime()));
-	 new Timestamp(new Date().getTime());
-	 Date date = Timestamp(Calendar.getInstance().getTime().getTime());
+     }
 
-           */
+     public boolean isBetween(float num, float a, float b) {
+          float larger;
+          float smaller;
+          if (a>b) {
+               larger = a;
+               smaller = b;
+          }
+          else {
+               larger = b;
+               smaller = a;
+          }
+
+          if (larger >= num && smaller <= num) return true;
+          else return false;
 
      }
 
