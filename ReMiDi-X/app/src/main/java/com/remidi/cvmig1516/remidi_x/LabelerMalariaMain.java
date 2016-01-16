@@ -5,6 +5,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
@@ -12,6 +18,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -387,7 +394,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           ArrayList<String> analysis = new ArrayList<>();
           String remarks;
 
-          Patch(int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
+          Patch(Context context, int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
 
                super(context, disease + "-img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
                this.imgno = imgno;
@@ -409,7 +416,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
      }
-
 
      /*
       ------------------------------------------------------------------------------------------------------------------
@@ -555,9 +561,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
                else cb.setChecked(false);
           }
 
-          ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText("");
+          ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText(patch.remarks);
 
      }
+
 
 
      /*
@@ -613,7 +620,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void createPatch(float x1, float y1, float x2, float y2) {
           final int patchno = patches.size();
-          Patch patch = new Patch(current_image, patchno, x1, y1, x2, y2, disease);
+          Patch patch = new Patch(context, current_image, patchno, x1, y1, x2, y2, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
@@ -654,6 +661,39 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           patch.append("\n\t<timestamp>" + new Timestamp(Calendar.getInstance().getTime().getTime()) + "</timestamp>");
           patch.append("\n</validation>");
+
+     }
+
+     public void drawBox(View view) {
+          float x1, x2, y1, y2;
+          x1 = 100;
+          x2 = 500;
+          y1 = 100;
+          y2 = 500;
+
+          ImageView myImageView = (ImageView) mContentView;
+          Bitmap myBitmap = ((BitmapDrawable)myImageView.getDrawable()).getBitmap();
+          Paint myRectPaint = new Paint();
+
+          myRectPaint.setColor(Color.WHITE);
+          myRectPaint.setStrokeWidth(30);
+          myRectPaint.setStyle(Paint.Style.STROKE);
+          myRectPaint.setShadowLayer(5,2,2,Color.BLACK);
+
+          //Create a new image bitmap and attach a brand new canvas to it
+          Bitmap tempBitmap = Bitmap.createBitmap(myBitmap.getWidth(), myBitmap.getHeight(), Bitmap.Config.RGB_565);
+          Canvas tempCanvas = new Canvas(tempBitmap);
+
+          //Draw the image bitmap into the canvas
+          tempCanvas.drawBitmap(myBitmap, 0, 0, null);
+
+          //Draw everything else you want into the canvas, in this example a rectangle with rounded edges
+          tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
+
+          //Attach the canvas to the ImageView
+          myImageView.setImageBitmap(tempBitmap);
+          Toast.makeText(context, "Box created!!!", Toast.LENGTH_SHORT).show();
+
 
      }
 
