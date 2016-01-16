@@ -178,20 +178,23 @@ public class LabelerMalariaMain extends ActionBarActivity {
                               current_patch = i;
                               currently_new = false;
                               showDialogBox();
-                              Toast.makeText(context, "Patch existing", Toast.LENGTH_SHORT).show();
+                              Toast.makeText(context, "Patch existing", Toast.LENGTH_SHORT).show(); //test
                               return true;
                          }
                     }
 
                     // If area is unpatched, create new patch
                     if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                         Toast.makeText(context, "Start", Toast.LENGTH_SHORT).show();
                          initX = currentX;
                          initY = currentY;
                     }
                     else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                         Toast.makeText(context, "End", Toast.LENGTH_SHORT).show();
                          float finalX = currentX;
                          float finalY = currentY;
                          if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
+                              Toast.makeText(context, "Coors 1: " + initX + ", " + initY + "Coors 2: " + finalX + ", " + finalY, Toast.LENGTH_SHORT).show(); //test
                               createPatch(initX, initY, finalX, finalY);
                          }
                     }
@@ -201,151 +204,13 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           mContentView.setOnTouchListener(patchBuilder);
 
-
-          // Set up the user interaction to manually show or hide the system UI.
-          /*mContentView.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View view) {
-                    toggle();
-               }
-          });
-
-          // Upon interacting with UI controls, delay any scheduled hide()
-          // operations to prevent the jarring behavior of controls going away
-          // while interacting with the UI.
-          findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-          rg1.getChildAt(i)).setEnabled(false);
-          }
-
-          RadioGroup radioGroup = (RadioGroup)findViewById(R.id.labeler_diagnosis);
-          radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-               @Override
-               public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    if (checkedId==R.id.labeler_positive) {
-                         for(int i = 0; i < rg1.getChildCount(); i++){
-                              (rg1.getChildAt(i)).setEnabled(true);
-                         }
-                    }
-                    else {
-                         for(int i = 0; i < rg1.getChildCount(); i++){
-                              (rg1.getChildAt(i)).setEnabled(false);
-                         }
-                    }
-               }
-          });
-          */
      }
 
      @Override
      protected void onPostCreate(Bundle savedInstanceState) {
           super.onPostCreate(savedInstanceState);
 
-          // Trigger the initial hide() shortly after the activity has been
-          // created, to briefly hint to the user that UI controls
-          // are available.
-          //delayedHide(100);
      }
-
-     /**
-      * Touch listener to use for in-layout UI controls to delay hiding the
-      * system UI. This is to prevent the jarring behavior of controls going away
-      * while interacting with activity UI.
-      */
-     /*
-     private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-          @Override
-          public boolean onTouch(View view, MotionEvent motionEvent) {
-               if (AUTO_HIDE) {
-                    delayedHide(AUTO_HIDE_DELAY_MILLIS);
-               }
-               return false;
-          }
-     };
-
-     private void toggle() {
-          if (mVisible) {
-               hide();
-          } else {
-               show();
-          }
-     }
-
-     private void hide() {
-          // Hide UI first
-          ActionBar actionBar = getSupportActionBar();
-          if (actionBar != null) {
-               actionBar.hide();
-          }
-          mControlsView.setVisibility(View.GONE);
-          mVisible = false;
-
-          // Schedule a runnable to remove the status and navigation bar after a delay
-          mHideHandler.removeCallbacks(mShowPart2Runnable);
-          mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-     }
-
-     private final Runnable mHidePart2Runnable = new Runnable() {
-          @SuppressLint("InlinedApi")
-          @Override
-          public void run() {
-               // Delayed removal of status and navigation bar
-
-               // Note that some of these constants are new as of API 16 (Jelly Bean)
-               // and API 19 (KitKat). It is safe to use them, as they are inlined
-               // at compile-time and do nothing on earlier devices.
-               mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                       | View.SYSTEM_UI_FLAG_FULLSCREEN
-                       | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                       | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                       | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                       | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-          }
-     };
-
-     @SuppressLint("InlinedApi")
-     private void show() {
-          // Show the system bar
-          mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                  | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-          mVisible = true;
-
-          // Schedule a runnable to display UI elements after a delay
-          mHideHandler.removeCallbacks(mHidePart2Runnable);
-          mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-     }
-
-     private final Runnable mShowPart2Runnable = new Runnable() {
-          @Override
-          public void run() {
-               // Delayed display of UI elements
-               ActionBar actionBar = getSupportActionBar();
-               if (actionBar != null) {
-                    actionBar.show();
-               }
-               mControlsView.setVisibility(View.VISIBLE);
-          }
-     };
-
-     private final Handler mHideHandler = new Handler();
-     private final Runnable mHideRunnable = new Runnable() {
-          @Override
-          public void run() {
-               hide();
-          }
-     };
-     */
-
-     /**
-      * Schedules a call to hide() in [delay] milliseconds, canceling any
-      * previously scheduled calls.
-      */
-     /*
-     private void delayedHide(int delayMillis) {
-          mHideHandler.removeCallbacks(mHideRunnable);
-          mHideHandler.postDelayed(mHideRunnable, delayMillis);
-     }
-     */
-
 
 
 
@@ -538,13 +403,14 @@ public class LabelerMalariaMain extends ActionBarActivity {
           Patch patch = patches.get(patchno);
           final RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
           int j = 0;
-          for (int i = 0; i<rg.getChildCount(); i++) {
-               CheckBox cb = (CheckBox)rg.getChildAt(i);
-               if (patch.analysis.get(j).equals(cb.getText().toString())) {
-                    cb.setChecked(true);
-                    j++;
+          if (patch.analysis.size() > 0) {
+               for (int i = 0; i < rg.getChildCount(); i++) {
+                    CheckBox cb = (CheckBox) rg.getChildAt(i);
+                    if (patch.analysis.get(j).equals(cb.getText().toString())) {
+                         cb.setChecked(true);
+                         j++;
+                    } else cb.setChecked(false);
                }
-               else cb.setChecked(false);
           }
 
           ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText(patch.remarks);
@@ -596,7 +462,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
                for (int i = 0; i < patches.size(); i++) {
                     patches.get(i).patchno = i;
                }
-               drawBox(RESET);
+               drawBoxes();
+               labelDialog.hide();
+               Toast.makeText(context, "Patch deleted!", Toast.LENGTH_SHORT).show();
+
+               /*
                final Handler mHideHandler = new Handler();
                final Runnable mHideRunnable = new Runnable() {
                     @Override
@@ -608,6 +478,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
                mHideHandler.removeCallbacks(mHideRunnable);
                mHideHandler.postDelayed(mHideRunnable, DELAY);
+               */
           }
           else Toast.makeText(context, "There are no patches to delete.", Toast.LENGTH_SHORT).show();
 
@@ -619,8 +490,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
-          Toast.makeText(context, "Patch count: " + patches.size(), Toast.LENGTH_SHORT).show();
-          drawBox(patchno);
+          //Toast.makeText(context, "Patch count: " + patches.size(), Toast.LENGTH_SHORT).show(); //test
+          drawBoxes();
+          showDialogBox();
+
+          /*
           final Handler mHideHandler = new Handler();
           final Runnable mHideRunnable = new Runnable() {
                @Override
@@ -631,6 +505,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           mHideHandler.removeCallbacks(mHideRunnable);
           mHideHandler.postDelayed(mHideRunnable, DELAY);
+          */
 
      }
 
@@ -670,21 +545,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
-     public void drawBox(int patchno) {
+     public void drawBoxes() {
 
           ImageView imageView = mContentView;
 
-          Bitmap oldBitmap;
-          if (patchno == RESET) oldBitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
-          else oldBitmap = origBitmap;
+          Bitmap oldBitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
 
           Paint paint = new Paint();
 
           paint.setColor(Color.WHITE);
-          paint.setStrokeWidth(10);
+          paint.setStrokeWidth(20);
           paint.setStyle(Paint.Style.STROKE);
           paint.setShadowLayer(5, 2, 2, Color.BLACK);
-          paint.setTextSize(5);
+          paint.setTextSize(100);
 
           //Create a new image bitmap and attach a brand new canvas to it
           Bitmap newBitmap = Bitmap.createBitmap(oldBitmap.getWidth(), oldBitmap.getHeight(), Bitmap.Config.RGB_565);
@@ -694,22 +567,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
           canvas.drawBitmap(oldBitmap, 0, 0, null);
 
           //Draw everything else you want into the canvas, in this example a rectangle with rounded edges
-          if (patchno == RESET) {
-               for (int i = 0; i<patches.size(); i++) {
-                    Patch patch = patches.get(patchno);
-                    canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
-                    canvas.drawText("" + (patchno + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1,patch.y2), paint);
-               }
-          }
-          else {
-               Patch patch = patches.get(patchno);
+          for (int i = 0; i<patches.size(); i++) {
+               Patch patch = patches.get(i);
                canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
-               canvas.drawText("" + (patchno + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1, patch.y2), paint);
+               canvas.drawText("" + (i + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1,patch.y2), paint);
           }
 
           //Attach the canvas to the ImageView
           imageView.setImageBitmap(newBitmap);
-          Toast.makeText(context, "Box created!!!", Toast.LENGTH_SHORT).show();
+          Toast.makeText(context, "Box created!!!", Toast.LENGTH_SHORT).show(); //test
 
      }
 
@@ -735,13 +601,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public float getMidpoint(float a, float b) {
-          float result = 0;
           float smaller;
           if (a<b) smaller = a;
           else smaller = b;
 
-          result = smaller + Math.abs(a-b);
-          return result;
+          return smaller + (Math.abs(a-b)/2);
      }
 
 
