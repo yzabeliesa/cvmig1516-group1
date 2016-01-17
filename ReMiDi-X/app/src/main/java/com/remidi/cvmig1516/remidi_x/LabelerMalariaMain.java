@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
@@ -205,6 +206,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView.setOnTouchListener(patchBuilder);
           mContentView.setImageDrawable(sample_images[current_image]);
           origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          drawBoxes(DRAW_ALL);
 
      }
 
@@ -345,14 +347,32 @@ public class LabelerMalariaMain extends ActionBarActivity {
                rg.addView(cb);
           }
 
+          EditText editText = (EditText)labelDialog.findViewById(R.id.labeler_comments);
+          editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(1000)});
+
           labelDialog.findViewById(R.id.labeler_dialog_cancel).setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
-                    Patch patch = patches.get(current_patch);
-                    if (patch.analysis.size() == 0) patch.state = PATCH_INCOMPLETE;
-                    else patch.state = PATCH_COMPLETE;
-                    drawBoxes(DRAW_CURRENT);
-                    labelDialog.hide();
+
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialog, int which) {
+                              switch (which) {
+                                   case DialogInterface.BUTTON_POSITIVE:
+                                        Patch patch = patches.get(current_patch);
+                                        if (patch.analysis.size() == 0) patch.state = PATCH_INCOMPLETE;
+                                        else patch.state = PATCH_COMPLETE;
+                                        drawBoxes(DRAW_CURRENT);
+                                        labelDialog.hide();
+                                        break;
+                                   case DialogInterface.BUTTON_NEGATIVE:
+                                        break;
+                              }
+                         }
+                    };
+                    AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                    builder.setMessage("Any unsaved data will be lost. Are you sure you want to cancel?").setPositiveButton("Yes", dialogClickListener)
+                            .setNegativeButton("No", dialogClickListener).show();
                }
           });
 
@@ -361,7 +381,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
                @Override
                public void onClick(View v) {
                     fetchPatchDataFromDialog();
-                    labelDialog.hide();
                }
           });
 
@@ -433,34 +452,34 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public void updateProgress() {
           // updates current image file as well as patches created in image
           /* PROTOCOL:
-          current_image
-          x1|y1|x2|y2|Species (comma-separated)|Remarks
-          x1|y1|x2|y2|Species (comma-separated)|Remarks
+          current_image$x1|y1|x2|y2|Species (comma-separated)|Remarks$x1|y1|x2|y2|Species (comma-separated)|Remarks
           */
           progress_file.write(current_image + "");
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
-               progress_file.append("\n");
-               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2);
-               progress_file.append("|");
+               progress_file.append("$");
+               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2 + "|");
                for (int j = 0; j<patch.analysis.size(); j++) {
                     if (j>0) progress_file.append(",");
                     progress_file.append(patch.analysis.get(j));
                }
+               if (patch.analysis.size() == 0) progress_file.append("###*No data*###");
                progress_file.append("|" + patch.remarks);
+               if (patch.remarks.equals("")) progress_file.append("###*No data*###");
           }
 
      }
 
      public void loadProgressFile() {
 
+          patches.clear(); // temp only
           String contents = progress_file.readContents();
-          StringTokenizer tokens = new StringTokenizer(contents, "\n");
+          StringTokenizer tokens = new StringTokenizer(contents, "$");
 
-          current_image = Integer.parseInt(tokens.nextToken().trim());
+          current_image = Integer.parseInt(tokens.nextToken());
 
           while (tokens.hasMoreTokens()) {
-               String token = tokens.nextToken().trim();
+               String token = tokens.nextToken();
                StringTokenizer patchData = new StringTokenizer(token, "|");
                float x1 = Float.parseFloat(patchData.nextToken());
                float y1 = Float.parseFloat(patchData.nextToken());
@@ -468,13 +487,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
                float y2 = Float.parseFloat(patchData.nextToken());
 
                Patch patch = new Patch(context, current_image, patches.size(),x1,y1,x2,y2,disease);
-               StringTokenizer analysisData = new StringTokenizer(patchData.nextToken(), ",");
-               while(analysisData.hasMoreTokens()) {
-                    String analysis = analysisData.nextToken();
-                    patch.analysis.add(analysis);
+               String analysisToken = patchData.nextToken();
+               if (!analysisToken.equals("###*No data*###")) {
+                    StringTokenizer analysisData = new StringTokenizer(analysisToken, ",");
+                    patch.state = PATCH_COMPLETE;
+                    while (analysisData.hasMoreTokens()) {
+                         String analysis = analysisData.nextToken();
+                         patch.analysis.add(analysis);
+                    }
                }
+               else patch.state = PATCH_INCOMPLETE;
 
-               patch.remarks = tokens.nextToken();
+               String remarks = patchData.nextToken();
+               if (!remarks.equals("###*No data*###")) patch.remarks = remarks;
+
+               patches.add(patch);
+
           }
 
      }
@@ -500,11 +528,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public void loadProgressFile(View view) {
           loadProgressFile();
           Toast.makeText(context, "Progress loaded!", Toast.LENGTH_SHORT).show();
+          drawBoxes(DRAW_ALL);
      }
 
      public void showDialogBox() {
 
-          labelDialog.setTitle("Patch " + (current_patch+1));
+          labelDialog.setTitle("Patch " + (current_patch + 1));
           if (currently_new) initializeDialogBox();
           else loadDialogBox(current_patch);
 
@@ -523,16 +552,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
                }
           }
 
-          patch.remarks = ((EditText)labelDialog.findViewById(R.id.labeler_comments)).getText().toString();
-
-          if (patch.analysis.size() == 0) patch.state = PATCH_INCOMPLETE;
-          else patch.state = PATCH_COMPLETE;
-          drawBoxes(DRAW_CURRENT);
-
-          if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
-          else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
-
-          new ProgressUpdater().execute();
+          if (patch.analysis.size() == 0) {
+               patch.state = PATCH_INCOMPLETE;
+               Toast.makeText(context, "Please accomplish patch analysis.", Toast.LENGTH_SHORT).show();
+          }
+          else {
+               patch.remarks = ((EditText)labelDialog.findViewById(R.id.labeler_comments)).getText().toString();
+               patch.state = PATCH_COMPLETE;
+               drawBoxes(DRAW_CURRENT);
+               if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
+               else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
+               labelDialog.hide();
+               new ProgressUpdater().execute();
+          }
 
      }
 
