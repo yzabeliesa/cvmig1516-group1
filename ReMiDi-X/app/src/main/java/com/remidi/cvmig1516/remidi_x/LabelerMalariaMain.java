@@ -730,28 +730,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Zip all files
-          String zipPath = progress_file.filefolder + "/" + patches.get(0).formatImgno() + ".zip";
-          createZipfile(zipPath);
+          String imageFolder = progress_file.filefolder;
+          String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
+          createZipfile(imageFolder,zipPath);
 
-          // Send & delete files
+          // Send & delete patch data
           uploadZipfile();
 
           // Load next image
           loadNextImage();
      }
 
-     public void uploadZipfile() {
+     public void createZipfile(String imageFolder, String zipPath) {
 
-          Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
-          for (int i = 0; i<patches.size(); i++) {
-               patches.get(i).deleteFolder();
-          }
-
-     }
-
-     public void createZipfile(String zipPath) {
-
-          String imageFolder = progress_file.filefolder;
           progress_file.delete();
 
           try {
@@ -759,23 +750,38 @@ public class LabelerMalariaMain extends ActionBarActivity {
                ZipOutputStream zos = new ZipOutputStream(fos);
                File srcFile = new File(imageFolder);
                File[] files = srcFile.listFiles();
-               Log.d("", "Zip directory: " + srcFile.getName());
                for (int i = 0; i < files.length; i++) {
-                    Log.d("", "Adding file: " + files[i].getName());
-                    byte[] buffer = new byte[1024];
-                    FileInputStream fis = new FileInputStream(files[i]);
-                    zos.putNextEntry(new ZipEntry(files[i].getName()));
-                    int length;
-                    while ((length = fis.read(buffer)) > 0) {
-                         zos.write(buffer, 0, length);
+                    String filename = files[i].getPath();
+                    String extension = filename.substring(filename.length()-4,filename.length());
+                    if (!extension.equals(".zip")) {
+                         byte[] buffer = new byte[1024];
+                         FileInputStream fis = new FileInputStream(files[i] + "/textData.xml");
+                         zos.putNextEntry(new ZipEntry(files[i].getName() + "/textData.xml"));
+                         int length;
+                         while ((length = fis.read(buffer)) > 0) {
+                              zos.write(buffer, 0, length);
+                         }
+                         zos.closeEntry();
+                         fis.close();
                     }
-                    zos.closeEntry();
-                    fis.close();
                }
                zos.close();
                Toast.makeText(context, "Zip created!", Toast.LENGTH_SHORT).show(); //test
           } catch (Exception ex) {
-               Log.e("", ex.getMessage());
+               Log.d("",ex.getMessage());
+          }
+
+     }
+
+     public void uploadZipfile() {
+
+          // run uploader
+
+          Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
+          for (int i = 0; i<patches.size(); i++) { //deletes patch data
+               Patch patch = patches.get(i);
+               patch.delete();
+               patch.deleteFolder();
           }
 
      }

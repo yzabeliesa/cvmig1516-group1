@@ -50,22 +50,11 @@ public class XMLTest extends ActionBarActivity {
           patches.get(3).analysis.add("jajejejeje");
           patches.get(3).analysis.add("hohohohoho");
           updateProgress();
-          ((TextView)findViewById(R.id.xmltester)).setText(progress_file.toString());
 
-          loadProgressFile();
-          //updateProgress();
-          Patch patch = patches.get(0);
-          StringBuilder patch1 = new StringBuilder();
-          patch1.append("Image no: " + patch.imgno);
-          patch1.append("\nPatch no: " + patch.patchno);
-          patch1.append("\nDisease: " + patch.disease);
-          patch1.append("\nAnalysis:");
-          for (int i = 0; i<patch.analysis.size(); i++) {
-               patch1.append("\n\t>" + patch.analysis.get(i));
-          }
-          patch1.append("\nRemarks: " + patch.remarks);
-
-          ((TextView) findViewById(R.id.xmltester2)).setText(patch1.toString());
+          String imageFolder = progress_file.filefolder;
+          String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
+          createZipfile(imageFolder, zipPath);
+          uploadZipfile(imageFolder);
 
      }
 
@@ -90,79 +79,62 @@ public class XMLTest extends ActionBarActivity {
 
      }
 
-     public void loadProgressFile() {
-
-          String contents = progress_file.readContents();
-          StringTokenizer tokens = new StringTokenizer(contents, "$");
-
-          current_image = Integer.parseInt(tokens.nextToken());
-
-          while (tokens.hasMoreTokens()) {
-               String token = tokens.nextToken();
-               StringTokenizer patchData = new StringTokenizer(token, "|");
-               float x1 = Float.parseFloat(patchData.nextToken());
-               float y1 = Float.parseFloat(patchData.nextToken());
-               float x2 = Float.parseFloat(patchData.nextToken());
-               float y2 = Float.parseFloat(patchData.nextToken());
-
-               Patch patch = new Patch(context, current_image, patches.size(),x1,y1,x2,y2,disease);
-               String analysisToken = patchData.nextToken();
-               if (!analysisToken.equals("###*No data*###")) {
-                    StringTokenizer analysisData = new StringTokenizer(analysisToken, ",");
-                    patch.state = PATCH_COMPLETE;
-                    while (analysisData.hasMoreTokens()) {
-                         String analysis = analysisData.nextToken();
-                         patch.analysis.add(analysis);
-                    }
-               }
-               else patch.state = PATCH_INCOMPLETE;
-
-               String remarks = patchData.nextToken();
-               if (!remarks.equals("###*No data*###")) patch.remarks = remarks;
-
-               patches.add(patch);
-
-          }
-
-     }
-
-     public void uploadZipfile() {
+     public void uploadZipfile(String imageFolder) {
 
           Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
           for (int i = 0; i<patches.size(); i++) {
-               (patches.get(i)).deleteFolder();
+               Patch patch = patches.get(i);
+               //patch.delete();
+               //patch.deleteFolder();
           }
+
+          // FOR TESTING ONLY
+          File srcFile = new File(imageFolder);
+          File[] files = srcFile.listFiles();
+          StringBuilder sb = new StringBuilder();
+          for (int i = 0; i < files.length; i++) {
+               if (i>0) sb.append("\n");
+               sb.append(files[i].getName());
+          }
+
+          ((TextView) findViewById(R.id.xmltester)).setText(sb.toString());
 
      }
 
-     public void createZipfile(String zipPath) {
+     public void createZipfile(String imageFolder, String zipPath) {
 
-          String imageFolder = progress_file.filefolder;
           progress_file.delete();
+          //StringBuilder sb = new StringBuilder();
 
           try {
                FileOutputStream fos = new FileOutputStream(zipPath);
                ZipOutputStream zos = new ZipOutputStream(fos);
                File srcFile = new File(imageFolder);
                File[] files = srcFile.listFiles();
-               Log.d("", "Zip directory: " + srcFile.getName());
                for (int i = 0; i < files.length; i++) {
-                    Log.d("", "Adding file: " + files[i].getName());
-                    byte[] buffer = new byte[1024];
-                    FileInputStream fis = new FileInputStream(files[i]);
-                    zos.putNextEntry(new ZipEntry(files[i].getName()));
-                    int length;
-                    while ((length = fis.read(buffer)) > 0) {
-                         zos.write(buffer, 0, length);
+                    String filename = files[i].getPath();
+                    String extension = filename.substring(filename.length()-4,filename.length());
+                    if (!extension.equals(".zip")) {
+                         //if (i > 0) sb.append("\n");
+                         //sb.append("[" + i + "] Adding file: " + files[i].getName());
+                         byte[] buffer = new byte[1024];
+                         FileInputStream fis = new FileInputStream(files[i] + "/textData.xml");
+                         zos.putNextEntry(new ZipEntry(files[i].getName() + "/textData.xml"));
+                         int length;
+                         while ((length = fis.read(buffer)) > 0) {
+                              zos.write(buffer, 0, length);
+                         }
+                         zos.closeEntry();
+                         fis.close();
                     }
-                    zos.closeEntry();
-                    fis.close();
                }
                zos.close();
                Toast.makeText(context, "Zip created!", Toast.LENGTH_SHORT).show(); //test
           } catch (Exception ex) {
-               Log.e("", ex.getMessage());
+               //sb.append("\nEXCEPTION!!! " + ex.getMessage());
           }
+
+          //((TextView) findViewById(R.id.xmltester2)).setText(sb.toString());
 
      }
 
