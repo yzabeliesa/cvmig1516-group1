@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,21 +11,14 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.AsyncTask;
-import android.provider.MediaStore;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -84,8 +76,10 @@ import java.util.Calendar;
 
 public class LabelerMalariaMain extends ActionBarActivity {
 
-     final int RESET = -1;
      final int DELAY = 1000;
+     final int PATCH_NEUTRAL = 0;
+     final int PATCH_COMPLETE = 1;
+     final int PATCH_INCOMPLETE = 2;
 
      Drawable[] sample_images;
      Dialog labelDialog;
@@ -141,7 +135,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Create handler for progress file
-          progress_file = new XMLFileHandler(context,"progress.txt");
+          progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
           if (progress_file.readContents() == "") progress_file.write("0");
 
           // Set Activity title
@@ -185,16 +179,16 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
                     // If area is unpatched, create new patch
                     if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                         Toast.makeText(context, "Start", Toast.LENGTH_SHORT).show();
+                         //Toast.makeText(context, "Start", Toast.LENGTH_SHORT).show(); //test
                          initX = currentX;
                          initY = currentY;
                     }
                     else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                         Toast.makeText(context, "End", Toast.LENGTH_SHORT).show();
+                         //Toast.makeText(context, "End", Toast.LENGTH_SHORT).show(); //test
                          float finalX = currentX;
                          float finalY = currentY;
                          if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
-                              Toast.makeText(context, "Coors 1: " + initX + ", " + initY + "Coors 2: " + finalX + ", " + finalY, Toast.LENGTH_SHORT).show(); //test
+                              //Toast.makeText(context, "Coors 1: " + initX + ", " + initY + "Coors 2: " + finalX + ", " + finalY, Toast.LENGTH_SHORT).show(); //test
                               createPatch(initX, initY, finalX, finalY);
                          }
                     }
@@ -228,10 +222,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           String disease;
           ArrayList<String> analysis = new ArrayList<>();
           String remarks;
+          int state;
 
           Patch(Context context, int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
 
-               super(context, disease + "-img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno));
+               super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno), disease, true);
                this.imgno = imgno;
                this.patchno = patchno;
                this.x1 = x1;
@@ -240,6 +235,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                this.y2 = y2;
                this.disease = disease;
                this.remarks = "";
+               this.state = PATCH_NEUTRAL;
 
           }
 
@@ -254,7 +250,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      /*
       ------------------------------------------------------------------------------------------------------------------
-                                                         LOADER METHODS
+                                                       LOADING METHODS
       ------------------------------------------------------------------------------------------------------------------
      */
 
@@ -271,6 +267,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public void updateProgress() {
+          current_image++;
+          current_image%=5;
           progress_file.write(current_image + "");
      }
 
@@ -378,7 +376,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
                               }
                          }
                     };
-
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                     builder.setMessage("Are you sure you want to permanently delete this patch?").setPositiveButton("Yes", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
@@ -403,9 +400,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
           Patch patch = patches.get(patchno);
           final RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
           int j = 0;
-          if (patch.analysis.size() > 0) {
-               for (int i = 0; i < rg.getChildCount(); i++) {
-                    CheckBox cb = (CheckBox) rg.getChildAt(i);
+          for (int i = 0; i < rg.getChildCount(); i++) {
+               CheckBox cb = (CheckBox) rg.getChildAt(i);
+               if (j<patch.analysis.size()) {
                     if (patch.analysis.get(j).equals(cb.getText().toString())) {
                          cb.setChecked(true);
                          j++;
@@ -553,7 +550,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           Paint paint = new Paint();
 
-          paint.setColor(Color.WHITE);
           paint.setStrokeWidth(20);
           paint.setStyle(Paint.Style.STROKE);
           paint.setShadowLayer(5, 2, 2, Color.BLACK);
@@ -566,21 +562,79 @@ public class LabelerMalariaMain extends ActionBarActivity {
           //Draw the image bitmap into the canvas
           canvas.drawBitmap(oldBitmap, 0, 0, null);
 
-          //Draw everything else you want into the canvas, in this example a rectangle with rounded edges
+          //Draw everything else into the canvas
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
+               if (patch.state == PATCH_NEUTRAL) paint.setColor(Color.WHITE);
+               else if (patch.state == PATCH_COMPLETE) paint.setColor(Color.GREEN);
+               else paint.setColor(Color.RED);
                canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
                canvas.drawText("" + (i + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1,patch.y2), paint);
           }
 
           //Attach the canvas to the ImageView
           imageView.setImageBitmap(newBitmap);
-          Toast.makeText(context, "Box created!!!", Toast.LENGTH_SHORT).show(); //test
 
      }
 
      public void sendData(View view) {
-          Toast.makeText(context, "Send lol", Toast.LENGTH_SHORT).show();
+
+          // Confirm if send. Return if no, continue if yes.
+          DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+               @Override
+               public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                         case DialogInterface.BUTTON_POSITIVE:
+                              break;
+                         case DialogInterface.BUTTON_NEGATIVE:
+                              return;
+                    }
+               }
+          };
+          AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMalariaMain.this);
+          builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
+                  .setNegativeButton("No", dialogClickListener).show();
+
+          // Check if all patches have enough data. Continue if yes, toast and return if no.
+          if (patches.size() == 0) {
+               Toast.makeText(context, "No patches were created.", Toast.LENGTH_SHORT).show();
+               return;
+          }
+
+          boolean patchDataComplete = true;
+          for (int i = 0; i<patches.size(); i++) {
+               Patch patch = patches.get(i);
+               if (patch.analysis.size() == 0) {
+                    patchDataComplete = false;
+                    patch.state = PATCH_INCOMPLETE;
+               }
+               else patch.state = PATCH_COMPLETE;
+          }
+          drawBoxes();
+
+          if (!patchDataComplete) {
+               Toast.makeText(context, "Some patches have incomplete data.", Toast.LENGTH_SHORT).show();
+               return;
+          }
+
+          // Create xml files for all patches
+          /*
+          for (int i = 0; i<patches.size(); i++) {
+               createPatchXML(i);
+          }
+          */
+
+          // Zip all files
+
+          // Send
+          uploadZipfile();
+
+          // Update progress
+          updateProgress();
+     }
+
+     public void uploadZipfile() {
+          Toast.makeText(context, "Sent zip lol", Toast.LENGTH_SHORT).show();
      }
 
      public boolean isBetween(float num, float a, float b) {
