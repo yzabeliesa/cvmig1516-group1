@@ -70,7 +70,7 @@ public class TestActivity extends ActionBarActivity {
      public String HOME = "/data/";
      //public String HOME = "/chunk_data/";
      public int HTTP_PORT = 5000;
-     public long long int ctr = 0;
+     public long ctr = 0;
      public String exception_message = "none";
      public String send_result = "";
      public boolean hasNet = false;
@@ -114,7 +114,7 @@ public class TestActivity extends ActionBarActivity {
                          File[] xml_files = myDirectory.listFiles();
 
                          if (xml_files == null || xml_files.length == 0) {
-                              continue;
+                              //continue;
                          }
 
                          if( isNetworkAvailable() ) {

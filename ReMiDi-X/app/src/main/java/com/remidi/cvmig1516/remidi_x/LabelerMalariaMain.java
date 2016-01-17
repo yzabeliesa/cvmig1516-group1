@@ -441,7 +441,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void loadNextImage() {
           current_image++;
-          current_image%=5;
+          current_image%=5; //temp
           mContentView.setImageDrawable(sample_images[current_image]);
           origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
           patches.clear();
@@ -551,6 +551,17 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
+     public void createPatch(float x1, float y1, float x2, float y2) {
+          final int patchno = patches.size();
+          Patch patch = new Patch(context, current_image, patchno, x1, y1, x2, y2, disease);
+          patches.add(patch);
+          currently_new = true;
+          current_patch = patchno;
+          drawBoxes(DRAW_CURRENT);
+          new ProgressUpdater().execute();
+          showDialogBox();
+     }
+
      public void deletePatch() {
 
           if (patches.size() > 0) {
@@ -566,17 +577,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           }
 
-     }
-
-     public void createPatch(float x1, float y1, float x2, float y2) {
-          final int patchno = patches.size();
-          Patch patch = new Patch(context, current_image, patchno, x1, y1, x2, y2, disease);
-          patches.add(patch);
-          currently_new = true;
-          current_patch = patchno;
-          drawBoxes(DRAW_CURRENT);
-          new ProgressUpdater().execute();
-          showDialogBox();
      }
 
      public void createPatchXML(int patchno) {
