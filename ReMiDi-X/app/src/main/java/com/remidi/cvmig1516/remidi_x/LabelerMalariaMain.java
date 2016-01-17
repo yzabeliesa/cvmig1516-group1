@@ -13,6 +13,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -112,6 +113,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      float initX = 0;
      float initY = 0;
      Bitmap origBitmap;
+     File myDirectory;
 
      /**
       * Whether or not the system UI should be auto-hidden after
@@ -141,6 +143,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           setContentView(R.layout.activity_labeler_malaria_main);
 
           context = getApplicationContext();
+          myDirectory = new File(context.getFilesDir(), "database");
+
+          if( !myDirectory.exists() ) {
+               myDirectory.mkdirs();
+          }
 
           // Get intent data
           Bundle extras = getIntent().getExtras();
@@ -729,22 +736,21 @@ public class LabelerMalariaMain extends ActionBarActivity {
                createPatchXML(i);
           }
 
-          // Zip all files
+          // Compress all files in zip, send zip file, delete patch data files
           String imageFolder = progress_file.filefolder;
           String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          createZipfile(imageFolder,zipPath);
-
-          // Send & delete patch data
-          uploadZipfile();
+          uploadZipfile(imageFolder,zipPath);
 
           // Load next image
           loadNextImage();
      }
 
-     public void createZipfile(String imageFolder, String zipPath) {
+     public void uploadZipfile(String imageFolder, String zipPath) {
 
+          // Delete progress_file
           progress_file.delete();
 
+          // Compress files in zip
           try {
                FileOutputStream fos = new FileOutputStream(zipPath);
                ZipOutputStream zos = new ZipOutputStream(fos);
@@ -766,24 +772,33 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     }
                }
                zos.close();
-               Toast.makeText(context, "Zip created!", Toast.LENGTH_SHORT).show(); //test
           } catch (Exception ex) {
                Log.d("",ex.getMessage());
           }
 
-     }
+          File file = new File(zipPath);
 
-     public void uploadZipfile() {
+          // Run uploader
+          Uploader uploader = new Uploader(myDirectory);
+          String msg = uploader.uploadFile(file);
+          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
-          // run uploader
-
-          Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
+          // Delete patch data files
           for (int i = 0; i<patches.size(); i++) { //deletes patch data
                Patch patch = patches.get(i);
                patch.delete();
                patch.deleteFolder();
           }
 
+     }
+
+     public void testonly(View view) {
+          StringBuilder sb = new StringBuilder("MYDIRECTORY CONTENTS");
+          File[] files = myDirectory.listFiles();
+          for (int i = 0; i<files.length; i++) {
+               sb.append("\n" + files[i].getName());
+          }
+          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
      }
 
      public boolean isBetween(float num, float a, float b) {

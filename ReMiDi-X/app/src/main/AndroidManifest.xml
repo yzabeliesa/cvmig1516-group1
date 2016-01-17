@@ -52,8 +52,6 @@
             android:name=".XMLTest"
             android:label="@string/title_activity_xmltest">
 
-
-
         </activity>
     </application>
 

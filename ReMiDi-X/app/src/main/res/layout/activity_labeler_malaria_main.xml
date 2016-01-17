@@ -51,6 +51,14 @@
                 android:text="Send diagnosis"
                 android:onClick="confirmSendData"/>
 
+            <Button
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Get myDir contents"
+                android:onClick="testonly"/>
+
         </LinearLayout>
     </FrameLayout>
 

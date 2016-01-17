@@ -27,12 +27,17 @@ public class XMLTest extends ActionBarActivity {
      ArrayList<Patch> patches = new ArrayList<>();
      String disease = "Disease";
      Context context;
+     File myDirectory;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
           setContentView(R.layout.activity_xmltest);
           context = getApplicationContext();
+          myDirectory = new File(context.getFilesDir(), "database");
+          if( !myDirectory.exists() ) {
+               myDirectory.mkdirs();
+          }
           /*
           Bundle extras = getIntent().getExtras();
 
@@ -54,7 +59,7 @@ public class XMLTest extends ActionBarActivity {
           String imageFolder = progress_file.filefolder;
           String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
           createZipfile(imageFolder, zipPath);
-          uploadZipfile(imageFolder);
+          uploadZipfile(zipPath);
 
      }
 
@@ -79,21 +84,27 @@ public class XMLTest extends ActionBarActivity {
 
      }
 
-     public void uploadZipfile(String imageFolder) {
+     public void uploadZipfile(String zipPath) {
 
-          Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
-          for (int i = 0; i<patches.size(); i++) {
+          File file = new File(zipPath);
+
+          // run uploader
+          Uploader uploader = new Uploader(myDirectory);
+          String msg = uploader.uploadFile(file);
+          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
+          //Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
+          for (int i = 0; i<patches.size(); i++) { //deletes patch data
                Patch patch = patches.get(i);
-               //patch.delete();
-               //patch.deleteFolder();
+               patch.delete();
+               patch.deleteFolder();
           }
 
           // FOR TESTING ONLY
-          File srcFile = new File(imageFolder);
-          File[] files = srcFile.listFiles();
-          StringBuilder sb = new StringBuilder();
+          File[] files = myDirectory.listFiles();
+          StringBuilder sb = new StringBuilder("myDirectory Contents");
           for (int i = 0; i < files.length; i++) {
-               if (i>0) sb.append("\n");
+               sb.append("\n");
                sb.append(files[i].getName());
           }
 
