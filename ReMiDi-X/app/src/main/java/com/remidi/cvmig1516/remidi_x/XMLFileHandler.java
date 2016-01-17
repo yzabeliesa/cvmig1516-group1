@@ -18,12 +18,24 @@ public class XMLFileHandler {
 
      String filename;
      String filepath;
+     String filefolder;
      File file;
 
-     public XMLFileHandler(Context context, String fn) {
-          filename = fn;
-          filepath = context.getFilesDir() + "/" + filename;
-          file = new File(context.getFilesDir(), filename);
+     /*
+     public XMLFileHandler(Context context, String name, boolean actualFile) {
+          if (actualFile) {
+               filename = name;
+               filefolder = context.getFilesDir() + "";
+          }
+          else {
+               filename = "textData.xml";
+               filefolder = context.getFilesDir() + "/" + name;
+               File folder = new File(filefolder);
+               folder.mkdir();
+          }
+
+          filepath =  filefolder + "/" + filename;
+          file = new File(filefolder, filename);
           try {
                Log.d("FILE PROCESS", "CHECKING NEW FILE");
                if (!file.exists()) {
@@ -31,15 +43,37 @@ public class XMLFileHandler {
                     file.createNewFile();
                }
           } catch (IOException e) {
-               Log.d("FILE ERROR", "Could not create Test file!");
+               Log.d("FILE ERROR", "Could not create text file!");
           }
 
      }
+     */
 
-     public XMLFileHandler(Context context, String fn, String initMessage) {
+     public XMLFileHandler(Context context, String name, String disease, boolean isTextData) {
+          if (isTextData) {
+               filename = "textData.xml";
+               filefolder = context.getFilesDir() + "/" + disease + "/" + name;
+               File folder = new File(filefolder);
+               if (!folder.exists()) folder.mkdirs();
+          }
+          else {
+               filename = name;
+               filefolder = context.getFilesDir() + "/" + disease;
+               File folder = new File(filefolder);
+               if (!folder.exists()) folder.mkdir();
+          }
 
-          new XMLFileHandler(context,fn);
-          write(initMessage);
+          filepath =  filefolder + "/" + filename;
+          file = new File(filefolder, filename);
+          try {
+               Log.d("FILE PROCESS", "CHECKING NEW FILE");
+               if (!file.exists()) {
+                    Log.d("FILE PROCESS", "CREATED NEW FILE");
+                    file.createNewFile();
+               }
+          } catch (IOException e) {
+               Log.d("FILE ERROR", "Could not create text file!");
+          }
 
      }
 
