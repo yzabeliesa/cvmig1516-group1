@@ -1,5 +1,15 @@
 package com.remidi.cvmig1516.remidi_x;
 
+/*
+FUCKING DEPENDENCIES:
+compile 'org.apache.httpcomponents:httpclient:4.5.1'
+compile 'org.apache.httpcomponents:httpclient-osgi:4.5.1'
+
+*/
+
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,7 +20,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -30,6 +39,7 @@ import org.apache.http.params.AbstractHttpParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -44,288 +54,104 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class TestActivity extends ActionBarActivity {
 
      //public static final String FILE_NAME = "testfile.xml";
      //public static final String FILE_NAME = "validation.xml";
-     public static final String FILE_NAME = "chunk_validation.xml";
+     public static final String FILE_NAME = "bago2.xml";
+     //public static final String FILE_NAME = "chunk_validation.xml";
      //public String HTTP_HOST = "54.179.135.52";
-     //public String HOME = "/api/chunk/upload_chunk";
+     //public String HOME = "/api/label";
      //public String HTTP_HOST = "10.40.107.82";
      public String HTTP_HOST = "192.168.1.10";
      public String HOME = "/data/";
      //public String HOME = "/chunk_data/";
      public int HTTP_PORT = 5000;
-     public int ctr = 0;
-     public String exception_message = "";
+     public long long int ctr = 0;
+     public String exception_message = "none";
+     public String send_result = "";
+     public boolean hasNet = false;
+     public int stat = 0;
+     public File myDirectory;
+     public boolean isThreadPause = false;
+     public Context context;
 
-     XMLFileHandler xmlfh = null;
+     /**
+      * ATTENTION: This was auto-generated to implement the App Indexing API.
+      * See https://g.co/AppIndexing/AndroidStudio for more information.
+      */
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
 
           super.onCreate(savedInstanceState);
           setContentView(R.layout.activity_test);
-          xmlfh = new XMLFileHandler(getApplicationContext(), FILE_NAME);
-          xmlfh.readContents();
+          context = getApplicationContext();
 
-     }
+          myDirectory = new File(context.getFilesDir(), "database");
 
-     public void readFile(View view) {
-
-          TextView text = (TextView) findViewById(R.id.file_contents);
-          text.setText(xmlfh.readContents());
-
-     }
-
-     // ==========================================================================================
-     //                     UPLOAD TASK - This is the working one bitch!
-     // ==========================================================================================
-
-     public void writeToFile(View view) {
-
-          EditText field = (EditText) findViewById(R.id.test_message);
-          xmlfh.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                  "<!-- this xml file contains the information of the diagnosis of a validator to a certain patch cell of a sample image of any diseases -->\n" +
-                  "\n" +
-                  "<validation>\n" +
-                  "\t<patchno></patchno> <!-- patch number of the cell (patch) -->\n" +
-                  "\t<validator></validator> <!-- id of the validator -->\n" +
-                  "\t<imageno></imageno> <!-- image number of the source image -->\n" +
-                  "\n" +
-                  "\t<ulcoordinate> <!-- upper left coordinate of the patch -->\n" +
-                  "\t\t<x></x> <!-- x coordinate -->\n" +
-                  "\t\t<y></y> <!-- y coordinate -->\n" +
-                  "\t</ulcoordinate>\n" +
-                  "\n" +
-                  "\t<lrcoordinate> <!-- lower right coordinate of the patch -->\n" +
-                  "\t\t<x></x> <!-- x coordinate -->\n" +
-                  "\t\t<y></y> <!-- y coordinate -->\n" +
-                  "\t</lrcoordinate>\n" +
-                  "\n" +
-                  "\t<disease></disease> <!-- name of the  disease the patch is tested -->\n" +
-                  "\t<diagnosis>\n" +
-                  "\t\t<analysis></analysis>  <!-- positive or negative, specie present -->\n" +
-                  "\t\t<analysis></analysis> \n" +
-                  "\t\t<analysis></analysis> \n" +
-                  "\t</diagnosis>\n" +
-                  "\n" +
-                  "\t<remarks></remarks> <!-- additional remarks -->\n" +
-                  "\n" +
-                  "\t<timestamp></timestamp> <!-- timestamp validated -->\n" +
-                  "</validation>\n");
-          field.setText("");
-          new UploadTask().execute("http://" + HTTP_HOST + ":" + HTTP_PORT + HOME);
-
-     }
-
-     public String Upload_Data(String urlstr, String filepath) {
-          String result = null;
-          try {
-               HttpClient hc = new DefaultHttpClient();
-               HttpPost httpPost = new HttpPost(urlstr);
-               httpPost.setHeader("ENCTYPE", "multipart/form-data");
-               String boundary = "-------------" + System.currentTimeMillis();
-               httpPost.setHeader("Content-type", "multipart/form-data; boundary=" + boundary);
-
-               HttpParams params = new BasicHttpParams();
-               params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-
-               File file = new File(filepath);
-               FileBody fb = new FileBody(file, ContentType.APPLICATION_XML, FILE_NAME);
-               MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
-               multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-               multipartEntity.setBoundary(boundary);
-               multipartEntity.addPart("uploaded_file", fb);
-               HttpEntity he = multipartEntity.build();
-               httpPost.setEntity(he);
-
-               HttpResponse hr = hc.execute(httpPost);
-               if (hr != null) {
-                    BasicResponseHandler responseHandler = new BasicResponseHandler();
-                    result = responseHandler.handleResponse(hr);
-               } else {
-                    result = "Didn't work!";
-               }
-          } catch (Exception e) {
-               e.printStackTrace();
-               Log.d("OutputStream", e.getLocalizedMessage());
+          if( !myDirectory.exists() ) {
+               myDirectory.mkdirs();
           }
-          return result;
+
+         new Thread(null, send, "SendThread").start();
      }
-     private class UploadTask extends AsyncTask<String, Void, String> {
+
+     Runnable send = new Runnable() {
           @Override
-          protected String doInBackground(String... params) {
-               return Upload_Data(params[0], xmlfh.filepath);
-          }
-          @Override
-          protected void onPostExecute(String result) {
-          }
-     }
+          public void run() {
+               //while (true) {
+                    //String result = "no result";
+                    hasNet = false;
+                    stat++;
+                    if (!isThreadPause) {
+                         //Toast.makeText(getApplicationContext(), "Running" + result, Toast.LENGTH_SHORT).show();
 
+                         String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
+                         File[] xml_files = myDirectory.listFiles();
 
+                         if (xml_files == null || xml_files.length == 0) {
+                              continue;
+                         }
 
-
-
-     // ==========================================================================================
-     //                                           DO UPLOAD
-     // ==========================================================================================
-     public void doUpload(View view) {
-
-          new Uploader().execute("");
-
-     }
-
-     public void getStatus(View view) {
-          ((TextView)findViewById(R.id.some_textview)).setText("Ended here: " + ctr);
-          ((TextView)findViewById(R.id.exception_text)).setText(exception_message);
-          exception_message = "No exception";
-          ctr = 0;
-     }
-
-     private class Uploader extends AsyncTask <String, Void, Boolean> {
-
-          @Override
-          protected Boolean doInBackground(String... params) {
-               String filename = xmlfh.filename;
-               String filepath = xmlfh.filepath;
-
-               HttpURLConnection conn = null;
-               DataOutputStream os = null;
-
-               String urlServer = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
-
-               String lineEnd = "\r\n";
-               String twoHyphens = "--";
-               String boundary =  "*****";
-               int bytesRead, bytesAvailable, bufferSize, bytesUploaded = 0;
-               byte[] buffer;
-               int maxBufferSize = 1024*1024;
-
-               String uploadname = filename.substring(0,filename.length()-5);
-
-               try {
-                    File file = new File(filepath);
-                    FileInputStream fis = new FileInputStream(file);
-                    URL url = new URL(urlServer);
-                    conn = (HttpURLConnection) url.openConnection();
-
-                    // POST settings.
-                    conn.setDoInput(true);
-                    conn.setDoOutput(true);
-                    conn.setUseCaches(false);
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Connection", "Keep-Alive");
-                    conn.setRequestProperty("ENCTYPE", "multipart/form-data");
-                    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
-                    conn.setRequestProperty("uploaded_file", filename);
-                    //conn.setRequestProperty("Content-Length",String.valueOf(file.length()));
-
-                    os = new DataOutputStream(conn.getOutputStream());
-                    os.writeBytes(twoHyphens + boundary + lineEnd);
-                    os.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";filename=\"" + uploadname +"\"" + lineEnd);
-                    os.writeBytes("Content-Type: " + HttpURLConnection.guessContentTypeFromName(filepath) + lineEnd);
-                    os.writeBytes(lineEnd);
-
-                    bytesAvailable = fis.available();
-                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                    buffer = new byte[bufferSize];
-
-                    bytesRead = fis.read(buffer, 0, bufferSize);
-                    bytesUploaded += bytesRead;
-
-                    while (bytesRead > 0)
-                    {
-                         os.write(buffer, 0, bufferSize);
-                         bytesAvailable = fis.available();
-                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                         buffer = new byte[bufferSize];
-                         bytesRead = fis.read(buffer, 0, bufferSize);
-                         bytesUploaded += bytesRead;
+                         if( isNetworkAvailable() ) {
+                              hasNet = true;
+                              Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
+                              send_result = Send_File(urlstr, xml_files[0].getAbsolutePath());
+                         }
+                         //Toast.makeText(getApplicationContext(), "Sent:\n" + result, Toast.LENGTH_LONG).show();
                     }
-
-                    os.writeBytes(lineEnd);
-                    os.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-
-                    // Responses from the server (code and message)
-
-                    conn.setConnectTimeout(10000); // allow 10 seconds timeout.
-                    int rcode = conn.getResponseCode();
-                    if (rcode == 200) exception_message = rcode + ": Success!!!";
-                    else  exception_message = rcode + ": Failed!!!";
-
-                    fis.close();
-                    os.flush();
-                    os.close();
-
-               }
-               catch (Exception ex) {
-                    ctr+=1000;
-                    exception_message = ex.toString();
-                    return false;
-               }
-               return true;
+               //}
           }
+     };
 
-          @Override
-          protected void onPostExecute(Boolean result) {
-          }
-
-          @Override
-          protected void onPreExecute() {
-          }
+     @Override
+     protected void onPause() {
+          isThreadPause = true;
+          super.onPause();
+          Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
      }
 
-     // ==========================================================================================
-     //                                     Send File - Chunked
-     // ==========================================================================================
+     @Override
+     protected void onResume(){
+          isThreadPause = false;
+          super.onResume();
+          Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
+     }
 
-     public void sendToFile(View view) {
-
-          EditText field = (EditText) findViewById(R.id.test_message);
-          xmlfh.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                  "<!-- this xml file contains the information of the diagnosis of a validator to a certain patch cell of a sample image of any diseases -->\n" +
-                  "\n" +
-                  "<validation>\n" +
-                  "\t<patchno></patchno> <!-- patch number of the cell (patch) -->\n" +
-                  "\t<validator></validator> <!-- id of the validator -->\n" +
-                  "\t<imageno></imageno> <!-- image number of the source image -->\n" +
-                  "\n" +
-                  "\t<ulcoordinate> <!-- upper left coordinate of the patch -->\n" +
-                  "\t\t<x></x> <!-- x coordinate -->\n" +
-                  "\t\t<y></y> <!-- y coordinate -->\n" +
-                  "\t</ulcoordinate>\n" +
-                  "\n" +
-                  "\t<lrcoordinate> <!-- lower right coordinate of the patch -->\n" +
-                  "\t\t<x></x> <!-- x coordinate -->\n" +
-                  "\t\t<y></y> <!-- y coordinate -->\n" +
-                  "\t</lrcoordinate>\n" +
-                  "\n" +
-                  "\t<disease></disease> <!-- name of the  disease the patch is tested -->\n" +
-                  "\t<diagnosis>\n" +
-                  "\t\t<analysis></analysis>  <!-- positive or negative, specie present -->\n" +
-                  "\t\t<analysis></analysis> \n" +
-                  "\t\t<analysis></analysis> \n" +
-                  "\t</diagnosis>\n" +
-                  "\n" +
-                  "\t<remarks></remarks> <!-- additional remarks -->\n" +
-                  "\n" +
-                  "\t<timestamp></timestamp> <!-- timestamp validated -->\n" +
-                  "</validation>\n");
-          field.setText("");
-          new SendTask().execute("http://" + HTTP_HOST + ":" + HTTP_PORT + HOME);
-
+     public boolean isNetworkAvailable() {
+          ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+          NetworkInfo ani = cm.getActiveNetworkInfo();
+          return (ani != null && ani.isConnected());
      }
 
      public String Send_File(String urlstr, String filepath) {
           String result = null;
+          File current_file = new File(filepath);
           try {
-               final int cSize = 1024 * 1024; // size of chunk
-               File file = new File(filepath);
-               String filename=filepath.substring(filepath.lastIndexOf("/") + 1);
-               final long pieces = file.length()/cSize; // used to return file length.
 
                HttpHost targetHost = null;
                HttpClient hc = null;
@@ -337,56 +163,92 @@ public class TestActivity extends ActionBarActivity {
                HttpParams params = new BasicHttpParams();
                params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
 
-               BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
+               String boundary = "-------------" + System.currentTimeMillis();
+               MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
+               multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+               multipartEntity.setBoundary(boundary);
 
-               for (int i= 0; i< pieces; i++) {
-                    byte[] buffer = new byte[cSize];
+               multipartEntity.addPart("uploaded_file", new FileBody(current_file,ContentType.APPLICATION_XML));
 
-                    if(stream.read(buffer) ==-1)
-                         break;
+               httpPost.setEntity(multipartEntity.build());
+               targetHost = new HttpHost(HTTP_HOST, HTTP_PORT, "http");
+               hc = new DefaultHttpClient();
+               hr = hc.execute(targetHost, httpPost);
 
-                    ByteArrayInputStream arrayStream = new ByteArrayInputStream(buffer);
-
-                    String boundary = "-------------" + System.currentTimeMillis();
-                    MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
-                    multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-                    multipartEntity.setBoundary(boundary);
-
-                    multipartEntity.addPart("chunk_id", new StringBody(String.valueOf(i), ContentType.TEXT_PLAIN)); //Chunk Id used for identification.
-                    multipartEntity.addPart("chunk_data", new InputStreamBody(arrayStream, filename));
-
-                    httpPost.setEntity(multipartEntity.build());
-                    targetHost = new HttpHost(HTTP_HOST, HTTP_PORT, "http");
-                    hc = new DefaultHttpClient();
-                    hr = hc.execute(targetHost, httpPost);
-
-                    if (hr != null) {
-                         BasicResponseHandler responseHandler = new BasicResponseHandler();
-                         result = responseHandler.handleResponse(hr);
-                    } else {
-                         result = "Didn't work!";
-                    }
+               if (hr != null) {
+                    BasicResponseHandler responseHandler = new BasicResponseHandler();
+                    result = responseHandler.handleResponse(hr);
+                    current_file.delete();
+               } else {
+                    result = "Didn't work!";
                }
-
-               ((TextView)findViewById(R.id.exception_text)).setText(result);
 
           } catch (Exception e) {
                e.printStackTrace();
                Log.d("OutputStream", e.getLocalizedMessage());
           }
 
-          //Toast.makeText(getApplicationContext(), "Sent:\n" + result, Toast.LENGTH_LONG).show();
           return result;
      }
 
-     private class SendTask extends AsyncTask<String, Void, String> {
+
+     public String make_xml() {
+
+          StringBuilder xmlfile = new StringBuilder();
+          xmlfile.append("<?xml version='1.0' encoding='us-ascii'?> \n");
+          xmlfile.append("<!--  A SAMPLE --> \n");
+          xmlfile.append("<displayName> My Message </displayName> \n");
+          xmlfile.append("<msg> " + " </msg> \n");
+          return xmlfile.toString();
+
+     }
+
+     public void getStatus(View view) {
+          ((TextView)findViewById(R.id.some_textview)).setText(exception_message + "\n" + myDirectory.listFiles().length + "\n" + hasNet + "\n" + isThreadPause + "\n" + stat);
+     }
+
+     public void upload(View view) {
+          String baseDir = myDirectory.getAbsolutePath();
+          new UploadTask().execute(baseDir);
+          Toast.makeText(getApplicationContext(), "Uploaded: " + exception_message, Toast.LENGTH_SHORT).show();
+     }
+
+     public String Upload_File(String filepath) {
+          //-- make xml file here --//
+          File f;
+          FileOutputStream fop;
+          String msg = "File not created";
+          try {
+               f = new File(filepath, FILE_NAME);
+               if( !f.exists() ) {
+                    f.createNewFile();
+                    msg = "File Created";
+               }
+
+               fop = new FileOutputStream(f);
+               fop.write(make_xml().getBytes());
+               fop.flush();
+               fop.close();
+               msg = "Save Successful";
+          } catch (Exception e) {
+               e.printStackTrace();
+               msg = "Exception occured";
+          }
+
+          return msg;
+     }
+
+     private class UploadTask extends AsyncTask<String, Void, String> {
           @Override
           protected String doInBackground(String... params) {
-               return Send_File(params[0], xmlfh.filepath);
+               exception_message = "";
+               String str = Upload_File(params[0]);
+               exception_message = str;
+               return str;
           }
+
           @Override
           protected void onPostExecute(String result) {
           }
      }
-
 }

@@ -472,7 +472,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void loadProgressFile() {
 
-          patches.clear(); // temp only
           String contents = progress_file.readContents();
           StringTokenizer tokens = new StringTokenizer(contents, "$");
 
@@ -514,22 +513,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
                                                      FUNCTIONALITY METHODS
       ------------------------------------------------------------------------------------------------------------------
      */
-
-     public void saveProgressFile(View view) {
-          patches.removeAll(patches);
-          drawBoxes(DRAW_CLEAR);
-          Toast.makeText(context, "Progress saved!", Toast.LENGTH_SHORT).show();
-          Intent intent = new Intent(getApplicationContext(), XMLTest.class);
-          //disease = (disease.toLowerCase()).replace(' ', '_');
-          intent.putExtra("XML Data", progress_file.readContents());
-          startActivity(intent);
-     }
-
-     public void loadProgressFile(View view) {
-          loadProgressFile();
-          Toast.makeText(context, "Progress loaded!", Toast.LENGTH_SHORT).show();
-          drawBoxes(DRAW_ALL);
-     }
 
      public void showDialogBox() {
 
@@ -634,21 +617,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void drawBoxes(int state) {
 
-          /*
-          final int DRAW_CLEAR = 0; // erase all
-          Load orig bitmap
-          Set current to orig bitmap
-
-          final int DRAW_CURRENT = 1; // new patch
-          Load current bitmap
-          Draw current patch
-          Set current bitmap to new bitmap
-
-          final int DRAW_ALL = 2; // delete, patch completion
-          Load orig bitmap
-          Draw all patches
-          Set current bitmap to new bitmap
-           */
           ImageView imageView = mContentView;
 
           if (state == DRAW_CLEAR) {

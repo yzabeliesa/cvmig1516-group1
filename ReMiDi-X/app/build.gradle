@@ -33,13 +33,13 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.android.support:support-v4:21.0.3'
-
-    compile ('org.apache.httpcomponents:httpmime:4.3'){
+    compile('org.apache.httpcomponents:httpmime:4.3') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
-    compile ('org.apache.httpcomponents:httpcore:4.4.1'){
+    compile('org.apache.httpcomponents:httpcore:4.4.1') {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
 
     }
+    compile 'commons-io:commons-io:2.0.1'
 }
 

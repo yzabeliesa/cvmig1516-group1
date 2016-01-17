@@ -18,74 +18,81 @@
         android:layout_height="wrap_content"
         android:hint="Type message here"/>
 
-    <LinearLayout android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal" >
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal" >
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="UploadTask"
-            android:onClick="writeToFile"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upload Task"
+                android:onClick="upload"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Read file contents"
-            android:onClick="readFile"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Get status"
+                android:onClick="getStatus"/>
+            <!--
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Read file contents"
+                        android:onClick="readFile"/>
+            -->
+        </LinearLayout>
 
-    </LinearLayout>
+    <!--
+                <LinearLayout android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:orientation="horizontal" >
 
-    <LinearLayout android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal" >
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="doUpload"
+                        android:onClick="doUpload"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="doUpload"
-            android:onClick="doUpload"/>
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Get status"
+                        android:onClick="getStatus"/>
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get status"
-            android:onClick="getStatus"/>
+                </LinearLayout>
 
-    </LinearLayout>
+                <LinearLayout android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:orientation="horizontal" >
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Send Chunk"
+                        android:onClick="sendToFile"/>
 
-    <LinearLayout android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal" >
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send Chunk"
-            android:onClick="sendToFile"/>
+                </LinearLayout>
+            -->
+                <TextView
+                    android:id="@+id/some_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="File Contents"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_marginTop="20dp" />
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/file_contents"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="some text"
+                    android:layout_marginTop="10dp" />
 
-    <TextView
-        android:id="@+id/some_textview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="File Contents"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_marginTop="20dp" />
+                <TextView
+                    android:id="@+id/exception_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/red"
+                    android:layout_marginTop="50dp" />
 
-    <TextView
-        android:id="@+id/file_contents"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:layout_marginTop="10dp" />
-
-    <TextView
-        android:id="@+id/exception_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textColor="@color/red"
-        android:layout_marginTop="50dp" />
-
-</LinearLayout>
+            </LinearLayout>
