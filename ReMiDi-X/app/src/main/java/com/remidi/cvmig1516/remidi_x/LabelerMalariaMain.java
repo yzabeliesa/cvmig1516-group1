@@ -545,9 +545,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public void drawBoxes() {
 
           ImageView imageView = mContentView;
-
           Bitmap oldBitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
-
           Paint paint = new Paint();
 
           paint.setStrokeWidth(20);
@@ -566,8 +564,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
                if (patch.state == PATCH_NEUTRAL) paint.setColor(Color.WHITE);
-               else if (patch.state == PATCH_COMPLETE) paint.setColor(Color.GREEN);
-               else paint.setColor(Color.RED);
+               else if (patch.state == PATCH_COMPLETE) paint.setColor(getResources().getColor(R.color.green));
+               else paint.setColor(getResources().getColor(R.color.red));
                canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
                canvas.drawText("" + (i + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1,patch.y2), paint);
           }
@@ -577,14 +575,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
-     public void sendData(View view) {
+     public void confirmSendData(View view) {
 
-          // Confirm if send. Return if no, continue if yes.
+          // Confirm if send. Return if no, sendData() if yes.
           DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                @Override
                public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                          case DialogInterface.BUTTON_POSITIVE:
+                              sendData();
                               break;
                          case DialogInterface.BUTTON_NEGATIVE:
                               return;
@@ -594,6 +593,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMalariaMain.this);
           builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
                   .setNegativeButton("No", dialogClickListener).show();
+
+     }
+
+     public void sendData() {
 
           // Check if all patches have enough data. Continue if yes, toast and return if no.
           if (patches.size() == 0) {
