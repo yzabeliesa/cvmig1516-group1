@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CheckBox;
@@ -25,10 +26,17 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -206,6 +214,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView.setOnTouchListener(patchBuilder);
           mContentView.setImageDrawable(sample_images[current_image]);
           origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+
+          //FOR TESTING ONLY
+          Patch p = new Patch(context, current_image, patches.size(), 20, 20, 700, 700, disease);
+          patches.add(p);
+
           drawBoxes(DRAW_ALL);
 
      }
@@ -693,7 +706,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           // Check if all patches have enough data. Continue if yes, toast and return if no.
           if (patches.size() == 0) {
-               Toast.makeText(context, "No patches were created.", Toast.LENGTH_SHORT).show();
+               Toast.makeText(context, "Image has no diagnosis.", Toast.LENGTH_SHORT).show();
                return;
           }
 
@@ -717,9 +730,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Zip all files
+          String zipPath = progress_file.filefolder + "/" + patches.get(0).formatImgno() + ".zip";
+          createZipfile(zipPath);
 
-
-          // Send
+          // Send & delete files
           uploadZipfile();
 
           // Load next image
@@ -727,7 +741,43 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public void uploadZipfile() {
-          Toast.makeText(context, "Sent zip lol", Toast.LENGTH_SHORT).show();
+
+          Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
+          for (int i = 0; i<patches.size(); i++) {
+               patches.get(i).deleteFolder();
+          }
+
+     }
+
+     public void createZipfile(String zipPath) {
+
+          String imageFolder = progress_file.filefolder;
+          progress_file.delete();
+
+          try {
+               FileOutputStream fos = new FileOutputStream(zipPath);
+               ZipOutputStream zos = new ZipOutputStream(fos);
+               File srcFile = new File(imageFolder);
+               File[] files = srcFile.listFiles();
+               Log.d("", "Zip directory: " + srcFile.getName());
+               for (int i = 0; i < files.length; i++) {
+                    Log.d("", "Adding file: " + files[i].getName());
+                    byte[] buffer = new byte[1024];
+                    FileInputStream fis = new FileInputStream(files[i]);
+                    zos.putNextEntry(new ZipEntry(files[i].getName()));
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                         zos.write(buffer, 0, length);
+                    }
+                    zos.closeEntry();
+                    fis.close();
+               }
+               zos.close();
+               Toast.makeText(context, "Zip created!", Toast.LENGTH_SHORT).show(); //test
+          } catch (Exception ex) {
+               Log.e("", ex.getMessage());
+          }
+
      }
 
      public boolean isBetween(float num, float a, float b) {

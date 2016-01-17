@@ -1,6 +1,7 @@
 package com.remidi.cvmig1516.remidi_x;
 
 import android.content.Context;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
@@ -21,43 +22,15 @@ public class XMLFileHandler {
      String filefolder;
      File file;
 
-     /*
-     public XMLFileHandler(Context context, String name, boolean actualFile) {
-          if (actualFile) {
-               filename = name;
-               filefolder = context.getFilesDir() + "";
-          }
-          else {
-               filename = "textData.xml";
-               filefolder = context.getFilesDir() + "/" + name;
-               File folder = new File(filefolder);
-               folder.mkdir();
-          }
-
-          filepath =  filefolder + "/" + filename;
-          file = new File(filefolder, filename);
-          try {
-               Log.d("FILE PROCESS", "CHECKING NEW FILE");
-               if (!file.exists()) {
-                    Log.d("FILE PROCESS", "CREATED NEW FILE");
-                    file.createNewFile();
-               }
-          } catch (IOException e) {
-               Log.d("FILE ERROR", "Could not create text file!");
-          }
-
-     }
-     */
-
      public XMLFileHandler(Context context, String name, String disease, boolean isTextData) {
           if (isTextData) {
                filename = "textData.xml";
-               filefolder = context.getFilesDir() + "/" + disease + "/" + name;
+               filefolder = context.getFilesDir() + "/" + disease + "/" + name; // name = imageno_patch
                File folder = new File(filefolder);
                if (!folder.exists()) folder.mkdirs();
           }
           else {
-               filename = name;
+               filename = name; // name = progress_file
                filefolder = context.getFilesDir() + "/" + disease;
                File folder = new File(filefolder);
                if (!folder.exists()) folder.mkdir();
@@ -115,6 +88,15 @@ public class XMLFileHandler {
           toWrite = readContents() + toWrite;
           write(toWrite);
 
+     }
+
+     public void delete() {
+          file.delete();
+     }
+
+     public void deleteFolder() {
+          File folder = new File(filefolder);
+          folder.delete();
      }
 
 }
