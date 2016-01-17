@@ -25,6 +25,7 @@ import android.widget.Toast;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.StringTokenizer;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -141,20 +142,18 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Set Activity title
           this.setTitle("Labeler: " + disease);
 
+          // Initialize images
+          sample_images = initializeImageArray();
+
           // Load dialog box
           labelDialog = new Dialog(LabelerMalariaMain.this);
           labelDialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
 
           // Initialize (turn into AsyncTask)
-          new Initializer().execute(disease);
-
-
-          // ----------------------------------------------
-
           mVisible = true;
           mControlsView = findViewById(R.id.fullscreen_content_controls);
           mContentView = (ImageView)findViewById(R.id.fullscreen_content);
-          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          new Initializer().execute(disease);
 
           // ----------------------------------------------
 
@@ -190,6 +189,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                          if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
                               //Toast.makeText(context, "Coors 1: " + initX + ", " + initY + "Coors 2: " + finalX + ", " + finalY, Toast.LENGTH_SHORT).show(); //test
                               createPatch(initX, initY, finalX, finalY);
+                              new ProgressUpdater().execute();
                          }
                     }
                     return true;
@@ -197,6 +197,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
           };
 
           mContentView.setOnTouchListener(patchBuilder);
+          mContentView.setImageDrawable(sample_images[current_image]);
+          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          drawBoxes();
 
      }
 
@@ -266,18 +269,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           return images;
      }
 
-     public void updateProgress() {
-          current_image++;
-          current_image%=5;
-          progress_file.write(current_image + "");
-     }
-
      public void initialize(String disease) {
-          // Load progress file data
-          current_image = Integer.parseInt(progress_file.readContents());
 
-          // Initialize images
-          sample_images = initializeImageArray();
+          // Load progress file data
+          loadProgressFile();
 
           String[] species;
 
@@ -414,6 +409,65 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
+     public void loadNextImage() {
+          current_image++;
+          current_image%=5;
+          mContentView.setImageDrawable(sample_images[current_image]);
+          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          patches.clear();
+          drawBoxes();
+          new ProgressUpdater().execute();
+     }
+
+     public void updateProgress() {
+          // updates current image file as well as patches created in image
+          /* PROTOCOL:
+          current_image
+          x1|y1|x2|y2|Species (comma-separated)|Remarks
+          x1|y1|x2|y2|Species (comma-separated)|Remarks
+          */
+
+          progress_file.write(current_image + "");
+          for (int i = 0; i<patches.size(); i++) {
+               Patch patch = patches.get(i);
+               progress_file.append("\n");
+               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2);
+               progress_file.append("|");
+               for (int j = 0; j<patch.analysis.size(); j++) {
+                    if (j>0) progress_file.append(",");
+                    progress_file.append(patch.analysis.get(j));
+               }
+               progress_file.append("|" + patch.remarks);
+          }
+     }
+
+     public void loadProgressFile() {
+
+          String contents = progress_file.readContents();
+          StringTokenizer tokens = new StringTokenizer(contents, "\n");
+
+          current_image = Integer.parseInt(tokens.nextToken().trim());
+
+          while (tokens.hasMoreTokens()) {
+               String token = tokens.nextToken().trim();
+               StringTokenizer patchData = new StringTokenizer(token, "|");
+               float x1 = Float.parseFloat(patchData.nextToken());
+               float y1 = Float.parseFloat(patchData.nextToken());
+               float x2 = Float.parseFloat(patchData.nextToken());
+               float y2 = Float.parseFloat(patchData.nextToken());
+
+               Patch patch = new Patch(context, current_image, patches.size(),x1,y1,x2,y2,disease);
+               StringTokenizer analysisData = new StringTokenizer(patchData.nextToken(), ",");
+               while(analysisData.hasMoreTokens()) {
+                    String analysis = analysisData.nextToken();
+                    patch.analysis.add(analysis);
+               }
+
+               patch.remarks = tokens.nextToken();
+          }
+
+     }
+
 
 
      /*
@@ -421,6 +475,18 @@ public class LabelerMalariaMain extends ActionBarActivity {
                                                      FUNCTIONALITY METHODS
       ------------------------------------------------------------------------------------------------------------------
      */
+
+     public void saveProgressFile(View view) {
+          new ProgressUpdater().execute();
+          patches.removeAll(patches);
+          drawBoxes();
+          Toast.makeText(context, "Progress saved!", Toast.LENGTH_SHORT).show();
+     }
+
+     public void loadProgressFile(View view) {
+          loadProgressFile();
+          Toast.makeText(context, "Progress loaded!", Toast.LENGTH_SHORT).show();
+     }
 
      public void showDialogBox() {
 
@@ -449,6 +515,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
           else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
 
+          new ProgressUpdater().execute();
+
      }
 
      public void deletePatch() {
@@ -460,6 +528,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     patches.get(i).patchno = i;
                }
                drawBoxes();
+               new ProgressUpdater().execute();
                labelDialog.hide();
                Toast.makeText(context, "Patch deleted!", Toast.LENGTH_SHORT).show();
 
@@ -489,6 +558,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           current_patch = patchno;
           //Toast.makeText(context, "Patch count: " + patches.size(), Toast.LENGTH_SHORT).show(); //test
           drawBoxes();
+          new ProgressUpdater().execute();
           showDialogBox();
 
           /*
@@ -621,19 +691,18 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Create xml files for all patches
-          /*
           for (int i = 0; i<patches.size(); i++) {
                createPatchXML(i);
           }
-          */
 
           // Zip all files
+
 
           // Send
           uploadZipfile();
 
-          // Update progress
-          updateProgress();
+          // Load next image
+          loadNextImage();
      }
 
      public void uploadZipfile() {
@@ -678,6 +747,24 @@ public class LabelerMalariaMain extends ActionBarActivity {
           @Override
           protected Boolean doInBackground(String... params) {
                initialize(params[0]);
+               return true;
+          }
+
+          @Override
+          protected void onPostExecute(Boolean result) {
+          }
+
+          @Override
+          protected void onPreExecute() {
+          }
+
+     }
+
+     private class ProgressUpdater extends AsyncTask<Void, Void, Boolean> {
+
+          @Override
+          protected Boolean doInBackground(Void... v) {
+               updateProgress();
                return true;
           }
 

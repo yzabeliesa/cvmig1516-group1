@@ -48,8 +48,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Send data"
-                android:onClick="confirmSendData"/>
+                android:text="Save progress file"
+                android:onClick="saveProgressFile"/>
+
+            <Button
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Load progress file"
+                android:onClick="loadProgressFile"/>
 
         </LinearLayout>
     </FrameLayout>
