@@ -150,13 +150,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
           int disease_num = 0;
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
           for (int i = 0; i<diseases.length; i++) {
-               if (diseases[i] == disease) {
+               if (diseases[i].equals(disease)) {
                     disease_num = i;
                     break;
                }
           }
 
-          // Run uploader
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_HOST, HTTP_PORT, HOME);
 
           // Create handler for progress file
@@ -759,8 +758,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Compress all files in zip, send zip file, delete patch data files
           String imageFolder = progress_file.filefolder;
           String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          //uploadZipfile(imageFolder, zipPath);
-          uploadXMLFiles();
+          uploadZipfile(imageFolder, zipPath);
+          //uploadXMLFiles();
 
           // Load next image
           loadNextImage();
@@ -771,14 +770,14 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Delete progress_file
           progress_file.delete();
 
-          StringBuilder sb = new StringBuilder("PATCH MSG:");
+          StringBuilder sb = new StringBuilder("PATCH MSG:"); //test
           // Delete patch data files
           for (int i = 0; i<patches.size(); i++) { //deletes patch data
                Patch patch = patches.get(i);
-               String msg = uploader.uploadFile(patch.file);
-               sb.append("\n" + msg);
-               //patch.delete();
-               //patch.deleteFolder();
+               String msg = uploader.uploadFile(patch.file,patch.formatImgno()+"_"+patch.formatPatchno()+".xml",false);
+               sb.append("\n" + msg); //test
+               patch.delete();
+               patch.deleteFolder();
           }
           Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show(); // test
 
@@ -817,8 +816,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           File file = new File(zipPath);
 
-          String msg = uploader.uploadFile(file);
-          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+          String msg = uploader.uploadFile(file,zipPath,true);
+          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show(); //test
 
           // Delete patch data files
           for (int i = 0; i<patches.size(); i++) { //deletes patch data
@@ -833,10 +832,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           StringBuilder sb = new StringBuilder("MYDIRECTORY CONTENTS");
           File[] files = myDirectory.listFiles();
           for (int i = 0; i<files.length; i++) {
-               sb.append("\n" + files[i].getName());
+               sb.append("\n" + files[i].getPath());
           }
           if (files.length == 0) sb.append("\nNo files");
-          //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
+          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
      }
 
      public boolean isBetween(float num, float a, float b) {

@@ -47,7 +47,7 @@ public class Uploader {
 
           this.context = context;
           this.disease = disease;
-          this.myDirectory = new File(directory + "/" + disease);
+          this.myDirectory = directory;
           this.HTTP_HOST = host;
           this.HTTP_PORT = port;
           this.HOME = home;
@@ -73,15 +73,19 @@ public class Uploader {
                }
           };
 
-          //new Thread(null, send, "SendThread").start();
+          new Thread(null, send, "SendThread").start();
 
      }
 
-     public String uploadFile(File file) {
+     public String uploadFile(File file, String filename, boolean isZipFile) {
           String msg;
           try {
-               file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + disease + "-" + file.getName()));
-               msg = "Sent image diagnosis!";
+               if (isZipFile) file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + disease + "-" + file.getName()));
+               else file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + disease + "-" + filename));
+               String filetype;
+               if (isZipFile) filetype = "zip";
+               else filetype = "xml";
+               msg = "Sent image diagnosis as " + filetype + "!";
           } catch (Exception e) {
                msg = "Exception occurred: " + e.getMessage();
           }
@@ -105,12 +109,12 @@ public class Uploader {
                String boundary = "-------------" + System.currentTimeMillis();
                HttpPost httpPost = new HttpPost(urlstr);
                httpPost.setHeader("ENCTYPE", "multipart/form-data");
-               httpPost.setHeader("Accept", "application/xml");
+               httpPost.setHeader("Accept", "application/octet-stream");
                httpPost.setHeader("Content-type", "multipart/form-data; boundary=" + boundary);
 
                HttpParams params = new BasicHttpParams();
                params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-               FileBody fb = new FileBody(current_file, ContentType.APPLICATION_XML, current_file.getName());
+               FileBody fb = new FileBody(current_file, ContentType.APPLICATION_OCTET_STREAM, current_file.getName());
 
                MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
                multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
