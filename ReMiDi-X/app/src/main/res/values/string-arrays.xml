@@ -4,6 +4,28 @@
 
     <!-- DISEASE ARRAYS -->
 
+    <string-array name="all_diseases">
+
+        <item>Malaria</item>
+        <item>Filariasis</item>
+        <item>Ascariasis</item>
+        <item>Trichuriasis</item>
+        <item>Hookworm infection</item>
+        <item>Schistosomiasis</item>
+        <item>Taeniasis</item>
+        <item>Heterophyidiasis</item>
+        <item>Paragonimiasis</item>
+        <item>Echinostomiasis</item>
+        <item>Capillariasis</item>
+        <item>Giardiasis</item>
+        <item>Tuberculosis</item>
+        <item>Leprosy</item>
+        <item>Gonorrhea</item>
+        <item>Bacterial vaginosis</item>
+        <item>Candidiasis</item>
+
+    </string-array>
+
     <string-array name="specimen_array">
         <item>Blood</item>
         <item>Stool</item>

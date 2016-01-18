@@ -33,13 +33,18 @@
                 android:layout_height="wrap_content"
                 android:text="Get status"
                 android:onClick="getStatus"/>
-            <!--
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Read file contents"
-                        android:onClick="readFile"/>
-            -->
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send a File"
+                android:onClick="send_task"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete all Files"
+                android:onClick="deleteAllFiles"/>
         </LinearLayout>
 
     <!--

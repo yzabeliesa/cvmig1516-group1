@@ -13,6 +13,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -89,7 +90,7 @@ import java.util.zip.ZipOutputStream;
 
 public class LabelerMalariaMain extends ActionBarActivity {
 
-     final int DELAY = 1000;
+     final int DELAY = 300;
      final int PATCH_NEUTRAL = 0;
      final int PATCH_COMPLETE = 1;
      final int PATCH_INCOMPLETE = 2;
@@ -115,27 +116,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
      Bitmap origBitmap;
      File myDirectory;
 
-     /**
-      * Whether or not the system UI should be auto-hidden after
-      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-      */
-     private static final boolean AUTO_HIDE = true;
-
-     /**
-      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-      * user interaction before hiding the system UI.
-      */
-     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-     /**
-      * Some older devices needs a small delay between UI widget updates
-      * and a change of the status and navigation bar.
-      */
-     private static final int UI_ANIMATION_DELAY = 300;
-
      private ImageView mContentView;
      private View mControlsView;
      private boolean mVisible;
+
+     public String HTTP_HOST = "192.168.1.10";
+     public String HOME = "/data/";
+     public int HTTP_PORT = 5000;
+     public boolean isThreadPause = false;
+     Uploader uploader;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +132,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           setContentView(R.layout.activity_labeler_malaria_main);
 
           context = getApplicationContext();
-          myDirectory = new File(context.getFilesDir(), "database");
+          myDirectory = new File(context.getFilesDir(), "myDatabase");
 
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
@@ -156,6 +145,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
           }
+
+          // Load uploader
+          int disease_num = 0;
+          String[] diseases = getResources().getStringArray(R.array.all_diseases);
+          for (int i = 0; i<diseases.length; i++) {
+               if (diseases[i] == disease) {
+                    disease_num = i;
+                    break;
+               }
+          }
+
+          // Run uploader
+          uploader = new Uploader(context,myDirectory, disease_num, HTTP_HOST, HTTP_PORT, HOME);
 
           // Create handler for progress file
           progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
@@ -193,23 +195,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
                               current_patch = i;
                               currently_new = false;
                               showDialogBox();
-                              Toast.makeText(context, "Patch existing", Toast.LENGTH_SHORT).show(); //test
                               return true;
                          }
                     }
 
                     // If area is unpatched, create new patch
                     if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                         //Toast.makeText(context, "Start", Toast.LENGTH_SHORT).show(); //test
                          initX = currentX;
                          initY = currentY;
                     }
                     else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                         //Toast.makeText(context, "End", Toast.LENGTH_SHORT).show(); //test
                          float finalX = currentX;
                          float finalY = currentY;
                          if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
-                              //Toast.makeText(context, "Coors 1: " + initX + ", " + initY + "Coors 2: " + finalX + ", " + finalY, Toast.LENGTH_SHORT).show(); //test
                               createPatch(initX, initY, finalX, finalY);
                               new ProgressUpdater().execute();
                          }
@@ -222,9 +220,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView.setImageDrawable(sample_images[current_image]);
           origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
+          /*
           //FOR TESTING ONLY
           Patch p = new Patch(context, current_image, patches.size(), 20, 20, 700, 700, disease);
           patches.add(p);
+          */
 
           drawBoxes(DRAW_ALL);
 
@@ -236,7 +236,21 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
+     @Override
+     protected void onPause() {
+          isThreadPause = true;
+          super.onPause();
+          uploader.setIsPaused(isThreadPause);
+          Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
+     }
 
+     @Override
+     protected void onResume(){
+          isThreadPause = false;
+          super.onResume();
+          uploader.setIsPaused(isThreadPause);
+          Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
+     }
 
      /*
       ------------------------------------------------------------------------------------------------------------------
@@ -435,8 +449,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText("");
-          labelDialog.show();
-
      }
 
      public void loadDialogBox(int patchno) {
@@ -455,7 +467,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           ((EditText)labelDialog.findViewById(R.id.labeler_comments)).setText(patch.remarks);
-          labelDialog.show();
 
      }
 
@@ -470,7 +481,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public void updateProgress() {
-          // updates current image file as well as patches created in image
+          //Updates current image file as well as patches created in image
           /* PROTOCOL:
           current_image$x1|y1|x2|y2|Species (comma-separated)|Remarks$x1|y1|x2|y2|Species (comma-separated)|Remarks
           */
@@ -539,6 +550,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
           labelDialog.setTitle("Patch " + (current_patch + 1));
           if (currently_new) initializeDialogBox();
           else loadDialogBox(current_patch);
+          Handler handler = new Handler();
+          handler.postDelayed(new Runnable() {
+
+               @Override
+               public void run() {
+                    labelDialog.show();
+               }
+
+          }, DELAY);
 
      }
 
@@ -739,10 +759,29 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Compress all files in zip, send zip file, delete patch data files
           String imageFolder = progress_file.filefolder;
           String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          uploadZipfile(imageFolder,zipPath);
+          //uploadZipfile(imageFolder, zipPath);
+          uploadXMLFiles();
 
           // Load next image
           loadNextImage();
+     }
+
+     public void uploadXMLFiles() {
+
+          // Delete progress_file
+          progress_file.delete();
+
+          StringBuilder sb = new StringBuilder("PATCH MSG:");
+          // Delete patch data files
+          for (int i = 0; i<patches.size(); i++) { //deletes patch data
+               Patch patch = patches.get(i);
+               String msg = uploader.uploadFile(patch.file);
+               sb.append("\n" + msg);
+               //patch.delete();
+               //patch.deleteFolder();
+          }
+          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show(); // test
+
      }
 
      public void uploadZipfile(String imageFolder, String zipPath) {
@@ -778,8 +817,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           File file = new File(zipPath);
 
-          // Run uploader
-          Uploader uploader = new Uploader(myDirectory);
           String msg = uploader.uploadFile(file);
           Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
@@ -798,7 +835,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           for (int i = 0; i<files.length; i++) {
                sb.append("\n" + files[i].getName());
           }
-          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
+          if (files.length == 0) sb.append("\nNo files");
+          //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
      }
 
      public boolean isBetween(float num, float a, float b) {

@@ -89,9 +89,9 @@ public class XMLTest extends ActionBarActivity {
           File file = new File(zipPath);
 
           // run uploader
-          Uploader uploader = new Uploader(myDirectory);
-          String msg = uploader.uploadFile(file);
-          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+          //Uploader uploader = new Uploader(myDirectory);
+          //String msg = uploader.uploadFile(file, disease);
+          //Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
           //Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
           for (int i = 0; i<patches.size(); i++) { //deletes patch data
@@ -115,7 +115,6 @@ public class XMLTest extends ActionBarActivity {
      public void createZipfile(String imageFolder, String zipPath) {
 
           progress_file.delete();
-          //StringBuilder sb = new StringBuilder();
 
           try {
                FileOutputStream fos = new FileOutputStream(zipPath);
@@ -126,8 +125,6 @@ public class XMLTest extends ActionBarActivity {
                     String filename = files[i].getPath();
                     String extension = filename.substring(filename.length()-4,filename.length());
                     if (!extension.equals(".zip")) {
-                         //if (i > 0) sb.append("\n");
-                         //sb.append("[" + i + "] Adding file: " + files[i].getName());
                          byte[] buffer = new byte[1024];
                          FileInputStream fis = new FileInputStream(files[i] + "/textData.xml");
                          zos.putNextEntry(new ZipEntry(files[i].getName() + "/textData.xml"));

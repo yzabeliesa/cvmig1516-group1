@@ -61,7 +61,7 @@ public class TestActivity extends ActionBarActivity {
 
      //public static final String FILE_NAME = "testfile.xml";
      //public static final String FILE_NAME = "validation.xml";
-     public static final String FILE_NAME = "bago2.xml";
+     public static final String FILE_NAME = "bago";
      //public static final String FILE_NAME = "chunk_validation.xml";
      //public String HTTP_HOST = "54.179.135.52";
      //public String HOME = "/api/label";
@@ -73,6 +73,7 @@ public class TestActivity extends ActionBarActivity {
      public long ctr = 0;
      public String exception_message = "none";
      public String send_result = "";
+     public String sent_filename = "";
      public boolean hasNet = false;
      public int stat = 0;
      public File myDirectory;
@@ -91,7 +92,7 @@ public class TestActivity extends ActionBarActivity {
           setContentView(R.layout.activity_test);
           context = getApplicationContext();
 
-          myDirectory = new File(context.getFilesDir(), "database");
+          myDirectory = new File(context.getFilesDir(), "myDatabase");
 
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
@@ -103,28 +104,23 @@ public class TestActivity extends ActionBarActivity {
      Runnable send = new Runnable() {
           @Override
           public void run() {
-               //while (true) {
-                    //String result = "no result";
+               while (true) {
                     hasNet = false;
                     stat++;
                     if (!isThreadPause) {
-                         //Toast.makeText(getApplicationContext(), "Running" + result, Toast.LENGTH_SHORT).show();
-
                          String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
-                         File[] xml_files = myDirectory.listFiles();
+                         if (myDirectory.isDirectory()) {
+                              File[] xml_files = myDirectory.listFiles();
 
-                         if (xml_files == null || xml_files.length == 0) {
-                              //continue;
+                              if ((xml_files.length > 0) && (isNetworkAvailable())) {
+                                   hasNet = true;
+                                   Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
+                                   sent_filename = xml_files[0].getAbsolutePath();
+                                   send_result = Send_File(urlstr, xml_files[0]);
+                              }
                          }
-
-                         if( isNetworkAvailable() ) {
-                              hasNet = true;
-                              Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
-                              send_result = Send_File(urlstr, xml_files[0].getAbsolutePath());
-                         }
-                         //Toast.makeText(getApplicationContext(), "Sent:\n" + result, Toast.LENGTH_LONG).show();
                     }
-               //}
+               }
           }
      };
 
@@ -148,27 +144,28 @@ public class TestActivity extends ActionBarActivity {
           return (ani != null && ani.isConnected());
      }
 
-     public String Send_File(String urlstr, String filepath) {
+     public String Send_File(String urlstr, File current_file) {
           String result = null;
-          File current_file = new File(filepath);
           try {
 
                HttpHost targetHost = null;
                HttpClient hc = null;
                HttpResponse hr = null;
+               String boundary = "-------------" + System.currentTimeMillis();
                HttpPost httpPost = new HttpPost(urlstr);
+               httpPost.setHeader("ENCTYPE", "multipart/form-data");
                httpPost.setHeader("Accept", "text/xml");
-               httpPost.setHeader("Content-Type", "application/xml");
+               httpPost.setHeader("Content-type", "multipart/form-data; boundary=" + boundary);
 
                HttpParams params = new BasicHttpParams();
                params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+               FileBody fb = new FileBody(current_file, ContentType.APPLICATION_XML, current_file.getName());
 
-               String boundary = "-------------" + System.currentTimeMillis();
                MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
                multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
                multipartEntity.setBoundary(boundary);
 
-               multipartEntity.addPart("uploaded_file", new FileBody(current_file,ContentType.APPLICATION_XML));
+               multipartEntity.addPart("uploaded_file", fb);
 
                httpPost.setEntity(multipartEntity.build());
                targetHost = new HttpHost(HTTP_HOST, HTTP_PORT, "http");
@@ -186,6 +183,7 @@ public class TestActivity extends ActionBarActivity {
           } catch (Exception e) {
                e.printStackTrace();
                Log.d("OutputStream", e.getLocalizedMessage());
+               result = e.getLocalizedMessage();
           }
 
           return result;
@@ -204,7 +202,14 @@ public class TestActivity extends ActionBarActivity {
      }
 
      public void getStatus(View view) {
-          ((TextView)findViewById(R.id.some_textview)).setText(exception_message + "\n" + myDirectory.listFiles().length + "\n" + hasNet + "\n" + isThreadPause + "\n" + stat);
+          ((TextView)findViewById(R.id.some_textview)).setText(exception_message + "\n" + myDirectory.listFiles().length + "\n" + send_result + "\n" + sent_filename + "\n" + stat);
+     }
+
+     public void deleteAllFiles(View view) {
+          File[] xml_files = myDirectory.listFiles();
+          for(int x=0; x<xml_files.length; x++) {
+               xml_files[x].delete();
+          }
      }
 
      public void upload(View view) {
@@ -219,7 +224,7 @@ public class TestActivity extends ActionBarActivity {
           FileOutputStream fop;
           String msg = "File not created";
           try {
-               f = new File(filepath, FILE_NAME);
+               f = new File(filepath, FILE_NAME + stat + ".xml");
                if( !f.exists() ) {
                     f.createNewFile();
                     msg = "File Created";
@@ -234,6 +239,8 @@ public class TestActivity extends ActionBarActivity {
                e.printStackTrace();
                msg = "Exception occured";
           }
+
+          stat++;
 
           return msg;
      }
