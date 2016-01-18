@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -76,8 +77,12 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
 
           Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
           //disease = (disease.toLowerCase()).replace(' ', '_');
+          String host = ((EditText) findViewById(R.id.http_host)).getText().toString();
+          int port = Integer.parseInt(((EditText) findViewById(R.id.http_port)).getText().toString());
           intent.putExtra("Disease", disease);
           intent.putExtra("Validator", validator);
+          intent.putExtra("Host", host);
+          intent.putExtra("Port", port);
           startActivity(intent);
 
      }

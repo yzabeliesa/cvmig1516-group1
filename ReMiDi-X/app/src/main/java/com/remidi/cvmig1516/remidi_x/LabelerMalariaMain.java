@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -113,6 +114,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      float initX = 0;
      float initY = 0;
+     float scaleFactor = 1;
+     float bounds_left = 0;
+     float bounds_top = 0;
      Bitmap origBitmap;
      File myDirectory;
 
@@ -120,9 +124,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
      private View mControlsView;
      private boolean mVisible;
 
-     public String HTTP_HOST = "192.168.1.10";
-     public String HOME = "/data/";
-     public int HTTP_PORT = 5000;
+     // Local url
+     //public String HTTP_HOST = "192.168.1.10";
+     //public String HOME = "/data/";
+
+     // Web url
+     public String HTTP_HOST = "54.179.135.52";
+     public String HOME = "/api/label/";
+
+     public int HTTP_PORT = 80;
      public boolean isThreadPause = false;
      Uploader uploader;
 
@@ -144,6 +154,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
+               HTTP_HOST = extras.getString("Host");
+               HTTP_PORT = extras.getInt("Port");
           }
 
           // Load uploader
@@ -177,6 +189,13 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mControlsView = findViewById(R.id.fullscreen_content_controls);
           mContentView = (ImageView)findViewById(R.id.fullscreen_content);
           new Initializer().execute(disease);
+          mContentView.setImageDrawable(sample_images[current_image]);
+          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          //origBitmap = Bitmap.createScaledBitmap(origBitmap, mContentView.getMeasuredHeight(), mContentView.getMeasuredWidth(), false);
+          //scaleFactor = bitmap_height/scaled_height;
+          //scaleFactor = scaled_height/bitmap_height;
+          bounds_left = mContentView.getLeft();
+          bounds_top = mContentView.getTop();
 
           // ----------------------------------------------
 
@@ -184,31 +203,48 @@ public class LabelerMalariaMain extends ActionBarActivity {
                @Override
                public boolean onTouch(View v, MotionEvent event) {
 
+                    ///*
                     float currentX = event.getX();
                     float currentY = event.getY();
+                    //*/
+                    /*
+                    int x = ev.getX() / zoomFactor + clipBounds_canvas.left;
+                    int y = ev.getY() / zoomFactor + clipBounds_canvas.top;
+                    */
 
-                    // Check if area is patched. If yes, open dialog box.
-                    for (int i = 0; i<patches.size(); i++) {
-                         Patch patch = patches.get(i);
-                         if (isBetween(currentX,patch.x1,patch.x2) && isBetween(currentY,patch.y1,patch.y2)) {
-                              current_patch = i;
-                              currently_new = false;
-                              showDialogBox();
-                              return true;
-                         }
-                    }
+                    int action = event.getActionMasked();
+                    //int pointerIndex = MotionEventCompat.getActionIndex(event);
+                    //float currentX = MotionEventCompat.getX(event,pointerIndex) / scaleFactor + bounds_left;
+                    //float currentY = MotionEventCompat.getY(event,pointerIndex) / scaleFactor + bounds_top;
+                    /*
+                    float currentX = event.getX() / scaleFactor + bounds_left;
+                    float currentY = event.getY() / scaleFactor + bounds_top;
+                    */
 
                     // If area is unpatched, create new patch
-                    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    if (action == MotionEvent.ACTION_DOWN) {
                          initX = currentX;
                          initY = currentY;
                     }
-                    else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                    else if (action == MotionEvent.ACTION_UP) {
+
                          float finalX = currentX;
                          float finalY = currentY;
                          if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
                               createPatch(initX, initY, finalX, finalY);
                               new ProgressUpdater().execute();
+                         }
+                         else {
+                              // Check if area is patched. If yes, open dialog box.
+                              for (int i = 0; i<patches.size(); i++) {
+                                   Patch patch = patches.get(i);
+                                   if (isBetween(currentX,patch.x1,patch.x2) && isBetween(currentY,patch.y1,patch.y2)) {
+                                        current_patch = i;
+                                        currently_new = false;
+                                        showDialogBox();
+                                        return true;
+                                   }
+                              }
                          }
                     }
                     return true;
@@ -216,8 +252,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           };
 
           mContentView.setOnTouchListener(patchBuilder);
-          mContentView.setImageDrawable(sample_images[current_image]);
-          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
           /*
           //FOR TESTING ONLY
@@ -240,7 +274,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           isThreadPause = true;
           super.onPause();
           uploader.setIsPaused(isThreadPause);
-          Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
+          //Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
      }
 
      @Override
@@ -248,7 +282,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           isThreadPause = false;
           super.onResume();
           uploader.setIsPaused(isThreadPause);
-          Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
+          //Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
      }
 
      /*
@@ -779,7 +813,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                patch.delete();
                patch.deleteFolder();
           }
-          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show(); // test
+          //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show(); // test
 
      }
 
@@ -832,10 +866,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           StringBuilder sb = new StringBuilder("MYDIRECTORY CONTENTS");
           File[] files = myDirectory.listFiles();
           for (int i = 0; i<files.length; i++) {
-               sb.append("\n" + files[i].getPath());
+               sb.append("\n" + files[i].getPath() + ": " + uploader.getCurrentCode);
           }
           if (files.length == 0) sb.append("\nNo files");
-          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
+          //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
      }
 
      public boolean isBetween(float num, float a, float b) {

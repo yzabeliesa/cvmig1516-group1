@@ -42,6 +42,7 @@ public class Uploader {
      public int stat = 0;
      String sent_filename;
      String send_result;
+     int getCurrentCode = -1;
 
      Uploader(Context context, File directory, int disease, String host, int port, String home) {
 
@@ -57,10 +58,12 @@ public class Uploader {
                public void run() {
                     while (true) {
                          if (!isThreadPause) {
+                              //String urlstr = HTTP_HOST + HOME;
                               String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
+                              //String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
+                              //String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
                               if (myDirectory.isDirectory()) {
                                    File[] xml_files = myDirectory.listFiles();
-
                                    if ((xml_files.length > 0) && (isNetworkAvailable())) {
                                         hasNet = true;
                                         Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
@@ -85,7 +88,7 @@ public class Uploader {
                String filetype;
                if (isZipFile) filetype = "zip";
                else filetype = "xml";
-               msg = "Sent image diagnosis as " + filetype + "!";
+               msg = "Sent image diagnosis!";
           } catch (Exception e) {
                msg = "Exception occurred: " + e.getMessage();
           }
@@ -130,7 +133,9 @@ public class Uploader {
                if (hr != null) {
                     BasicResponseHandler responseHandler = new BasicResponseHandler();
                     result = responseHandler.handleResponse(hr);
-                    if (hr.getStatusLine().getStatusCode() == 200) current_file.delete();
+                    getCurrentCode = hr.getStatusLine().getStatusCode();
+                    if (getCurrentCode == 200) current_file.delete();
+
                } else {
                     result = "Didn't work!";
                }
