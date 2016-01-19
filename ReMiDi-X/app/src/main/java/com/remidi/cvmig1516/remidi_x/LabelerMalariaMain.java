@@ -112,10 +112,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
      String validator = "";
      XMLFileHandler progress_file;
      ArrayList<Patch> patches = new ArrayList<>();
+     float scaleFactor = 1;
 
      float initX = 0;
      float initY = 0;
-     float scaleFactor = 1;
      float bounds_left = 0;
      float bounds_top = 0;
      Bitmap origBitmap;
@@ -144,6 +144,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           context = getApplicationContext();
           myDirectory = new File(context.getFilesDir(), "myDatabase");
+
+
 
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
@@ -198,16 +200,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
           bounds_left = mContentView.getLeft();
           bounds_top = mContentView.getTop();
 
-          SurfaceView sfvTrack = (SurfaceView)findViewById(R.id.screen_drawing);
-          sfvTrack.setZOrderOnTop(true);    // necessary
-          SurfaceHolder sfhTrackHolder = sfvTrack.getHolder();
-          sfhTrackHolder.setFormat(PixelFormat.TRANSPARENT);
+          //idealHeight = scaleFactor*actualHeight;
 
           // ----------------------------------------------
 
           View.OnTouchListener patchBuilder = new View.OnTouchListener() {
                @Override
                public boolean onTouch(View v, MotionEvent event) {
+
+                    float idealWidth = mContentView.getMeasuredWidth();
+                    float idealHeight = mContentView.getMeasuredHeight();
+                    float actualWidth = mContentView.getWidth();
+                    float actualHeight = mContentView.getHeight();
+                    scaleFactor = idealWidth/actualWidth;
+
+                    Toast.makeText(getApplicationContext(), "Ideal: " + idealWidth + "\nActual: " + actualWidth + "\nScale factor: " + scaleFactor, Toast.LENGTH_LONG).show();
+
 
                     ///*
                     float currentX = event.getX();
@@ -219,7 +227,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     */
 
                     int action = event.getActionMasked();
-                    //int pointerIndex = MotionEventCompat.getActionIndex(event);
+                    int pointerIndex = MotionEventCompat.getActionIndex(event);
                     //float currentX = MotionEventCompat.getX(event,pointerIndex) / scaleFactor + bounds_left;
                     //float currentY = MotionEventCompat.getY(event,pointerIndex) / scaleFactor + bounds_top;
                     /*
