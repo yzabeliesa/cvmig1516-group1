@@ -7,7 +7,10 @@ compile 'org.apache.httpcomponents:httpclient-osgi:4.5.1'
 
 */
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -17,13 +20,17 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -50,6 +57,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -66,7 +74,7 @@ public class TestActivity extends ActionBarActivity {
      //public String HTTP_HOST = "54.179.135.52";
      //public String HOME = "/api/label";
      //public String HTTP_HOST = "10.40.107.82";
-     public String HTTP_HOST = "192.168.1.10";
+     public String HTTP_HOST = "172.20.10.2";
      public String HOME = "/data/";
      //public String HOME = "/chunk_data/";
      public int HTTP_PORT = 5000;
@@ -77,6 +85,7 @@ public class TestActivity extends ActionBarActivity {
      public boolean hasNet = false;
      public int stat = 0;
      public File myDirectory;
+     public File[] myGallery;
      public boolean isThreadPause = false;
      public Context context;
 
@@ -93,12 +102,19 @@ public class TestActivity extends ActionBarActivity {
           context = getApplicationContext();
 
           myDirectory = new File(context.getFilesDir(), "myDatabase");
-
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
           }
 
-         new Thread(null, send, "SendThread").start();
+          myGallery = new File[5];
+          for(int x=0; x<5; x++) {
+               myGallery[x] = new File(context.getFilesDir(), "disease_" + x);
+               if( !myGallery[x].exists() ) {
+                    myGallery[x].mkdirs();
+               }
+          }
+
+         //new Thread(null, send, "SendThread").start();
      }
 
      Runnable send = new Runnable() {
@@ -144,6 +160,20 @@ public class TestActivity extends ActionBarActivity {
           return (ani != null && ani.isConnected());
      }
 
+     public void send_task(View view) {
+          String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
+          if (myDirectory.isDirectory()) {
+               File[] xml_files = myDirectory.listFiles();
+
+               if ((xml_files.length > 0) && (isNetworkAvailable())) {
+                    hasNet = true;
+                    Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
+                    sent_filename = xml_files[0].getAbsolutePath();
+                    send_result = Send_File(urlstr, xml_files[0]);
+               }
+          }
+     }
+
      public String Send_File(String urlstr, File current_file) {
           String result = null;
           try {
@@ -182,7 +212,7 @@ public class TestActivity extends ActionBarActivity {
 
           } catch (Exception e) {
                e.printStackTrace();
-               Log.d("OutputStream", e.getLocalizedMessage());
+               //Log.d("OutputStream", e.getLocalizedMessage());
                result = e.getLocalizedMessage();
           }
 
@@ -202,7 +232,10 @@ public class TestActivity extends ActionBarActivity {
      }
 
      public void getStatus(View view) {
-          ((TextView)findViewById(R.id.some_textview)).setText(exception_message + "\n" + myDirectory.listFiles().length + "\n" + send_result + "\n" + sent_filename + "\n" + stat);
+          //((TextView)findViewById(R.id.some_textview)).setText(exception_message + "\n" + myGallery[0].listFiles()[0].getName() + "\n" + myGallery[1].listFiles().length + "\n" + myGallery[2].listFiles().length + "\n" + myGallery[3].listFiles().length + "\n" + myGallery[4].listFiles()[0].getName());
+          ImageView mImageView;
+          mImageView = (ImageView) findViewById(R.id.imageViewId);
+          mImageView.setImageBitmap(BitmapFactory.decodeFile("pathToImageFile"));
      }
 
      public void deleteAllFiles(View view) {
@@ -256,6 +289,91 @@ public class TestActivity extends ActionBarActivity {
 
           @Override
           protected void onPostExecute(String result) {
+          }
+     }
+
+     public String downloadUrl = "http://54.179.135.52/pic/1/";
+     public int IMG_ID = 154;
+     public int DISEASE_ID = 4;
+     public String fn = "";
+
+
+     public void download(View view) {
+          new DownloadTask().execute(downloadUrl);
+     }
+
+     public Bitmap Download_Image(String urlstr) {
+
+          ProgressDialog simpleWaitDialog;
+          HttpClient hc = new DefaultHttpClient();
+          HttpGet httpGet = new HttpGet(urlstr);
+          HttpEntity entity = null;
+          HttpResponse response = null;
+          InputStream is = null;
+          Bitmap bitmap = null;
+
+          try {
+
+               response = hc.execute(httpGet);
+               int statusCode = response.getStatusLine().getStatusCode();
+
+               if (statusCode != HttpStatus.SC_OK) {
+                   // Log.w("ImageDownloader", "Error " + statusCode + " while retrieving bitmap from " + url);
+                    return null;
+               }
+
+               entity = response.getEntity();
+
+               if (entity != null) {
+                    try {
+
+                         is = entity.getContent();
+                         bitmap = BitmapFactory.decodeStream(is);
+
+                    } finally {
+
+                         if (is != null) {
+                              is.close();
+                         }
+
+                         entity.consumeContent();
+                    }
+               }
+
+          } catch (Exception e) {
+               httpGet.abort();
+               e.printStackTrace();
+               Log.d("OutputStream", e.getLocalizedMessage());
+          }
+
+          return bitmap;
+     }
+
+     public class DownloadTask extends AsyncTask<String, Void, Bitmap> {
+
+          @Override
+          protected Bitmap doInBackground(String... param) {
+               return Download_Image(param[0]);
+          }
+
+          @Override
+          protected void onPostExecute(Bitmap result) {
+               File f;
+               FileOutputStream fop;
+               String diseaseDir = myGallery[DISEASE_ID].getAbsolutePath();
+               fn =  "img" + IMG_ID + ".png";
+
+               try {
+
+                    f = new File(diseaseDir, fn);
+                    fop = new FileOutputStream(f);
+                    result.compress(Bitmap.CompressFormat.PNG, 100, fop);
+                    fop.flush();
+                    fop.close();
+
+               } catch (Exception e) {
+                    e.printStackTrace();
+               }
           }
      }
 }

@@ -49,7 +49,6 @@ import java.util.zip.ZipOutputStream;
 // File naming convention: img1234567_123
 
      /*
-
      #0. Initialize
           #- Get intent data
           #- Load images
@@ -86,7 +85,6 @@ import java.util.zip.ZipOutputStream;
           - Create xml files for all patches
           - Zip all xml files
           - Send zip file
-
       */
 
 public class LabelerMalariaMain extends ActionBarActivity {
@@ -125,12 +123,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
      private boolean mVisible;
 
      // Local url
-     //public String HTTP_HOST = "192.168.1.10";
-     //public String HOME = "/data/";
+     //public String HTTP_IP_ADDRESS = "192.168.1.10";
+     //public String HTTP_HOME = "/data/";
 
      // Web url
-     public String HTTP_HOST = "54.179.135.52";
-     public String HOME = "/api/label/";
+     public String HTTP_IP_ADDRESS = "54.179.135.52";
+     public String HTTP_HOME = "/api/label/";
 
      public int HTTP_PORT = 80;
      public boolean isThreadPause = false;
@@ -154,8 +152,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
-               HTTP_HOST = extras.getString("Host");
-               HTTP_PORT = extras.getInt("Port");
+               String address = extras.getString("Address");
+               tokenizeAddress(address);
           }
 
           // Load uploader
@@ -168,7 +166,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                }
           }
 
-          uploader = new Uploader(context,myDirectory, disease_num, HTTP_HOST, HTTP_PORT, HOME);
+          uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
           // Create handler for progress file
           progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
@@ -230,15 +228,17 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
                          float finalX = currentX;
                          float finalY = currentY;
+                         float radius = getRadius(initX, initY, finalX, finalY);
                          if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
-                              createPatch(initX, initY, finalX, finalY);
+                              createPatch(getMidpoint(initX,finalX),getMidpoint(initY,finalY),radius);
                               new ProgressUpdater().execute();
                          }
+
                          else {
                               // Check if area is patched. If yes, open dialog box.
                               for (int i = 0; i<patches.size(); i++) {
                                    Patch patch = patches.get(i);
-                                   if (isBetween(currentX,patch.x1,patch.x2) && isBetween(currentY,patch.y1,patch.y2)) {
+                                   if (isBetween(currentX,currentY,patch.x,patch.y,radius)) {
                                         current_patch = i;
                                         currently_new = false;
                                         showDialogBox();
@@ -295,21 +295,20 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           int imgno;
           int patchno;
-          float x1, y1, x2, y2;
+          float x, y, radius;
           String disease;
           ArrayList<String> analysis = new ArrayList<>();
           String remarks;
           int state;
 
-          Patch(Context context, int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
+          Patch(Context context, int imgno, int patchno, float x, float y, float radius, String disease) {
 
                super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno), disease, true);
                this.imgno = imgno;
                this.patchno = patchno;
-               this.x1 = x1;
-               this.y1 = y1;
-               this.x2 = x2;
-               this.y2 = y2;
+               this.x = x;
+               this.y = y;
+               this.radius = radius;
                this.disease = disease;
                this.remarks = "";
                this.state = PATCH_NEUTRAL;
@@ -522,7 +521,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
                progress_file.append("$");
-               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2 + "|");
+               progress_file.append(patch.x + "|" + patch.y + "|" + patch.radius + "|");
                for (int j = 0; j<patch.analysis.size(); j++) {
                     if (j>0) progress_file.append(",");
                     progress_file.append(patch.analysis.get(j));
@@ -544,12 +543,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           while (tokens.hasMoreTokens()) {
                String token = tokens.nextToken();
                StringTokenizer patchData = new StringTokenizer(token, "|");
-               float x1 = Float.parseFloat(patchData.nextToken());
-               float y1 = Float.parseFloat(patchData.nextToken());
-               float x2 = Float.parseFloat(patchData.nextToken());
-               float y2 = Float.parseFloat(patchData.nextToken());
+               float x = Float.parseFloat(patchData.nextToken());
+               float y = Float.parseFloat(patchData.nextToken());
+               float radius = Float.parseFloat(patchData.nextToken());
 
-               Patch patch = new Patch(context, current_image, patches.size(),x1,y1,x2,y2,disease);
+               Patch patch = new Patch(context, current_image, patches.size(),x,y,radius,disease);
                String analysisToken = patchData.nextToken();
                if (!analysisToken.equals("###*No data*###")) {
                     StringTokenizer analysisData = new StringTokenizer(analysisToken, ",");
@@ -624,9 +622,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
-     public void createPatch(float x1, float y1, float x2, float y2) {
+     public void createPatch(float x, float y, float radius) {
           final int patchno = patches.size();
-          Patch patch = new Patch(context, current_image, patchno, x1, y1, x2, y2, disease);
+          Patch patch = new Patch(context, current_image, patchno, x, y, radius, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
@@ -663,15 +661,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patch.append("\n\t<validator>" + validator + "</validator>");
           patch.append("\n\t<imageno>" + patch.imgno + "</imageno>");
 
-          patch.append("\n\n\t<ulcoordinate>");
-          patch.append("\n\t\t<x>" + patch.x1 + "</x>");
-          patch.append("\n\t\t<y>" + patch.y1 + "</y>");
-          patch.append("\n\t</ulcoordinate>");
-
-          patch.append("\n\n\t<lrcoordinate>");
-          patch.append("\n\t\t<x>" + patch.x2 + "</x>");
-          patch.append("\n\t\t<y>" + patch.y2 + "</y>");
-          patch.append("\n\t</lrcoordinate>");
+          patch.append("\n\n\t<coordinates>");
+          patch.append("\n\t\t<x>" + patch.x + "</x>");
+          patch.append("\n\t\t<y>" + patch.y + "</y>");
+          patch.append("\n\t\t<radius>" + patch.radius + "</radius>");
+          patch.append("\n\t</coordinates>");
 
           patch.append("\n\n\t<disease>" + patch.disease + "</disease>");
           patch.append("\n\t<diagnosis>");
@@ -722,8 +716,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     else if (patch.state == PATCH_COMPLETE)
                          paint.setColor(getResources().getColor(R.color.green));
                     else paint.setColor(getResources().getColor(R.color.red));
-                    canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
-                    canvas.drawText("" + (i + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1, patch.y2), paint);
+                    canvas.drawCircle(patch.x,patch.y,patch.radius,paint);
+                    canvas.drawText("" + (patch.patchno + 1), patch.x, patch.y, paint);
                }
           }
           else {
@@ -732,8 +726,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                else if (patch.state == PATCH_COMPLETE)
                     paint.setColor(getResources().getColor(R.color.green));
                else paint.setColor(getResources().getColor(R.color.red));
-               canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
-               canvas.drawText("" + (patch.patchno + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1, patch.y2), paint);
+               canvas.drawCircle(patch.x,patch.y,patch.radius,paint);
+               canvas.drawText("" + (patch.patchno+1), patch.x, patch.y, paint);
           }
 
           //Attach the canvas to the ImageView
@@ -872,6 +866,24 @@ public class LabelerMalariaMain extends ActionBarActivity {
           //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
      }
 
+     public void tokenizeAddress(String url) {
+          StringTokenizer tokenizer = new StringTokenizer(url,":");
+          if (tokenizer.countTokens()>1) {
+               HTTP_IP_ADDRESS = tokenizer.nextToken();
+               url = tokenizer.nextToken();
+               tokenizer = new StringTokenizer(url,"/");
+               String port = tokenizer.nextToken();
+               if (!port.equals("")) HTTP_PORT = Integer.parseInt(port);
+               else HTTP_PORT = -1;
+          }
+          else {
+               tokenizer = new StringTokenizer(url,"/");
+               HTTP_IP_ADDRESS = tokenizer.nextToken();
+          }
+          HTTP_HOME = tokenizer.nextToken();
+          Toast.makeText(context, "IP address: " + HTTP_IP_ADDRESS + "\nPort: " + HTTP_PORT + "\nHome: " + HTTP_HOME, Toast.LENGTH_SHORT).show();
+     }
+
      public boolean isBetween(float num, float a, float b) {
           float larger;
           float smaller;
@@ -886,7 +898,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           if (larger >= num && smaller <= num) return true;
           else return false;
+     }
 
+     public boolean isBetween(float x1, float y1, float x2, float y2, float radius) {
+          return (getRadius(x1,y1,x2,y2) == radius);
      }
 
      public float getMidpoint(float a, float b) {
@@ -895,6 +910,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           else smaller = b;
 
           return smaller + (Math.abs(a-b)/2);
+     }
+
+     public float getRadius(float x1, float y1, float x2, float y2) {
+          return (float)Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
      }
 
 

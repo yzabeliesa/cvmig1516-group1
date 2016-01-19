@@ -1,9 +1,17 @@
 package com.remidi.cvmig1516.remidi_x;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +32,6 @@ public class XMLTest extends ActionBarActivity {
      final int PATCH_COMPLETE = 1;
      final int PATCH_INCOMPLETE = 2;
 
-     ArrayList<Patch> patches = new ArrayList<>();
      String disease = "Disease";
      Context context;
      File myDirectory;
@@ -38,146 +45,43 @@ public class XMLTest extends ActionBarActivity {
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
           }
-          /*
-          Bundle extras = getIntent().getExtras();
-
-          if (extras != null) {
-               ((TextView)findViewById(R.id.xmltester)).setText(extras.getString("XML Data"));
-          }
-          */
-          progress_file = new XMLFileHandler(context,"progress.txt",disease,false);
-          patches.add(new Patch(context, current_image, 0, 1, 2, 3, 4, disease));
-          patches.add(new Patch(context, current_image, 1, 1, 2, 3, 4, disease));
-          patches.add(new Patch(context,current_image,2,1,2,3,4,disease));
-          patches.add(new Patch(context,current_image,3,1,2,3,4,disease));
-          patches.add(new Patch(context,current_image,4,1,2,3,4,disease));
-          patches.get(2).remarks="hehehe";
-          patches.get(3).analysis.add("jajejejeje");
-          patches.get(3).analysis.add("hohohohoho");
-          updateProgress();
-
-          String imageFolder = progress_file.filefolder;
-          String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          createZipfile(imageFolder, zipPath);
-          uploadZipfile(zipPath);
 
      }
 
-     public void updateProgress() {
-          // updates current image file as well as patches created in image
-          /* PROTOCOL:
-          current_image$x1|y1|x2|y2|Species (comma-separated)|Remarks$x1|y1|x2|y2|Species (comma-separated)|Remarks
-          */
-          progress_file.write(current_image + "");
-          for (int i = 0; i<patches.size(); i++) {
-               Patch patch = patches.get(i);
-               progress_file.append("$");
-               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2 + "|");
-               for (int j = 0; j<patch.analysis.size(); j++) {
-                    if (j>0) progress_file.append(",");
-                    progress_file.append(patch.analysis.get(j));
-               }
-               if (patch.analysis.size() == 0) progress_file.append("###*No data*###");
-               progress_file.append("|" + patch.remarks);
-               if (patch.remarks.equals("")) progress_file.append("###*No data*###");
+     public void tokenizeAddress(View view) {
+          // http://0.0.0.0:port/home
+          String ipaddress = "";
+          String port = "";
+          String home = "";
+
+          EditText urlwriter = (EditText)findViewById(R.id.urlwriter);
+          String url = urlwriter.getText().toString();
+          TextView text = (TextView)findViewById(R.id.xmltester);
+          text.setText("Original text: " + url);
+          TextView text2 = (TextView)findViewById(R.id.xmltester2);
+          StringBuilder sb = new StringBuilder();
+
+          // url = 0.0.0.0:port/home
+          StringTokenizer tokenizer = new StringTokenizer(url,":");
+          if (tokenizer.countTokens()>1) {
+               ipaddress = tokenizer.nextToken();
+               url = tokenizer.nextToken();
+               // url = port/home
+               tokenizer = new StringTokenizer(url,"/");
+               port = tokenizer.nextToken();
           }
-
-     }
-
-     public void uploadZipfile(String zipPath) {
-
-          File file = new File(zipPath);
-
-          // run uploader
-          //Uploader uploader = new Uploader(myDirectory);
-          //String msg = uploader.uploadFile(file, disease);
-          //Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-
-          //Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
-          for (int i = 0; i<patches.size(); i++) { //deletes patch data
-               Patch patch = patches.get(i);
-               patch.delete();
-               patch.deleteFolder();
+          else {
+               tokenizer = new StringTokenizer(url,"/"); // url = 0.0.0.0/home
+               ipaddress = tokenizer.nextToken();
           }
+          home = tokenizer.nextToken();
 
-          // FOR TESTING ONLY
-          File[] files = myDirectory.listFiles();
-          StringBuilder sb = new StringBuilder("myDirectory Contents");
-          for (int i = 0; i < files.length; i++) {
-               sb.append("\n");
-               sb.append(files[i].getName());
-          }
+          if (port.equals("")) port = "(No port)";
 
-          ((TextView) findViewById(R.id.xmltester)).setText(sb.toString());
-
-     }
-
-     public void createZipfile(String imageFolder, String zipPath) {
-
-          progress_file.delete();
-
-          try {
-               FileOutputStream fos = new FileOutputStream(zipPath);
-               ZipOutputStream zos = new ZipOutputStream(fos);
-               File srcFile = new File(imageFolder);
-               File[] files = srcFile.listFiles();
-               for (int i = 0; i < files.length; i++) {
-                    String filename = files[i].getPath();
-                    String extension = filename.substring(filename.length()-4,filename.length());
-                    if (!extension.equals(".zip")) {
-                         byte[] buffer = new byte[1024];
-                         FileInputStream fis = new FileInputStream(files[i] + "/textData.xml");
-                         zos.putNextEntry(new ZipEntry(files[i].getName() + "/textData.xml"));
-                         int length;
-                         while ((length = fis.read(buffer)) > 0) {
-                              zos.write(buffer, 0, length);
-                         }
-                         zos.closeEntry();
-                         fis.close();
-                    }
-               }
-               zos.close();
-               Toast.makeText(context, "Zip created!", Toast.LENGTH_SHORT).show(); //test
-          } catch (Exception ex) {
-               //sb.append("\nEXCEPTION!!! " + ex.getMessage());
-          }
-
-          //((TextView) findViewById(R.id.xmltester2)).setText(sb.toString());
-
-     }
-
-     private class Patch extends XMLFileHandler {
-
-          int imgno;
-          int patchno;
-          float x1, y1, x2, y2;
-          String disease;
-          ArrayList<String> analysis = new ArrayList<>();
-          String remarks;
-          int state;
-
-          Patch(Context context, int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
-
-               super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno), disease, true);
-               this.imgno = imgno;
-               this.patchno = patchno;
-               this.x1 = x1;
-               this.y1 = y1;
-               this.x2 = x2;
-               this.y2 = y2;
-               this.disease = disease;
-               this.remarks = "";
-               this.state = PATCH_NEUTRAL;
-
-          }
-
-          public String formatImgno() {
-               return String.format("%07d", imgno);
-          }
-          public String formatPatchno() {
-               return String.format("%03d", patchno);
-          }
-
+          sb.append("\nIP Address: " + ipaddress);
+          sb.append("\nPort: " + port);
+          sb.append("\nHome: " + home);
+          text2.setText(sb.toString());
      }
 
 }

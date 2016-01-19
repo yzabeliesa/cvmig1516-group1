@@ -35,7 +35,22 @@
         android:id="@+id/disease_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="16dp"/>
+        android:paddingBottom="5dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Server address"
+        android:paddingTop="10dp"
+        android:textColor="@color/pink"/>
+
+    <EditText
+        android:id="@+id/http_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="a.b.c.d:xxxx/xyz/"
+        android:paddingTop="20dp"
+        android:layout_marginBottom="10dp"/>
 
     <Button
         android:id="@+id/labeler_settings_ok"
