@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -21,6 +22,8 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -195,6 +198,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           bounds_left = mContentView.getLeft();
           bounds_top = mContentView.getTop();
 
+          SurfaceView sfvTrack = (SurfaceView)findViewById(R.id.screen_drawing);
+          sfvTrack.setZOrderOnTop(true);    // necessary
+          SurfaceHolder sfhTrackHolder = sfvTrack.getHolder();
+          sfhTrackHolder.setFormat(PixelFormat.TRANSPARENT);
+
           // ----------------------------------------------
 
           View.OnTouchListener patchBuilder = new View.OnTouchListener() {
@@ -284,6 +292,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           uploader.setIsPaused(isThreadPause);
           //Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
      }
+
+
 
      /*
       ------------------------------------------------------------------------------------------------------------------

@@ -19,6 +19,13 @@
         android:adjustViewBounds="true"
         android:src="@drawable/img0000000_000"/>
 
+    <SurfaceView
+        android:id="@+id/screen_drawing"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:adjustViewBounds="true"/>
+
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
     <FrameLayout

@@ -11,37 +11,11 @@
     android:orientation="vertical"
     tools:context="com.remidi.cvmig1516.remidi_x.XMLTest">
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/yellow"
-        android:text="0.0.0.0:port/home"
-        android:id="@+id/urlwriter"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/green"
-        android:text="hehe"
-        android:id="@+id/xmltester"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/red"
-        android:text="hoho"
-        android:id="@+id/xmltester2"/>
-
-    <Button
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="Tokenize"
-        android:onClick="tokenizeAddress"/>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/img0000000_000"
-        android:id="@+id/someimage"/>
+    <LinearLayout
+        android:id="@+id/view_drawing_pad"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    </LinearLayout>
 
 </LinearLayout>
