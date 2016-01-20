@@ -20,7 +20,7 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
      //public class SpecimenSpinnerActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
      public void onItemSelected(AdapterView<?> parent, View view,
-                                     int pos, long id) {
+                                int pos, long id) {
           // An item was selected. You can retrieve the selected item using
           //String value = (String)parent.getItemAtPosition(pos);
 
@@ -87,5 +87,3 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
 
 
 }
-
-

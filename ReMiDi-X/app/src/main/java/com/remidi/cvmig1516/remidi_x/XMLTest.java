@@ -95,7 +95,7 @@ public class XMLTest extends ActionBarActivity {
           //mContentView = (ImageView)findViewById(R.id.imagetest);
           //origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
-          LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.view_drawing_pad);
+          final LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.view_drawing_pad);
           final DrawingView mDrawingView = new DrawingView(this);
           Drawable drawable = getResources().getDrawable(R.drawable.img0000000_000);
           mDrawingView.setImageDrawable(drawable);
@@ -115,36 +115,25 @@ public class XMLTest extends ActionBarActivity {
 
           mDrawingPad.setMinimumWidth(width);
 
-          Toast.makeText(context, "Ideal Height: " + idealHeight + "\nIdeal Width: " + idealWidth
-                  + "\nActual Height: " + actualHeight + "\nActual Width: " + actualWidth + "\nScale factor: " + scaleFactor, Toast.LENGTH_SHORT).show();
-
-          //int idealWidth = mDrawingView.getMeasuredWidth();
-          //int idealHeight;
-          //int actualWidth = mDrawingView.getWidth();
-          //int actualHeight = mDrawingView.getHeight();
-          //int scaleFactor = idealWidth/actualWidth;
-
-          Button b = new Button(this);
-          b.setText("Button");
+          Button b = new Button(context);
           View.OnClickListener clicker = new View.OnClickListener() {
                @Override
                public void onClick(View v) {
-                    int[] img_coordinates = new int[2];
-                    mDrawingView.getLocationOnScreen(img_coordinates);
-                    Toast.makeText(context, mDrawingView.getLeft() + ", " + mDrawingView.getTop(), Toast.LENGTH_SHORT).show();
+                    patches.remove(0);
+                    mDrawingView.resetDraw();
                }
           };
           b.setOnClickListener(clicker);
+          b.setText("BUTTON");
           mDrawingPad.addView(b);
           mDrawingPad.addView(mDrawingView);
+
 
      }
 
      class DrawingView extends ImageView {
           Paint       mPaint;
           Paint textPaint;
-          //MaskFilter  mEmboss;
-          //MaskFilter  mBlur;
           Bitmap  mBitmap;
           Canvas  mCanvas;
           Paint   mBitmapPaint;
@@ -153,6 +142,8 @@ public class XMLTest extends ActionBarActivity {
           float radius = 0;
           float cx = 0;
           float cy = 0;
+          int width = 1;
+          int height = 1;
 
           public DrawingView(Context context) {
                super(context);
@@ -174,19 +165,42 @@ public class XMLTest extends ActionBarActivity {
                super.onSizeChanged(w, h, oldw, oldh);
                mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
                mCanvas = new Canvas(mBitmap);
+               width = w;
+               height = h;
           }
           @Override
           public void draw(Canvas canvas) {
                // TODO Auto-generated method stub
                super.draw(canvas);
                canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-               canvas.drawCircle(cx, cy, radius, mPaint);
+               //canvas.drawCircle(cx, cy, radius, mPaint);
+          }
+
+          public void resetDraw() {
+
+               clearDraw();
+
+               for (int i = 0; i<patches.size(); i++) {
+                    Patch patch = patches.get(i);
+
+                    mPaint.setStrokeWidth(5);
+                    mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+                    mPaint.setStrokeWidth(3);
+                    mCanvas.drawText((patch.patchno+1) + "", patch.x, patch.y, mPaint);
+               }
+
+          }
+
+          public void clearDraw() {
+
+               mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+               mCanvas = new Canvas(mBitmap);
+               invalidate();
+
           }
 
 
           private void touch_start(float x, float y) {
-               //mPath.reset();
-               //mPath.moveTo(x, y);
                initX = x;
                initY = y;
           }
@@ -194,33 +208,56 @@ public class XMLTest extends ActionBarActivity {
                float dx = Math.abs(x - mX);
                float dy = Math.abs(y - mY);
                if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-                    //mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
                     mX = x;
                     mY = y;
                }
           }
           private void touch_up() {
-               //mPath.lineTo(mX, mY);
+
                radius = getRadius(initX, initY, mX, mY);
 
-               if (radius<4) return;
+               if (radius > 4) { //10
+                    //createPatch(initX,initY,finalX,finalY);
+                    //Toast.makeText(getApplicationContext(), getMidpoint(initX,finalX) + ", " + getMidpoint(initY,finalY), Toast.LENGTH_SHORT).show();
+                    cx = getMidpoint(initX, mX);
+                    cy = getMidpoint(initY, mY);
 
-               cx = getMidpoint(initX, mX);
-               cy = getMidpoint(initY, mY);
+                    Patch patch = new Patch(context, current_image, patches.size(),cx,cy,radius,disease);
+                    patches.add(patch);
+                    mPaint.setStrokeWidth(5);
+                    mCanvas.drawCircle(cx, cy, radius, mPaint);
+                    mPaint.setStrokeWidth(3);
+                    mCanvas.drawText((patch.patchno+1) + "", cx, cy, mPaint);
+                    Toast.makeText(context, "Patch exists", Toast.LENGTH_SHORT).show();
+                    //new ProgressUpdater().execute();
+               }
+
+               /*
+               else {
+                    // Check if area is patched. If yes, open dialog box.
+                    for (int i = 0; i<patches.size(); i++) {
+                         Patch patch = patches.get(i);
+                         if (isBetween(patch.x1,patch.x2,finalX) && isBetween(patch.y1,patch.y2,finalY)) {
+                              current_patch = i;
+                              currently_new = false;
+                              Toast.makeText(context, "Patch exists", Toast.LENGTH_SHORT).show();
+                         }
+                    }
+               }
+               */
+
+
+
 
                // commit the path to our offscreen
-               //mCanvas.drawPath(mPath, mPaint);
-               mPaint.setStrokeWidth(10);
-               mCanvas.drawCircle(cx,cy,radius, mPaint);
-               mPaint.setStrokeWidth(5);
-               mCanvas.drawText(ctr++ + "", cx, cy, mPaint);
-               //mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
-               // kill this so we don't double draw
-               //mPath.reset();
-               // mPath= new Path();
-               float radius = 0;
-               float cx = 0;
-               float cy = 0;
+               // mCanvas.drawPath(mPath, mPaint);
+
+               // PAINT OPERATION HERE
+               // PUT PATCH SHIZNIZ HERE
+
+               //float radius = 0;
+               //float cx = 0;
+               //float cy = 0;
           }
 
           @Override
@@ -256,19 +293,6 @@ public class XMLTest extends ActionBarActivity {
           else smaller = b;
 
           return smaller + (Math.abs(a-b)/2);
-     }
-
-     class CircleThing {
-          float radius;
-          float x;
-          float y;
-
-          CircleThing(float radius, float x1, float y1, float x2, float y2) {
-               this.x = getMidpoint(x1,x2);
-               this.y = getMidpoint(y1,y2);
-               this.radius = getRadius(x1,y1,x2,y2);
-          }
-
      }
 
      // ==============================================================================================
