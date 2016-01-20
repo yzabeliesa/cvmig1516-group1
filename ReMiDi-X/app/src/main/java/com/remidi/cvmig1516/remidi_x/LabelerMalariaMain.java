@@ -130,12 +130,13 @@ public class LabelerMalariaMain extends ActionBarActivity {
      // Local url
      //public String HTTP_IP_ADDRESS = "192.168.1.10";
      //public String HTTP_HOME = "/data/";
+     //public int HTTP_PORT = 5000;
 
      // Web url
      public String HTTP_IP_ADDRESS = "54.179.135.52";
      public String HTTP_HOME = "/api/label/";
-
      public int HTTP_PORT = 80;
+
      public boolean isThreadPause = false;
      Uploader uploader;
 

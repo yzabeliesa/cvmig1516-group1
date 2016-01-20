@@ -70,29 +70,44 @@ public class TestActivity extends ActionBarActivity {
      //public static final String FILE_NAME = "testfile.xml";
      //public static final String FILE_NAME = "validation.xml";
      public static final String FILE_NAME = "bago";
-     //public static final String FILE_NAME = "chunk_validation.xml";
-     //public String HTTP_HOST = "54.179.135.52";
-     //public String HOME = "/api/label";
-     //public String HTTP_HOST = "10.40.107.82";
-     public String HTTP_HOST = "172.20.10.2";
-     public String HOME = "/data/";
-     //public String HOME = "/chunk_data/";
+     // Local url
+     public String HTTP_HOST = "192.168.1.2";
+     public String HTTP_HOME = "/data/";
      public int HTTP_PORT = 5000;
-     public long ctr = 0;
+
+     // Web url
+     //public String HTTP_HOST = "54.179.135.52";
+     //public String HTTP_HOME = "/api/label/";
+     //public int HTTP_PORT = 80;
+
+
      public String exception_message = "none";
      public String send_result = "";
-     public String sent_filename = "";
-     public boolean hasNet = false;
+
+
      public int stat = 0;
      public File myDirectory;
      public File[] myGallery;
      public boolean isThreadPause = false;
      public Context context;
 
+     public String DOWNLOAD_URL = "http://54.179.135.52/pic/1/";
+     public int IMG_ID = 0;
+     public int DISEASE_ID = 0;
+     public String fn = "";
+     public int getCurrentCode;
+
      /**
       * ATTENTION: This was auto-generated to implement the App Indexing API.
       * See https://g.co/AppIndexing/AndroidStudio for more information.
       */
+
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                             SERVICE METHODS TO OVERRIDE
+     //
+     //------------------------------------------------------------------------------------------------------------------
+
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -101,44 +116,21 @@ public class TestActivity extends ActionBarActivity {
           setContentView(R.layout.activity_test);
           context = getApplicationContext();
 
-          myDirectory = new File(context.getFilesDir(), "myDatabase");
+          myDirectory = new File(context.getFilesDir(), "remidiDatabase");
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
           }
 
-          myGallery = new File[5];
-          for(int x=0; x<5; x++) {
-               myGallery[x] = new File(context.getFilesDir(), "disease_" + x);
+          myGallery = new File[19];
+          for(int x=0; x<19; x++) {
+               myGallery[x] = new File(context.getFilesDir(), "disease_" + (x+1));
                if( !myGallery[x].exists() ) {
                     myGallery[x].mkdirs();
                }
           }
 
-         //new Thread(null, send, "SendThread").start();
+         new Thread(null, send, "SendThread").start();
      }
-
-     Runnable send = new Runnable() {
-          @Override
-          public void run() {
-               while (true) {
-                    hasNet = false;
-                    stat++;
-                    if (!isThreadPause) {
-                         String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
-                         if (myDirectory.isDirectory()) {
-                              File[] xml_files = myDirectory.listFiles();
-
-                              if ((xml_files.length > 0) && (isNetworkAvailable())) {
-                                   hasNet = true;
-                                   Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
-                                   sent_filename = xml_files[0].getAbsolutePath();
-                                   send_result = Send_File(urlstr, xml_files[0]);
-                              }
-                         }
-                    }
-               }
-          }
-     };
 
      @Override
      protected void onPause() {
@@ -154,25 +146,86 @@ public class TestActivity extends ActionBarActivity {
           Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
      }
 
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                                RUNNABLE THREADS
+     //
+     //------------------------------------------------------------------------------------------------------------------
+
+
+     Runnable send = new Runnable() {
+          @Override
+          public void run() {
+               while (true) {
+                    if (!isThreadPause) {
+                         String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HTTP_HOME;
+                         if (myDirectory.isDirectory()) {
+                              File[] xml_files = myDirectory.listFiles();
+
+                              if ((xml_files.length > 0) && (isNetworkAvailable())) {
+                                   Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
+                                   send_result = Send_File(urlstr, xml_files[0]);
+                              }
+                         }
+                    }
+               }
+          }
+     };
+
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                                ACCESSORY METHODS
+     //
+     //------------------------------------------------------------------------------------------------------------------
+
      public boolean isNetworkAvailable() {
           ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
           NetworkInfo ani = cm.getActiveNetworkInfo();
           return (ani != null && ani.isConnected());
      }
 
-     public void send_task(View view) {
-          String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HOME;
+     public String make_xml() {
+
+          StringBuilder xmlfile = new StringBuilder();
+          xmlfile.append("<?xml version='1.0' encoding='us-ascii'?> \n");
+          xmlfile.append("<!--  A SAMPLE --> \n");
+          xmlfile.append("<displayName> My Message </displayName> \n");
+          xmlfile.append("<msg> " + " </msg> \n");
+          return xmlfile.toString();
+
+     }
+
+     public void getStatus(View view) {
+          ((TextView)findViewById(R.id.some_textview)).setText( myDirectory.listFiles().length + "\n" + myGallery[0].listFiles().length + "\n" + myGallery[1].listFiles().length + "\n" + myGallery[2].listFiles().length + "\n" + myGallery[3].listFiles().length + "\n" + myGallery[4].listFiles().length);
+          ImageView iv = (ImageView) findViewById(R.id.imageViewId);
+          iv.setImageBitmap(BitmapFactory.decodeFile(myGallery[0].listFiles()[0].getAbsolutePath()));
+     }
+
+     public void deleteAllFiles(View view) {
+          File[] xml_files = myDirectory.listFiles();
+          for(int x=0; x<xml_files.length; x++) {
+               xml_files[x].delete();
+          }
+     }
+
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                  THIS IS FOR SENDING FILES FROM THE LOCAL DATABASE
+     //
+     //------------------------------------------------------------------------------------------------------------------
+
+
+     /*public void send_task(View view) {
+          String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HTTP_HOME;
           if (myDirectory.isDirectory()) {
                File[] xml_files = myDirectory.listFiles();
 
                if ((xml_files.length > 0) && (isNetworkAvailable())) {
-                    hasNet = true;
                     Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
-                    sent_filename = xml_files[0].getAbsolutePath();
                     send_result = Send_File(urlstr, xml_files[0]);
                }
           }
-     }
+     }*/
 
      public String Send_File(String urlstr, File current_file) {
           String result = null;
@@ -184,7 +237,7 @@ public class TestActivity extends ActionBarActivity {
                String boundary = "-------------" + System.currentTimeMillis();
                HttpPost httpPost = new HttpPost(urlstr);
                httpPost.setHeader("ENCTYPE", "multipart/form-data");
-               httpPost.setHeader("Accept", "text/xml");
+               httpPost.setHeader("Accept", "application/xml");
                httpPost.setHeader("Content-type", "multipart/form-data; boundary=" + boundary);
 
                HttpParams params = new BasicHttpParams();
@@ -205,45 +258,27 @@ public class TestActivity extends ActionBarActivity {
                if (hr != null) {
                     BasicResponseHandler responseHandler = new BasicResponseHandler();
                     result = responseHandler.handleResponse(hr);
-                    current_file.delete();
+                    getCurrentCode = hr.getStatusLine().getStatusCode();
+                    if (getCurrentCode == 200) current_file.delete();
+
                } else {
                     result = "Didn't work!";
                }
 
           } catch (Exception e) {
                e.printStackTrace();
-               //Log.d("OutputStream", e.getLocalizedMessage());
+               Log.d("OutputStream", e.getLocalizedMessage());
                result = e.getLocalizedMessage();
           }
 
           return result;
      }
 
-
-     public String make_xml() {
-
-          StringBuilder xmlfile = new StringBuilder();
-          xmlfile.append("<?xml version='1.0' encoding='us-ascii'?> \n");
-          xmlfile.append("<!--  A SAMPLE --> \n");
-          xmlfile.append("<displayName> My Message </displayName> \n");
-          xmlfile.append("<msg> " + " </msg> \n");
-          return xmlfile.toString();
-
-     }
-
-     public void getStatus(View view) {
-          //((TextView)findViewById(R.id.some_textview)).setText(exception_message + "\n" + myGallery[0].listFiles()[0].getName() + "\n" + myGallery[1].listFiles().length + "\n" + myGallery[2].listFiles().length + "\n" + myGallery[3].listFiles().length + "\n" + myGallery[4].listFiles()[0].getName());
-          ImageView mImageView;
-          mImageView = (ImageView) findViewById(R.id.imageViewId);
-          mImageView.setImageBitmap(BitmapFactory.decodeFile("pathToImageFile"));
-     }
-
-     public void deleteAllFiles(View view) {
-          File[] xml_files = myDirectory.listFiles();
-          for(int x=0; x<xml_files.length; x++) {
-               xml_files[x].delete();
-          }
-     }
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                    THIS IS FOR UPLOADING FILES TO THE LOCAL DATABASE
+     //
+     //------------------------------------------------------------------------------------------------------------------
 
      public void upload(View view) {
           String baseDir = myDirectory.getAbsolutePath();
@@ -292,19 +327,18 @@ public class TestActivity extends ActionBarActivity {
           }
      }
 
-     public String downloadUrl = "http://54.179.135.52/pic/1/";
-     public int IMG_ID = 154;
-     public int DISEASE_ID = 4;
-     public String fn = "";
-
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                      THIS IS FOR GETTING IMAGE FROM GIVEN URL
+     //
+     //------------------------------------------------------------------------------------------------------------------
 
      public void download(View view) {
-          new DownloadTask().execute(downloadUrl);
+          new DownloadTask().execute(DOWNLOAD_URL);
      }
 
-     public Bitmap Download_Image(String urlstr) {
+     public Bitmap Download_Image( String urlstr ) {
 
-          ProgressDialog simpleWaitDialog;
           HttpClient hc = new DefaultHttpClient();
           HttpGet httpGet = new HttpGet(urlstr);
           HttpEntity entity = null;
@@ -317,33 +351,29 @@ public class TestActivity extends ActionBarActivity {
                response = hc.execute(httpGet);
                int statusCode = response.getStatusLine().getStatusCode();
 
-               if (statusCode != HttpStatus.SC_OK) {
-                   // Log.w("ImageDownloader", "Error " + statusCode + " while retrieving bitmap from " + url);
-                    return null;
+               if (statusCode == HttpStatus.SC_OK) {
+                    entity = response.getEntity();
+                    if (entity != null) {
+                         try {
+                              is = entity.getContent();
+                              bitmap = BitmapFactory.decodeStream(is);
+                         } finally {
+                              if (is != null) {
+                                   is.close();
+                              }
+                              entity.consumeContent();
+                         }
+                    }
                }
 
-               entity = response.getEntity();
-
-               if (entity != null) {
-                    try {
-
-                         is = entity.getContent();
-                         bitmap = BitmapFactory.decodeStream(is);
-
-                    } finally {
-
-                         if (is != null) {
-                              is.close();
-                         }
-
-                         entity.consumeContent();
-                    }
+               else {
+                    return null;
                }
 
           } catch (Exception e) {
                httpGet.abort();
                e.printStackTrace();
-               Log.d("OutputStream", e.getLocalizedMessage());
+               Log.d("InputStream", e.getLocalizedMessage());
           }
 
           return bitmap;
@@ -361,15 +391,16 @@ public class TestActivity extends ActionBarActivity {
                File f;
                FileOutputStream fop;
                String diseaseDir = myGallery[DISEASE_ID].getAbsolutePath();
-               fn =  "img" + IMG_ID + ".png";
-
+               fn = "img" + IMG_ID + ".png";
                try {
 
-                    f = new File(diseaseDir, fn);
-                    fop = new FileOutputStream(f);
-                    result.compress(Bitmap.CompressFormat.PNG, 100, fop);
-                    fop.flush();
-                    fop.close();
+                    if( result != null ) {
+                         f = new File(diseaseDir, fn);
+                         fop = new FileOutputStream(f);
+                         result.compress(Bitmap.CompressFormat.PNG, 100, fop);
+                         fop.flush();
+                         fop.close();
+                    }
 
                } catch (Exception e) {
                     e.printStackTrace();
