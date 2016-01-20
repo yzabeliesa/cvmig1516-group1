@@ -96,7 +96,7 @@ public class XMLTest extends ActionBarActivity {
           //origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
           LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.view_drawing_pad);
-          DrawingView mDrawingView = new DrawingView(this);
+          final DrawingView mDrawingView = new DrawingView(this);
           Drawable drawable = getResources().getDrawable(R.drawable.img0000000_000);
           mDrawingView.setImageDrawable(drawable);
 
@@ -129,7 +129,9 @@ public class XMLTest extends ActionBarActivity {
           View.OnClickListener clicker = new View.OnClickListener() {
                @Override
                public void onClick(View v) {
-                    Toast.makeText(context, "Click", Toast.LENGTH_SHORT).show();
+                    int[] img_coordinates = new int[2];
+                    mDrawingView.getLocationOnScreen(img_coordinates);
+                    Toast.makeText(context, mDrawingView.getLeft() + ", " + mDrawingView.getTop(), Toast.LENGTH_SHORT).show();
                }
           };
           b.setOnClickListener(clicker);

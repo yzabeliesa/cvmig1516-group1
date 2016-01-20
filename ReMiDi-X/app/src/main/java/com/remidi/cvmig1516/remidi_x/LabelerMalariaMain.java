@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -21,6 +22,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -112,12 +114,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
      String validator = "";
      XMLFileHandler progress_file;
      ArrayList<Patch> patches = new ArrayList<>();
-     float scaleFactor = 1;
 
      float initX = 0;
      float initY = 0;
      float bounds_left = 0;
      float bounds_top = 0;
+     float scaleFactor = 1;
      Bitmap origBitmap;
      File myDirectory;
 
@@ -193,14 +195,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView = (ImageView)findViewById(R.id.fullscreen_content);
           new Initializer().execute(disease);
           mContentView.setImageDrawable(sample_images[current_image]);
-          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          Drawable drawable = mContentView.getDrawable();
+          origBitmap = ((BitmapDrawable)drawable).getBitmap();
           //origBitmap = Bitmap.createScaledBitmap(origBitmap, mContentView.getMeasuredHeight(), mContentView.getMeasuredWidth(), false);
           //scaleFactor = bitmap_height/scaled_height;
           //scaleFactor = scaled_height/bitmap_height;
-          bounds_left = mContentView.getLeft();
-          bounds_top = mContentView.getTop();
 
-          //idealHeight = scaleFactor*actualHeight;
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          int width = size.x;
+
+          int idealWidth = width;
+          int actualWidth = drawable.getIntrinsicWidth();
+          scaleFactor = ((float)idealWidth)/((float)actualWidth);
+
+
 
           // ----------------------------------------------
 
@@ -208,32 +218,30 @@ public class LabelerMalariaMain extends ActionBarActivity {
                @Override
                public boolean onTouch(View v, MotionEvent event) {
 
-                    float idealWidth = mContentView.getMeasuredWidth();
-                    float idealHeight = mContentView.getMeasuredHeight();
-                    float actualWidth = mContentView.getWidth();
-                    float actualHeight = mContentView.getHeight();
-                    scaleFactor = idealWidth/actualWidth;
-
-                    Toast.makeText(getApplicationContext(), "Ideal: " + idealWidth + "\nActual: " + actualWidth + "\nScale factor: " + scaleFactor, Toast.LENGTH_LONG).show();
-
-
                     ///*
-                    float currentX = event.getX();
-                    float currentY = event.getY();
+                    //float currentX = event.getX();
+                    //float currentY = event.getY();
                     //*/
                     /*
                     int x = ev.getX() / zoomFactor + clipBounds_canvas.left;
                     int y = ev.getY() / zoomFactor + clipBounds_canvas.top;
                     */
 
+                    int[] img_coordinates = new int[2];
+                    mContentView.getLocationOnScreen(img_coordinates);
+                    bounds_left = img_coordinates[0];
+                    bounds_top = img_coordinates[1];
+                    Toast.makeText(getApplicationContext(), "Left: "+ bounds_left + "\nTop: " + bounds_top, Toast.LENGTH_SHORT).show();
+
                     int action = event.getActionMasked();
                     int pointerIndex = MotionEventCompat.getActionIndex(event);
                     //float currentX = MotionEventCompat.getX(event,pointerIndex) / scaleFactor + bounds_left;
                     //float currentY = MotionEventCompat.getY(event,pointerIndex) / scaleFactor + bounds_top;
-                    /*
-                    float currentX = event.getX() / scaleFactor + bounds_left;
-                    float currentY = event.getY() / scaleFactor + bounds_top;
-                    */
+
+                    float currentX = event.getX() / scaleFactor;
+                    //float currentY = (event.getY() / scaleFactor) + bounds_top;
+                    float currentY = (event.getY() - bounds_top) / scaleFactor;
+                    //float currentY = (event.getY() - bounds_top)/scaleFactor;
 
                     // If area is unpatched, create new patch
                     if (action == MotionEvent.ACTION_DOWN) {
@@ -244,9 +252,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
                          float finalX = currentX;
                          float finalY = currentY;
+                         //createPatch(finalX, finalY, 50);
                          float radius = getRadius(initX, initY, finalX, finalY);
-                         if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
+                         if (radius > 10) {
                               createPatch(getMidpoint(initX,finalX),getMidpoint(initY,finalY),radius);
+                              //Toast.makeText(getApplicationContext(), getMidpoint(initX,finalX) + ", " + getMidpoint(initY,finalY), Toast.LENGTH_SHORT).show();
                               new ProgressUpdater().execute();
                          }
 
@@ -262,6 +272,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                                    }
                               }
                          }
+
                     }
                     return true;
                }
@@ -282,6 +293,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
      @Override
      protected void onPostCreate(Bundle savedInstanceState) {
           super.onPostCreate(savedInstanceState);
+
+          int[] img_coordinates = new int[2];
+          mContentView.getLocationOnScreen(img_coordinates);
+          bounds_left = img_coordinates[0];
+          bounds_top = img_coordinates[1];
+          Toast.makeText(getApplicationContext(), "Left: "+ bounds_left + "\nTop: " + bounds_top, Toast.LENGTH_SHORT).show();
+
+          Drawable drawable = mContentView.getDrawable();
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          int width = size.x;
+
+          int idealWidth = width;
+          int actualWidth = drawable.getIntrinsicWidth();
+          scaleFactor = ((float)idealWidth)/((float)actualWidth);
 
      }
 
@@ -525,6 +552,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
           current_image%=5; //temp
           mContentView.setImageDrawable(sample_images[current_image]);
           origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+
+          int[] img_coordinates = new int[2];
+          mContentView.getLocationOnScreen(img_coordinates);
+          bounds_left = img_coordinates[0];
+          bounds_top = img_coordinates[1];
+
+          Drawable drawable = mContentView.getDrawable();
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          int width = size.x;
+
+          int idealWidth = width;
+          int actualWidth = drawable.getIntrinsicWidth();
+          scaleFactor = ((float)idealWidth)/((float)actualWidth);
+
           patches.clear();
           drawBoxes(DRAW_CLEAR);
           new ProgressUpdater().execute();
@@ -931,7 +974,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public float getRadius(float x1, float y1, float x2, float y2) {
-          return (float)Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)));
+          return (float)(Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))/2);
      }
 
 
