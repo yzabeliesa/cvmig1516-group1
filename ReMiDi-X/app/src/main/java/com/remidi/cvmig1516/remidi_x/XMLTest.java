@@ -97,13 +97,8 @@ public class XMLTest extends ActionBarActivity {
 
           LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.view_drawing_pad);
           DrawingView mDrawingView = new DrawingView(this);
-          mDrawingView.setImageDrawable(getResources().getDrawable(R.drawable.img0000000_000));
-
-          //int idealWidth = mDrawingView.getMeasuredWidth();
-          //int idealHeight;
-          //int actualWidth = mDrawingView.getWidth();
-          //int actualHeight = mDrawingView.getHeight();
-          //int scaleFactor = idealWidth/actualWidth;
+          Drawable drawable = getResources().getDrawable(R.drawable.img0000000_000);
+          mDrawingView.setImageDrawable(drawable);
 
           Display display = getWindowManager().getDefaultDisplay();
           Point size = new Point();
@@ -111,9 +106,23 @@ public class XMLTest extends ActionBarActivity {
           int width = size.x;
           int height = size.y;
 
+          int idealWidth = width;
+          int idealHeight;
+          int actualWidth = drawable.getIntrinsicWidth();
+          int actualHeight = drawable.getIntrinsicHeight();
+          float scaleFactor = ((float)idealWidth)/((float)actualWidth);
+          idealHeight = (int)(scaleFactor*actualHeight);
+
           mDrawingPad.setMinimumWidth(width);
 
-          mDrawingPad.addView(mDrawingView);
+          Toast.makeText(context, "Ideal Height: " + idealHeight + "\nIdeal Width: " + idealWidth
+                  + "\nActual Height: " + actualHeight + "\nActual Width: " + actualWidth + "\nScale factor: " + scaleFactor, Toast.LENGTH_SHORT).show();
+
+          //int idealWidth = mDrawingView.getMeasuredWidth();
+          //int idealHeight;
+          //int actualWidth = mDrawingView.getWidth();
+          //int actualHeight = mDrawingView.getHeight();
+          //int scaleFactor = idealWidth/actualWidth;
 
           Button b = new Button(this);
           b.setText("Button");
@@ -125,6 +134,7 @@ public class XMLTest extends ActionBarActivity {
           };
           b.setOnClickListener(clicker);
           mDrawingPad.addView(b);
+          mDrawingPad.addView(mDrawingView);
 
      }
 
