@@ -137,9 +137,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public int HTTP_PORT = 5000;
      public boolean isThreadPause = false;
+
      Uploader uploader;
      Drawable drawable;
      DrawingView mContentView;
+     int mContentView_top = 0;
+     int mContentView_bottom = 0;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -199,7 +202,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           new Initializer().execute(disease);
           mContentView.setImageDrawable(sample_images[current_image]);
           drawable = mContentView.getDrawable();
-          origBitmap = ((BitmapDrawable)drawable).getBitmap();
 
           final LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad);
 
@@ -289,14 +291,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           Toast.makeText(getApplicationContext(), "Left: "+ bounds_left + "\nTop: " + bounds_top, Toast.LENGTH_SHORT).show();
 
           drawable = mContentView.getDrawable();
-          Display display = getWindowManager().getDefaultDisplay();
-          Point size = new Point();
-          display.getSize(size);
-          int width = size.x;
-
-          int idealWidth = width;
-          int actualWidth = drawable.getIntrinsicWidth();
-          scaleFactorX = ((float)idealWidth)/((float)actualWidth);
+          mContentView_top = drawable.getBounds().top;
+          mContentView_bottom = drawable.getBounds().bottom;
 
      }
 
@@ -433,6 +429,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                initX = x;
                initY = y;
           }
+
           private void touch_move(float x, float y) {
                float dx = Math.abs(x - mX);
                float dy = Math.abs(y - mY);
@@ -446,24 +443,28 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
                radius = getRadius(initX, initY, mX, mY);
 
-               if (radius > 4) { //10
+               if (radius > TOUCH_TOLERANCE) { //10
 
                     cx = getMidpoint(initX, mX);
                     cy = getMidpoint(initY, mY);
 
-                    createPatch(cx,cy,radius);
+                    if ((cy-radius) > mContentView_top && (cy+radius) < mContentView_bottom) {
 
-                    if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
-                    else if (patch.state == PATCH_COMPLETE)
-                         mPaint.setColor(getResources().getColor(R.color.green));
-                    else mPaint.setColor(getResources().getColor(R.color.red));
+                         createPatch(cx,cy,radius);
+                         Patch patch = patches.get(current_patch);
 
-                    mPaint.setStrokeWidth(7);
-                    mCanvas.drawCircle(cx, cy, radius, mPaint);
-                    mPaint.setStrokeWidth(5);
-                    mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
-                    Toast.makeText(context, "Patch created", Toast.LENGTH_SHORT).show();
-                    new ProgressUpdater().execute();
+                         if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
+                         else if (patch.state == PATCH_COMPLETE)
+                              mPaint.setColor(getResources().getColor(R.color.green));
+                         else mPaint.setColor(getResources().getColor(R.color.red));
+
+                         mPaint.setStrokeWidth(7);
+                         mCanvas.drawCircle(cx, cy, radius, mPaint);
+                         mPaint.setStrokeWidth(5);
+                         mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
+                         Toast.makeText(context, "Patch created", Toast.LENGTH_SHORT).show();
+                         new ProgressUpdater().execute();
+                    }
                }
 
 
@@ -504,6 +505,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
                }
                return true;
           }
+
+          
+          
      }
 
      /*
@@ -689,7 +693,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           current_image++;
           current_image%=5; //temp
           mContentView.setImageDrawable(sample_images[current_image]);
-          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+
+          drawable = mContentView.getDrawable();
+          mContentView_top = drawable.getBounds().top;
+          mContentView_bottom = drawable.getBounds().bottom;
 
           patches.clear();
           mContentView.clearDraw();
