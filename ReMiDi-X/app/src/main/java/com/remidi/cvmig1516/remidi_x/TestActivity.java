@@ -9,6 +9,7 @@ compile 'org.apache.httpcomponents:httpclient-osgi:4.5.1'
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -133,6 +134,8 @@ public class TestActivity extends ActionBarActivity {
                }
           }
 
+          Intent myIntent = new Intent(this, LoopService.class);
+          context.startService(myIntent);
          // new Thread(null, send, "SendThread").start();
          //new Thread(null, receive_img, "GetImageThread").start();
      }
@@ -202,7 +205,18 @@ public class TestActivity extends ActionBarActivity {
      }
 
      public void getStatus(View view) {
-          ((TextView)findViewById(R.id.some_textview)).setText(myGallery[0].listFiles().length + "\n" + myGallery[1].listFiles().length + "\n" + myGallery[2].listFiles().length + "\n" + myGallery[3].listFiles().length + "\n" + myGallery[4].listFiles().length + "\n" + myGallery[6].listFiles().length + "\n" + myGallery[5].listFiles().length );
+          ((TextView)findViewById(R.id.some_textview)).setText(myDirectory.listFiles().length + "\n"
+                          + myGallery[0].listFiles().length + " " + myGallery[1].listFiles().length + " "
+                          + myGallery[2].listFiles().length + " " + myGallery[3].listFiles().length + " "
+                          + myGallery[4].listFiles().length + " " + myGallery[5].listFiles().length + " "
+                          + myGallery[6].listFiles().length + " " + myGallery[7].listFiles().length + " "
+                          + myGallery[8].listFiles().length + " " + myGallery[9].listFiles().length + " "
+                          + myGallery[10].listFiles().length + " " + myGallery[11].listFiles().length + " "
+                          + myGallery[12].listFiles().length + " " + myGallery[13].listFiles().length + " "
+                          + myGallery[14].listFiles().length + " " + myGallery[15].listFiles().length + " "
+                          + myGallery[16].listFiles().length + " " + myGallery[17].listFiles().length + " "
+                          + myGallery[18].listFiles().length );
+
           /*ImageView iv = (ImageView) findViewById(R.id.imageViewId);
           iv.setImageBitmap(BitmapFactory.decodeFile(myGallery[0].listFiles()[0].getAbsolutePath()));*/
      }

@@ -37,6 +37,7 @@ public class Uploader {
      int HTTP_PORT;
      String HOME;
      int disease;
+
      public boolean hasNet = false;
      public boolean isThreadPause = false;
      public int stat = 0;

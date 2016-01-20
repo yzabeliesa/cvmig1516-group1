@@ -313,7 +313,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
-     @Override
+     /*@Override
      protected void onPause() {
           isThreadPause = true;
           super.onPause();
@@ -327,7 +327,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           super.onResume();
           uploader.setIsPaused(isThreadPause);
           //Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
-     }
+     }*/
 
 
 
