@@ -89,16 +89,17 @@ public class TestActivity extends ActionBarActivity {
 
 
      public int stat = 0;
+     public int ctr = 0;
      public File myDirectory;
      public File[] myGallery;
-     public boolean isThreadPause = false;
      public Context context;
 
-     public String DOWNLOAD_URL = "http://54.179.135.52/pic/1/";
      public int IMG_ID = 0;
      public int DISEASE_ID = 0;
+     public String DOWNLOAD_URL = "";
      public String fn = "";
      public int getCurrentCode;
+
 
      /**
       * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -132,10 +133,11 @@ public class TestActivity extends ActionBarActivity {
                }
           }
 
-         //new Thread(null, send, "SendThread").start();
+         // new Thread(null, send, "SendThread").start();
+         //new Thread(null, receive_img, "GetImageThread").start();
      }
 
-     //------------------------------------------------------------------------------------------------------------------
+     //-----------------------------------------------------------------------------------------------------------------
      //
      //                                                RUNNABLE THREADS
      //
@@ -155,6 +157,23 @@ public class TestActivity extends ActionBarActivity {
                               send_result = Send_File(urlstr, xml_files[0]);
                          }
                     }
+               }
+          }
+     };
+
+     Runnable receive_img = new Runnable() {
+          @Override
+          public void run() {
+               while (true) {
+                    for(int x=0; x<19; x++) {
+                         get_image_from_json(x);
+                    }
+
+                    if(ctr >= 10) {
+                         //this.notifyAll();
+                    }
+
+                    ctr++;
                }
           }
      };
@@ -183,9 +202,9 @@ public class TestActivity extends ActionBarActivity {
      }
 
      public void getStatus(View view) {
-          ((TextView)findViewById(R.id.some_textview)).setText( myDirectory.listFiles().length + "\n" + myGallery[0].listFiles().length + "\n" + myGallery[1].listFiles().length + "\n" + myGallery[2].listFiles().length + "\n" + myGallery[3].listFiles().length + "\n" + myGallery[4].listFiles().length);
-          ImageView iv = (ImageView) findViewById(R.id.imageViewId);
-          iv.setImageBitmap(BitmapFactory.decodeFile(myGallery[0].listFiles()[0].getAbsolutePath()));
+          ((TextView)findViewById(R.id.some_textview)).setText(myGallery[0].listFiles().length + "\n" + myGallery[1].listFiles().length + "\n" + myGallery[2].listFiles().length + "\n" + myGallery[3].listFiles().length + "\n" + myGallery[4].listFiles().length + "\n" + myGallery[6].listFiles().length + "\n" + myGallery[5].listFiles().length );
+          /*ImageView iv = (ImageView) findViewById(R.id.imageViewId);
+          iv.setImageBitmap(BitmapFactory.decodeFile(myGallery[0].listFiles()[0].getAbsolutePath()));*/
      }
 
      public void deleteAllFiles(View view) {
@@ -250,7 +269,7 @@ public class TestActivity extends ActionBarActivity {
 
      //------------------------------------------------------------------------------------------------------------------
      //
-     //                                    THIS IS FOR UPLOADING FILES TO THE LOCAL DATABASE
+     //                          THIS IS FOR UPLOADING FILES TO THE LOCAL DATABASE ( Palitan nung ZIP file )
      //
      //------------------------------------------------------------------------------------------------------------------
 
@@ -303,9 +322,58 @@ public class TestActivity extends ActionBarActivity {
 
      //------------------------------------------------------------------------------------------------------------------
      //
-     //                                           THIS IS FOR REQUESTING JSON DATA
+     //                           THIS IS FOR REQUESTING JSON DATA AND DOWNLOADING IMAGE FROM URL
      //
      //------------------------------------------------------------------------------------------------------------------
+
+     public void get_image_from_json(int x) {
+          if (myGallery[x].isDirectory()) {
+               String JSON_URL = "http://" + HTTP_HOST + ":" + HTTP_PORT + "/api/get_img_info/" + (x+1) + "/";
+               //String JSON_URL = "http://" + "54.179.135.52" + "/api/get_img_info/" + (x+1) + "/";
+
+               if ((myGallery[x].listFiles().length < 10) && (isNetworkAvailable())) {
+                    String json_txt = Get_JSON(JSON_URL);
+                    try {
+                         if( json_txt != null ) {
+                              JSONObject jsonObject = new JSONObject(json_txt);
+                              IMG_ID = Integer.parseInt(jsonObject.getString("img"));
+                              DISEASE_ID = Integer.parseInt(jsonObject.getString("disease"));
+                              DOWNLOAD_URL = jsonObject.getString("img_url");
+                         }
+                    } catch(Exception e) {
+                         e.printStackTrace();
+                    } finally {
+                         System.out.println("Success");
+                    }
+
+                    if ( !DOWNLOAD_URL.equals("") ) {
+                         Bitmap result = Download_Image(DOWNLOAD_URL);
+
+                         File f;
+                         FileOutputStream fop;
+                         String diseaseDir = myGallery[DISEASE_ID-1].getAbsolutePath();
+                         fn = "img" + IMG_ID + ".png";
+                         try {
+
+                              if( result != null ) {
+                                   f = new File(diseaseDir, fn);
+                                   fop = new FileOutputStream(f);
+                                   result.compress(Bitmap.CompressFormat.PNG, 100, fop);
+                                   fop.flush();
+                                   fop.close();
+                              }
+
+                         } catch (Exception e) {
+                              e.printStackTrace();
+                         }
+
+                         DOWNLOAD_URL = "";
+                         IMG_ID = 0;
+                         DISEASE_ID = 0;
+                    }
+               }
+          }
+     }
 
      public String Get_JSON(String urlstr){
           StringBuilder builder = new StringBuilder();
@@ -341,40 +409,6 @@ public class TestActivity extends ActionBarActivity {
           }
 
           return builder.toString();
-     }
-
-     public class GetJSONTask extends AsyncTask<String, Void, String> {
-
-          @Override
-          protected Bitmap doInBackground(String... param) {
-               return Get_JSON(param[0]);
-          }
-
-          @Override
-          protected void onPostExecute(String json_txt) {
-               try {
-                    if( json_txt != null ) {
-                         JSONObject jsonObject = new JSONObject(json_txt);
-                         IMG_ID = jsonObject.getString("img");
-                         DISEASE_ID = jsonObject.getString("disease");
-                         DOWNLOAD_URL = jsonObject.getString("img_url");
-                    }
-               } catch(Exception e) {
-                    e.printStackTrace();
-               } finally {
-                    System.out.println("Success");
-               }
-          }
-     }
-
-     //------------------------------------------------------------------------------------------------------------------
-     //
-     //                                      THIS IS FOR GETTING IMAGE FROM GIVEN URL
-     //
-     //------------------------------------------------------------------------------------------------------------------
-
-     public void download(View view) {
-          new DownloadTask().execute(DOWNLOAD_URL);
      }
 
      public Bitmap Download_Image( String urlstr ) {
@@ -417,34 +451,5 @@ public class TestActivity extends ActionBarActivity {
           }
 
           return bitmap;
-     }
-
-     public class DownloadTask extends AsyncTask<String, Void, Bitmap> {
-
-          @Override
-          protected Bitmap doInBackground(String... param) {
-               return Download_Image(param[0]);
-          }
-
-          @Override
-          protected void onPostExecute(Bitmap result) {
-               File f;
-               FileOutputStream fop;
-               String diseaseDir = myGallery[DISEASE_ID].getAbsolutePath();
-               fn = "img" + IMG_ID + ".png";
-               try {
-
-                    if( result != null ) {
-                         f = new File(diseaseDir, fn);
-                         fop = new FileOutputStream(f);
-                         result.compress(Bitmap.CompressFormat.PNG, 100, fop);
-                         fop.flush();
-                         fop.close();
-                    }
-
-               } catch (Exception e) {
-                    e.printStackTrace();
-               }
-          }
      }
 }
