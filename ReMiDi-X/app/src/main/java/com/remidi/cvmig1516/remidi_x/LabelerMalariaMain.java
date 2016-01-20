@@ -123,7 +123,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      Bitmap origBitmap;
      File myDirectory;
 
-     private ImageView mContentView;
+     //private ImageView mContentView;
      private View mControlsView;
      private boolean mVisible;
 
@@ -139,7 +139,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public boolean isThreadPause = false;
      Uploader uploader;
      Drawable drawable;
-     DrawingView drawView;
+     DrawingView mContentView;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -166,11 +166,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Load uploader
-          int disease_num = 0;
+          int disease_num = 1;
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
           for (int i = 0; i<diseases.length; i++) {
                if (diseases[i].equals(disease)) {
-                    disease_num = i;
+                    disease_num = i+1;
                     break;
                }
           }
@@ -194,11 +194,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Initialize (turn into AsyncTask)
           mVisible = true;
           mControlsView = findViewById(R.id.fullscreen_content_controls);
-          mContentView = (ImageView)findViewById(R.id.fullscreen_content);
+          mContentView = new DrawingView(this);
+          //mContentView = (ImageView)findViewById(R.id.fullscreen_content);
           new Initializer().execute(disease);
           mContentView.setImageDrawable(sample_images[current_image]);
           drawable = mContentView.getDrawable();
           origBitmap = ((BitmapDrawable)drawable).getBitmap();
+
+          final LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad);
+
 
           // ----------------------------------------------
 
@@ -403,6 +407,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
                for (int i = 0; i<patches.size(); i++) {
                     Patch patch = patches.get(i);
 
+                    if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
+                    else if (patch.state == PATCH_COMPLETE)
+                         mPaint.setColor(getResources().getColor(R.color.green));
+                    else mPaint.setColor(getResources().getColor(R.color.red));
+
                     mPaint.setStrokeWidth(5);
                     mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
                     mPaint.setStrokeWidth(3);
@@ -443,6 +452,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     cy = getMidpoint(initY, mY);
 
                     createPatch(cx,cy,radius);
+
+                    if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
+                    else if (patch.state == PATCH_COMPLETE)
+                         mPaint.setColor(getResources().getColor(R.color.green));
+                    else mPaint.setColor(getResources().getColor(R.color.red));
+
                     mPaint.setStrokeWidth(7);
                     mCanvas.drawCircle(cx, cy, radius, mPaint);
                     mPaint.setStrokeWidth(5);
@@ -595,7 +610,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                                         Patch patch = patches.get(current_patch);
                                         if (patch.analysis.size() == 0) patch.state = PATCH_INCOMPLETE;
                                         else patch.state = PATCH_COMPLETE;
-                                        drawBoxes(DRAW_CURRENT);
+                                        //drawBoxes(DRAW_CURRENT);
+                                        mContentView.resetDraw();
                                         labelDialog.hide();
                                         break;
                                    case DialogInterface.BUTTON_NEGATIVE:
@@ -675,23 +691,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView.setImageDrawable(sample_images[current_image]);
           origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
-          int[] img_coordinates = new int[2];
-          mContentView.getLocationOnScreen(img_coordinates);
-          bounds_left = img_coordinates[0];
-          bounds_top = img_coordinates[1];
-
-          drawable = mContentView.getDrawable();
-          Display display = getWindowManager().getDefaultDisplay();
-          Point size = new Point();
-          display.getSize(size);
-          int width = size.x;
-
-          int idealWidth = width;
-          int actualWidth = drawable.getIntrinsicWidth();
-          scaleFactorX = ((float)idealWidth)/((float)actualWidth);
-
           patches.clear();
-          drawBoxes(DRAW_CLEAR);
+          mContentView.clearDraw();
           new ProgressUpdater().execute();
      }
 
@@ -796,7 +797,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           else {
                patch.remarks = ((EditText)labelDialog.findViewById(R.id.labeler_comments)).getText().toString();
                patch.state = PATCH_COMPLETE;
-               drawBoxes(DRAW_CURRENT);
+               mContentView.resetDraw();
                if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
                else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
                labelDialog.hide();
@@ -811,7 +812,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
-          drawBoxes(DRAW_CURRENT);
           new ProgressUpdater().execute();
           showDialogBox();
      }
@@ -824,7 +824,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                for (int i = 0; i < patches.size(); i++) {
                     patches.get(i).patchno = i;
                }
-               drawBoxes(DRAW_ALL);
+               mContentView.resetDraw();
                new ProgressUpdater().execute();
                labelDialog.hide();
                Toast.makeText(context, "Patch deleted!", Toast.LENGTH_SHORT).show();
@@ -1086,7 +1086,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public boolean isBetween(float x1, float y1, float x2, float y2, float radius) {
-          return (getRadius(x1,y1,x2,y2) == radius);
+          return (getRadius(x1,y1,x2,y2) <= radius);
      }
 
      public float getMidpoint(float a, float b) {

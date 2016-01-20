@@ -95,7 +95,7 @@ public class XMLTest extends ActionBarActivity {
           //mContentView = (ImageView)findViewById(R.id.imagetest);
           //origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
-          final LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.view_drawing_pad);
+          final LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.test_drawpad);
           final DrawingView mDrawingView = new DrawingView(this);
           Drawable drawable = getResources().getDrawable(R.drawable.img0000000_000);
           mDrawingView.setImageDrawable(drawable);

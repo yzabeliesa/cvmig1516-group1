@@ -12,7 +12,7 @@
     tools:context="com.remidi.cvmig1516.remidi_x.XMLTest">
 
     <LinearLayout
-        android:id="@+id/view_drawing_pad"
+        android:id="@+id/test_drawpad"
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
