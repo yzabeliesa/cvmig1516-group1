@@ -47,8 +47,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -58,6 +60,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -129,21 +132,7 @@ public class TestActivity extends ActionBarActivity {
                }
           }
 
-         new Thread(null, send, "SendThread").start();
-     }
-
-     @Override
-     protected void onPause() {
-          isThreadPause = true;
-          super.onPause();
-          Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     protected void onResume(){
-          isThreadPause = false;
-          super.onResume();
-          Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
+         //new Thread(null, send, "SendThread").start();
      }
 
      //------------------------------------------------------------------------------------------------------------------
@@ -157,15 +146,13 @@ public class TestActivity extends ActionBarActivity {
           @Override
           public void run() {
                while (true) {
-                    if (!isThreadPause) {
-                         String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HTTP_HOME;
-                         if (myDirectory.isDirectory()) {
-                              File[] xml_files = myDirectory.listFiles();
+                    String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HTTP_HOME;
+                    if (myDirectory.isDirectory()) {
+                         File[] xml_files = myDirectory.listFiles();
 
-                              if ((xml_files.length > 0) && (isNetworkAvailable())) {
-                                   Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
-                                   send_result = Send_File(urlstr, xml_files[0]);
-                              }
+                         if ((xml_files.length > 0) && (isNetworkAvailable())) {
+                              Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
+                              send_result = Send_File(urlstr, xml_files[0]);
                          }
                     }
                }
@@ -214,19 +201,6 @@ public class TestActivity extends ActionBarActivity {
      //
      //------------------------------------------------------------------------------------------------------------------
 
-
-     /*public void send_task(View view) {
-          String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + HTTP_HOME;
-          if (myDirectory.isDirectory()) {
-               File[] xml_files = myDirectory.listFiles();
-
-               if ((xml_files.length > 0) && (isNetworkAvailable())) {
-                    Arrays.sort(xml_files, LastModifiedFileComparator.LASTMODIFIED_COMPARATOR);
-                    send_result = Send_File(urlstr, xml_files[0]);
-               }
-          }
-     }*/
-
      public String Send_File(String urlstr, File current_file) {
           String result = null;
           try {
@@ -237,12 +211,12 @@ public class TestActivity extends ActionBarActivity {
                String boundary = "-------------" + System.currentTimeMillis();
                HttpPost httpPost = new HttpPost(urlstr);
                httpPost.setHeader("ENCTYPE", "multipart/form-data");
-               httpPost.setHeader("Accept", "application/xml");
+               httpPost.setHeader("Accept", "application/octet-stream");
                httpPost.setHeader("Content-type", "multipart/form-data; boundary=" + boundary);
 
                HttpParams params = new BasicHttpParams();
                params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
-               FileBody fb = new FileBody(current_file, ContentType.APPLICATION_XML, current_file.getName());
+               FileBody fb = new FileBody(current_file, ContentType.APPLICATION_OCTET_STREAM, current_file.getName());
 
                MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
                multipartEntity.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -324,6 +298,72 @@ public class TestActivity extends ActionBarActivity {
 
           @Override
           protected void onPostExecute(String result) {
+          }
+     }
+
+     //------------------------------------------------------------------------------------------------------------------
+     //
+     //                                           THIS IS FOR REQUESTING JSON DATA
+     //
+     //------------------------------------------------------------------------------------------------------------------
+
+     public String Get_JSON(String urlstr){
+          StringBuilder builder = new StringBuilder();
+          HttpClient hc = new DefaultHttpClient();
+          HttpGet httpGet = new HttpGet(urlstr);
+          HttpEntity entity = null;
+          BufferedReader reader = null;
+          HttpResponse response = null;
+
+          try{
+               response = hc.execute(httpGet);
+               int statusCode = response.getStatusLine().getStatusCode();
+
+               if(statusCode == HttpStatus.SC_OK){
+                    entity = response.getEntity();
+                    InputStream is = entity.getContent();
+                    reader = new BufferedReader(new InputStreamReader(is));
+
+                    String line;
+                    while((line = reader.readLine()) != null){
+                         builder.append(line);
+                    }
+               }
+
+               else {
+                    //Log.e(MainActivity.class.toString(),"Failed to get JSON object");
+                    return null;
+               }
+
+          } catch(Exception e){
+               e.printStackTrace();
+               Log.d("InputStream", e.getLocalizedMessage());
+          }
+
+          return builder.toString();
+     }
+
+     public class GetJSONTask extends AsyncTask<String, Void, String> {
+
+          @Override
+          protected Bitmap doInBackground(String... param) {
+               return Get_JSON(param[0]);
+          }
+
+          @Override
+          protected void onPostExecute(String json_txt) {
+               try {
+                    if( json_txt != null ) {
+                         JSONObject jsonObject = new JSONObject(json_txt);
+                         IMG_ID = jsonObject.getString("img");
+                         DISEASE_ID = jsonObject.getString("disease");
+                         DOWNLOAD_URL = jsonObject.getString("img_url");
+                    }
+               } catch(Exception e) {
+                    e.printStackTrace();
+               } finally {
+                    System.out.println("Success");
+               }
           }
      }
 
