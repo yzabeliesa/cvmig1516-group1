@@ -68,6 +68,9 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
           disease_spinner.setAdapter(adapter2);
 
           validator = "Test";
+
+          Intent myIntent = new Intent(this, LoopService.class);
+          getApplicationContext().startService(myIntent);
      }
 
      public void labelerSettingsOK(View view) {

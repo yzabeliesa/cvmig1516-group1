@@ -58,45 +58,6 @@ import java.util.zip.ZipOutputStream;
 
 // File naming convention: img1234567_123
 
-     /*
-     #0. Initialize
-          #- Get intent data
-          #- Load images
-          #- Load dialog box contents based on disease
-               - Set species RadioGroup dependency on diagnosis RadioGroup
-               - Set species contents based on disease
-               - Set diagnosis based on disease
-     1. Create box
-          - Touch listener: Action up & down
-          - Get 2 points from Action up & down
-          - Create box based on 2 points
-               - fetchDialogDataFromPatch(int patchno)
-               - createPatch(float x1, float y1, float x2, float y2)
-               - Display patch number in middle
-          - Create new patch
-          - Show label dialog
-               - If tap + coors are within patches, show label dialog only (modify)
-     2. Show label dialog for patch
-          - Show patch number in title
-          - Cancel
-               - Close label dialog
-          - Delete
-               - Remove patch from patches
-               - Delete patch xml file if exists
-               - Reset patch numbers
-                    - Reset displayed patch numbers
-               - Close label dialog
-               - Toast: Patch deleted
-          - Save
-               #- Save data in patch
-               #- Close label dialog
-               #- Toast: Patch created/modified
-     3. Send patches
-          - Create xml files for all patches
-          - Zip all xml files
-          - Send zip file
-      */
-
 public class LabelerMalariaMain extends ActionBarActivity {
 
      final int DELAY = 300;
@@ -220,12 +181,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           File image = images[image_ctr];
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+          Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
-          StringTokenizer token1 = new StringTokenizer(image.getName(),"img");
-          token1.nextToken();
-          StringTokenizer token2 = new StringTokenizer(token1.nextToken(),".png");
-          current_image = Integer.parseInt(token2.nextToken());
-
+          current_image = tokenizeImageNum(image);
 
           // Initialize (turn into AsyncTask)
           mVisible = true;
@@ -759,7 +717,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-
+          Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
 
           new Initializer().execute(disease);
@@ -812,6 +770,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           current_image = Integer.parseInt(tokens.nextToken());
           File image = new File(image_directory + "/img" + current_image + ".png");
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+          Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           mContentView.setImageBitmap(imageBitmap);
 
           while (tokens.hasMoreTokens()) {
@@ -1008,8 +967,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Compress all files in zip, send zip file, delete patch data files
           String imageFolder = progress_file.filefolder;
           String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          //uploadZipfile(imageFolder, zipPath); //bring me to life
-          Toast.makeText(context, "SENTTT!!!", Toast.LENGTH_SHORT).show(); //test
+          uploadZipfile(imageFolder, zipPath); //bring me to life
+          //Toast.makeText(context, "SENTTT!!!", Toast.LENGTH_SHORT).show(); //test
           //uploadXMLFiles();
 
           // Load next image
@@ -1068,7 +1027,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           File file = new File(zipPath);
 
           String msg = uploader.uploadFile(file,zipPath,true);
-          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show(); //test
+          Toast.makeText(context, "Sent!", Toast.LENGTH_SHORT).show(); //test
 
           // Delete patch data files
           for (int i = 0; i<patches.size(); i++) { //deletes patch data

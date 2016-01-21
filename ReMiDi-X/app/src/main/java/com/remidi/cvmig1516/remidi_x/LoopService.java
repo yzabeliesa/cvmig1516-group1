@@ -98,7 +98,7 @@ public class LoopService extends Service {
           }
 
           new Thread(null, receive_img, "ReceiveImageThread").start();
-          //new Thread(null, send, "SendThread").start();
+          new Thread(null, send, "SendThread").start();
 
           super.onStartCommand(intent, flags, startId);
           return 0;
