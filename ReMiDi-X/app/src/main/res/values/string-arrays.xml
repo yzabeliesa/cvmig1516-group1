@@ -18,6 +18,7 @@
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
         <item>Giardiasis</item>
+        <item>Unspecified Infection</item>
         <item>Tuberculosis</item>
         <item>Leprosy</item>
         <item>Gonorrhea</item>
@@ -50,6 +51,7 @@
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
         <item>Giardiasis</item>
+        <item>Unspecified Infection</item>
     </string-array>
 
     <string-array name="sputum_disease_array">
@@ -73,56 +75,73 @@
         <item>Plasmodium falciparum</item>
         <item>Plasmodium vivax</item>
         <item>Plasmodium malariae</item>
+        <item>No malaria parasites seen</item>
     </string-array>
 
     <string-array name="filariasis_species">
         <item>Wuchereria bancrofti</item>
         <item>Brugia malayi</item>
+        <item>No microfilariae seen</item>
     </string-array>
 
     <string-array name="ascariasis_species">
         <item>Ascaris lumbricoides egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="trichuriasis_species">
         <item>Trichuris trichiura egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="hookworm_species">
         <item>Hookworm egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="schistosomiasis_species">
         <item>Schistosoma japonicum egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="taeniasis_species">
         <item>Taenia  sp. egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="heterophyidiasis_species">
         <item>Heterophyid egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="paragonimiasis_species">
         <item>Paragonimus egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="echinostomiasis_species">
         <item>Echinostoma egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="capillariasis_species">
         <item>Capillaria egg</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="amoebiasis_species">
         <item>Entamoeba histolytica/dispar</item>
+        <item>No parasite seen</item>
     </string-array>
 
     <string-array name="giardiasis_species">
         <item>Giardia lamblia</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="unspecified_species">
         <item>Blastocystis hominis</item>
+        <item>No ova/parasite seen</item>
     </string-array>
 
     <string-array name="tuberculosis_species">

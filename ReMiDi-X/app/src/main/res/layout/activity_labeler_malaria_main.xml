@@ -5,67 +5,47 @@
              android:background="@color/teal"
              tools:context="com.remidi.cvmig1516.remidi_x.LabelerMalariaMain">
 
-    <!-- The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc. -->
-
-    <ImageView
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:src="@drawable/img0000000_000"/>
-
-
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
-    <FrameLayout
+
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:layout_height="wrap_content"
+        android:text="Send diagnosis"
+        android:layout_gravity="center|bottom|clip_vertical"
+        android:onClick="confirmSendData"
+        android:backgroundTint="@color/yellow"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Patch mode"
+        android:id="@+id/button"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="50dp"/>
+
+    <LinearLayout
+        android:id="@+id/drawing_pad"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/text_instructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Tap and drag on image to label cell."
+            android:text="@string/labeler_instructions"
+            android:layout_gravity="center|bottom"
+            android:textAlignment="center"
             android:textColor="#ffffff"
-            android:paddingTop="50dp" />
+            android:layout_marginTop="16dp"
+            />
 
-        <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
 
-            <Button
-                android:id="@+id/labeler_send"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Send diagnosis"
-                android:onClick="confirmSendData"/>
 
-            <!--
-            <Button
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Get myDir contents"
-                android:onClick="testonly"/>
-            -->
+    </LinearLayout>
 
-        </LinearLayout>
-    </FrameLayout>
 
 
 
