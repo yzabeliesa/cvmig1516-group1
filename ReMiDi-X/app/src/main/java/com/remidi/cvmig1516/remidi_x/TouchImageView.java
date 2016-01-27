@@ -1,15 +1,17 @@
 package com.remidi.cvmig1516.remidi_x;
 
 import android.content.Context;
-import android.graphics.Matrix;  
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.PointF;  
 import android.graphics.drawable.Drawable;  
 import android.util.AttributeSet;  
 import android.util.Log;  
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;  
-import android.view.View;  
-import android.widget.ImageView;  
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
  
 public class TouchImageView extends ImageView {  
     Matrix matrix;  
@@ -36,16 +38,30 @@ public class TouchImageView extends ImageView {
   
     int oldMeasuredWidth, oldMeasuredHeight;  
   
-    ScaleGestureDetector mScaleDetector;  
+    ScaleGestureDetector mScaleDetector;
+
+     Bitmap myBitmap;
   
-    Context context;  
+    Context context;
+
+     ViewGroup layout;
  
     public TouchImageView(Context context) {  
         super(context);  
         sharedConstructing(context);  
-    }  
+    }
 
-    public TouchImageView(Context context, AttributeSet attrs) {  
+     public TouchImageView(Context context, Bitmap bitmap, ViewGroup vg) {
+          super(context);
+          myBitmap = bitmap;
+          setImageBitmap(bitmap);
+          layout = vg;
+          viewWidth = bitmap.getWidth();
+          viewHeight = bitmap.getHeight();
+          sharedConstructing(context);
+     }
+
+     public TouchImageView(Context context, AttributeSet attrs) {
         super(context, attrs);  
         sharedConstructing(context);  
     }  
@@ -267,22 +283,29 @@ public class TouchImageView extends ImageView {
   
         viewWidth = MeasureSpec.getSize(widthMeasureSpec);  
   
-        viewHeight = MeasureSpec.getSize(heightMeasureSpec);  
+        viewHeight = MeasureSpec.getSize(heightMeasureSpec);
+
+         viewWidth = myBitmap.getWidth();
+         viewHeight = myBitmap.getHeight();
   
         //  
-        // Rescales image on rotation  
-        //  
+        // Rescales image on rotation
+
+
         if (oldMeasuredHeight == viewWidth && oldMeasuredHeight == viewHeight  
   
                 || viewWidth == 0 || viewHeight == 0)  
   
-            return;  
+            return;
+
+
   
         oldMeasuredHeight = viewHeight;  
   
-        oldMeasuredWidth = viewWidth; 
-  
-        if (saveScale == 1) {  
+        oldMeasuredWidth = viewWidth;
+
+
+        if (saveScale == 1) {
   
             //Fit to screen.  
   
@@ -307,7 +330,8 @@ public class TouchImageView extends ImageView {
             scale = Math.min(scaleX, scaleY);  
   
             matrix.setScale(scale, scale);  
-  
+
+
             // Center the image  
   
             float redundantYSpace = (float) viewHeight - (scale * (float) bmHeight);  
@@ -323,10 +347,14 @@ public class TouchImageView extends ImageView {
             origWidth = viewWidth - 2 * redundantXSpace;  
   
             origHeight = viewHeight - 2 * redundantYSpace;  
-  
+
+
+
+
             setImageMatrix(matrix);  
   
-        }  
+        }
+
   
         fixTrans();  
   

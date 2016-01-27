@@ -30,7 +30,7 @@
         </activity>
         <activity
             android:name=".LabelerSettings"
-            android:label="Labeler Settings">
+            android:label="ReMiDi-X">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

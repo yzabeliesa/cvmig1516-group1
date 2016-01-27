@@ -36,13 +36,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="5dp"/>
-
+    <!--
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Server address"
         android:paddingTop="10dp"
         android:textColor="@color/pink"/>
+
 
     <EditText
         android:id="@+id/http_address"
@@ -51,7 +52,7 @@
         android:hint="a.b.c.d:xxxx/xyz/"
         android:text="0.0.0.0:6969/xyz/"
         android:paddingTop="20dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"/> -->
 
     <Button
         android:id="@+id/labeler_settings_ok"

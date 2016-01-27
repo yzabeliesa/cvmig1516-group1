@@ -1,5 +1,6 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -92,6 +93,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      //private ImageView mContentView;
      private View mControlsView;
      private boolean mVisible;
+     int screen_width = 0;
 
      // Local url
      //public String HTTP_IP_ADDRESS = "192.168.1.10";
@@ -101,7 +103,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public String HTTP_IP_ADDRESS = "54.179.135.52";
      public String HTTP_HOME = "/api/label/";
 
-     public int HTTP_PORT = 5000;
+     public int HTTP_PORT = 80;
      public boolean isThreadPause = false;
 
      Uploader uploader;
@@ -126,7 +128,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           setContentView(R.layout.activity_labeler_malaria_main);
 
           context = getApplicationContext();
-          myDirectory = new File(context.getFilesDir(), "myDatabase");
+          myDirectory = new File(context.getFilesDir(), "remidiDatabase");
 
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
@@ -138,8 +140,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
-               String address = extras.getString("Address");
-               tokenizeAddress(address);
+               /*String address = extras.getString("Address");
+               tokenizeAddress(address);*/
           }
 
           // Load uploader
@@ -152,9 +154,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                }
           }
 
-          // Get image directory
           image_directory = context.getFilesDir() + "/disease_" + disease_num;
-          Toast.makeText(context, "Retrieved image: " + image_directory, Toast.LENGTH_SHORT).show();
 
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
@@ -176,16 +176,14 @@ public class LabelerMalariaMain extends ActionBarActivity {
           File srcFile = new File(image_directory);
           images = srcFile.listFiles();
 
-          /*
-          if (images.length == 0) {
+          if (image_ctr >= images.length) {
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
                startActivity(intent);
           }
-          */
 
           File image = images[image_ctr];
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-          Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
           current_image = tokenizeImageNum(image);
 
@@ -196,11 +194,23 @@ public class LabelerMalariaMain extends ActionBarActivity {
           //mContentView = (ImageView)findViewById(R.id.fullscreen_content);
           initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
           drawable = mContentView.getDrawable();
 
-          zoomContentView = new TouchImageView(this);
-          zoomContentView.setImageBitmap(imageBitmap);
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          screen_width = size.x;
+
+          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
+          //zoomContentView.setMinimumHeight(mContentView.height);
+          //zoomContentView.setMinimumWidth(mContentView.);
           zoomContentView.setMaxZoom(4f);
+          //zoomContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          //zoomContentView.setAdjustViewBounds(true);
 
           mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad);
           mDrawingPad.addView(mContentView);
@@ -217,9 +227,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                          // view location in 2
                          mDrawingPad.removeView(mContentView);
                          drawable = mContentView.getDrawable();
-                         zoomContentView.setImageDrawable(drawable);
                          mDrawingPad.addView(zoomContentView);
-
                          button.setText("Zoom mode");
                          text.setText(getResources().getText(R.string.zoom_instructions));
                     }
@@ -253,6 +261,38 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView_bottom = drawable.getBounds().bottom;
           //Toast.makeText(getApplicationContext(), "Top: "+ mContentView_top + "\nBottom: " + mContentView_bottom, Toast.LENGTH_SHORT).show();
 
+     }
+
+     private Bitmap getScaledImage(ImageView view, int boundBoxInDp)
+     {
+          // Get the ImageView and its bitmap
+          Drawable drawing = view.getDrawable();
+          Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+          // Get current dimensions
+          int width = bitmap.getWidth();
+          int height = bitmap.getHeight();
+
+          // Determine how much to scale: the dimension requiring less scaling is
+          // closer to the its side. This way the image always stays inside your
+          // bounding box AND either x/y axis touches it.
+          float xScale = ((float) boundBoxInDp) / width ;
+          float yScale = ((float) boundBoxInDp) / height;
+          float scale = (xScale <= yScale) ? xScale : yScale;
+
+          // Create a matrix for the scaling and add the scaling data
+          Matrix matrix = new Matrix();
+          matrix.postScale(scale, scale);
+
+          // Create a new bitmap and convert it to a format understood by the ImageView
+          Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+          return scaledBitmap;
+     }
+
+     private int dpToPx(int dp)
+     {
+          float density = getApplicationContext().getResources().getDisplayMetrics().density;
+          return Math.round((float)dp * density);
      }
 
 
@@ -710,19 +750,25 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void loadNextImage() {
 
+          /*
           image_ctr++;
+
 
           if (image_ctr >= images.length) {
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
                startActivity(intent);
                return;
           }
+          */
+
           File image = images[image_ctr];
 
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-          Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
 
+          progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
+          progress_file.write(current_image + "");
           initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
           drawable = mContentView.getDrawable();
@@ -738,9 +784,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView.resetDraw();
           mContentView.invalidate();
 
-          mDrawingPad.removeViewAt(2);
-          mDrawingPad.addView(mContentView);
-          mode = MODE_PATCH;
+          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
+
+          if (mode == MODE_ZOOM) {
+               mDrawingPad.removeView(zoomContentView);
+               mDrawingPad.addView(mContentView);
+               mode = MODE_PATCH;
+          }
+
 
      }
 
@@ -773,7 +825,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           current_image = Integer.parseInt(tokens.nextToken());
           File image = new File(image_directory + "/img" + current_image + ".png");
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-          Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           mContentView.setImageBitmap(imageBitmap);
 
           while (tokens.hasMoreTokens()) {
@@ -1030,7 +1082,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           File file = new File(zipPath);
 
           String msg = uploader.uploadFile(file,zipPath,true);
-          Toast.makeText(context, "Sent!", Toast.LENGTH_SHORT).show(); //test
+          Toast.makeText(context, msg, Toast.LENGTH_SHORT).show(); //test
 
           // Delete patch data files
           for (int i = 0; i<patches.size(); i++) { //deletes patch data

@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.File;
+
 public class LabelerSettings extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
 
      Spinner specimen_spinner;
@@ -78,12 +80,30 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
           Spinner disease_spinner = (Spinner) findViewById(R.id.disease_spinner);
           String disease = disease_spinner.getSelectedItem().toString();
 
+          int disease_num = 1;
+          String[] diseases = getResources().getStringArray(R.array.all_diseases);
+          for (int i = 0; i<diseases.length; i++) {
+               if (diseases[i].equals(disease)) {
+                    disease_num = i+1;
+                    break;
+               }
+          }
+
+          String image_directory = getApplicationContext().getFilesDir() + "/disease_" + disease_num;
+
+          File srcFile = new File(image_directory);
+          File[] images = srcFile.listFiles();
+
+          while (true) {
+               if (images.length > 0) break;
+          }
+
           Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
           //disease = (disease.toLowerCase()).replace(' ', '_');
-          String address = ((EditText) findViewById(R.id.http_address)).getText().toString();
+          //String address = ((EditText) findViewById(R.id.http_address)).getText().toString();
           intent.putExtra("Disease", disease);
           intent.putExtra("Validator", validator);
-          intent.putExtra("Address", address);
+          //intent.putExtra("Address", address);
           startActivity(intent);
 
      }
