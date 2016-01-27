@@ -152,7 +152,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
                }
           }
 
+          // Get image directory
           image_directory = context.getFilesDir() + "/disease_" + disease_num;
+          Toast.makeText(context, "Retrieved image: " + image_directory, Toast.LENGTH_SHORT).show();
 
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
@@ -173,11 +175,13 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Get image file from folder
           File srcFile = new File(image_directory);
           images = srcFile.listFiles();
+
+          /*
           if (images.length == 0) {
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
                startActivity(intent);
-               return;
           }
+          */
 
           File image = images[image_ctr];
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
@@ -190,7 +194,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           //mControlsView = findViewById(R.id.fullscreen_content_controls);
           mContentView = new DrawingView(this);
           //mContentView = (ImageView)findViewById(R.id.fullscreen_content);
-          new Initializer().execute(disease);
+          initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
           drawable = mContentView.getDrawable();
 
@@ -433,7 +437,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                          mPaint.setStrokeWidth(5);
                          mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
 
-                         new ProgressUpdater().execute();
+                         updateProgress();
                     }
                     else Toast.makeText(context, "Patch must not exceed image bounds.", Toast.LENGTH_SHORT).show();
 
@@ -700,7 +704,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public int tokenizeImageNum(File image) {
           StringTokenizer token1 = new StringTokenizer(image.getName(),"img");
-          token1.nextToken();
           StringTokenizer token2 = new StringTokenizer(token1.nextToken(),".png");
           return Integer.parseInt(token2.nextToken());
      }
@@ -708,19 +711,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public void loadNextImage() {
 
           image_ctr++;
-          File image = images[image_ctr];
 
-          if (!image.exists()) {
+          if (image_ctr >= images.length) {
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
                startActivity(intent);
                return;
           }
+          File image = images[image_ctr];
 
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
           Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
 
-          new Initializer().execute(disease);
+          initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
           drawable = mContentView.getDrawable();
           mContentView_top = drawable.getBounds().top;
@@ -728,7 +731,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           patches.clear();
           mContentView.clearDraw();
-          new ProgressUpdater().execute();
+          updateProgress();
 
           mContentView.setImageDrawable(sample_images[current_image]);
           drawable = mContentView.getDrawable();
@@ -852,7 +855,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
                else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
                labelDialog.hide();
-               new ProgressUpdater().execute();
+               updateProgress();
           }
 
      }
@@ -863,7 +866,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
-          new ProgressUpdater().execute();
+          updateProgress();
           showDialogBox();
      }
 
@@ -876,7 +879,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     patches.get(i).patchno = i;
                }
                mContentView.resetDraw();
-               new ProgressUpdater().execute();
+               updateProgress();
                labelDialog.hide();
                Toast.makeText(context, "Patch deleted!", Toast.LENGTH_SHORT).show();
 
