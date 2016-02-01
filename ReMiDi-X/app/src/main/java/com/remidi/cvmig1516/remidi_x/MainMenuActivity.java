@@ -53,6 +53,11 @@ import java.util.List;
 public class MainMenuActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
+     String labeler_name = "some random labeler";
+     int labeled_image_count = 5;
+     int validated_image_count = 10;
+     int message_count = 15;
+
      /**
       * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
       */
@@ -80,6 +85,13 @@ public class MainMenuActivity extends ActionBarActivity
 
           ListView drawer = (ListView) findViewById(R.id.drawer_menu);
           drawer.setOnItemClickListener(new DrawerItemClickListener());
+
+          /*
+               GET NAME AND COUNT INFO HERE
+
+
+
+          */
      }
 
      @Override
@@ -89,6 +101,7 @@ public class MainMenuActivity extends ActionBarActivity
           fragmentManager.beginTransaction()
                   .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                   .commit();
+
      }
 
      private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -98,23 +111,19 @@ public class MainMenuActivity extends ActionBarActivity
                Intent intent = null;
                Toast toast = null;
                switch (position) {
-                    case 0:
-                         intent = new Intent(getApplicationContext(), MainMenuActivity.class);
-                         startActivity(intent);
-                         break;
-                    case 1:
-                         toast = Toast.makeText(getApplicationContext(), "Feature unavailable", Toast.LENGTH_SHORT);
-                         toast.show();
-                         break;
-                    case 2:
+                    case 0: // Label images
                          intent = new Intent(getApplicationContext(), LabelerSettings.class);
                          startActivity(intent);
                          break;
-                    case 3:
+                    case 1: // Profile
+                         intent = new Intent(getApplicationContext(), MainMenuActivity.class);
+                         startActivity(intent);
+                         break;
+                    case 2: // Settings
                          toast = Toast.makeText(getApplicationContext(), "Feature unavailable", Toast.LENGTH_SHORT);
                          toast.show();
                          break;
-                    case 4:
+                    case 3: // Logout
                          toast = Toast.makeText(getApplicationContext(), "Feature unavailable", Toast.LENGTH_SHORT);
                          toast.show();
                          break;
@@ -124,23 +133,8 @@ public class MainMenuActivity extends ActionBarActivity
      }
 
      public void onSectionAttached(int number) {
-          switch (number) {
-               case 1:
-                    mTitle = getString(R.string.title_section1);
-                    break;
-               case 2:
-                    mTitle = getString(R.string.title_section2);
-                    break;
-               case 3:
-                    mTitle = getString(R.string.title_section3);
-                    break;
-               case 4:
-                    mTitle = getString(R.string.title_section4);
-                    break;
-               case 5:
-                    mTitle = getString(R.string.title_section5);
-                    break;
-          }
+          String[] drawer_sections = getResources().getStringArray(R.array.drawer_sections);
+          mTitle = drawer_sections[number-1];
      }
 
      public void restoreActionBar() {
@@ -150,6 +144,21 @@ public class MainMenuActivity extends ActionBarActivity
           actionBar.setTitle(mTitle);
      }
 
+     public void viewMessages(View view) {
+          Toast.makeText(getApplicationContext(), "Messages!", Toast.LENGTH_SHORT).show();
+     }
+
+     public void viewLabels(View view) {
+          Toast.makeText(getApplicationContext(), "Labels!", Toast.LENGTH_SHORT).show();
+     }
+
+     public void viewValidation(View view) {
+          Toast.makeText(getApplicationContext(), "Validation!", Toast.LENGTH_SHORT).show();
+     }
+
+
+
+
      /**
       * A placeholder fragment containing a simple view.
       */
@@ -158,6 +167,7 @@ public class MainMenuActivity extends ActionBarActivity
            * The fragment argument representing the section number for this
            * fragment.
            */
+
           private static final String ARG_SECTION_NUMBER = "section_number";
 
           /**
@@ -169,16 +179,20 @@ public class MainMenuActivity extends ActionBarActivity
                Bundle args = new Bundle();
                args.putInt(ARG_SECTION_NUMBER, sectionNumber);
                fragment.setArguments(args);
+
                return fragment;
           }
 
           public PlaceholderFragment() {
+
+
           }
 
           @Override
           public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                    Bundle savedInstanceState) {
                View rootView = inflater.inflate(R.layout.fragment_main_menu, container, false);
+
                return rootView;
           }
 
@@ -187,115 +201,6 @@ public class MainMenuActivity extends ActionBarActivity
                super.onAttach(activity);
                ((MainMenuActivity) activity).onSectionAttached(
                        getArguments().getInt(ARG_SECTION_NUMBER));
-          }
-     }
-
-     public void sendMessageToServer(View view) {
-          // send message to server
-
-          // String response_msg = new Sender().execute("http://192.168.1.26:5000/data/").toString();
-          //String response_msg = communicate(");
-          //Log.d("Read attempt: ", "> " + response_msg);
-
-          EditText field = (EditText) findViewById(R.id.message);
-          EditText field2 = (EditText) findViewById(R.id.url);
-          String message = field.getText().toString();
-          String url_text = field2.getText().toString();
-
-
-
-
-          //Toast toast = Toast.makeText(getApplicationContext(), "put ur message here", Toast.LENGTH_SHORT);
-          //toast.show();
-
-          field.setText("");
-          field2.setText("");
-
-          //receiveMessageFromServer(message);
-
-     }
-
-     public void getMessage(View view) {
-          refreshButton();
-          new DownloadTask().execute("http://192.168.1.26:5000/data");
-     }
-
-     public void refreshButton() {
-
-          TextView text = (TextView) findViewById(R.id.section_label);
-          if (this.isConnected()) {
-               text.setText("Connected");
-               text.setTextColor(getResources().getColor(R.color.green));
-          } else {
-               text.setText("No connection");
-               text.setTextColor(getResources().getColor(R.color.red));
-          }
-
-     }
-
-     public void receiveMessageFromServer(String message) {
-
-          refreshButton();
-          serverReplies++;
-          TextView replyCount = (TextView) findViewById(R.id.section_label);
-          TextView replies = (TextView) findViewById(R.id.server_replies);
-
-          replyCount.setText("Server replies: " + serverReplies);
-          replies.append(message + "\n");
-
-     }
-
-     //check internet/network connection
-     public boolean isConnected() {
-          ConnectivityManager connMngr = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
-          NetworkInfo ntwrkInfo = connMngr.getActiveNetworkInfo();
-
-          if (ntwrkInfo != null && ntwrkInfo.isConnected())
-               return true;
-          else
-               return false;
-     }
-
-     public String communicate(String urlstr) {
-          InputStream is = null;
-          String result = "";
-
-          try {
-               HttpClient hc = new DefaultHttpClient();
-               HttpResponse hr = hc.execute(new HttpGet(urlstr));
-               is = hr.getEntity().getContent();
-
-               if (is != null) {
-                    BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(is));
-                    String line = "";
-
-                    while((line = bufferedReader.readLine()) != null)
-                         result += line;
-
-                    is.close();
-               }
-               else {
-                    result = "Didn't work!";
-               }
-
-          } catch(Exception e) {
-               e.printStackTrace();
-               Log.d("InputStream", e.getLocalizedMessage());
-          }
-
-          return result;
-     }
-
-     private class DownloadTask extends AsyncTask<String, Void, String> {
-          @Override
-          protected String doInBackground(String... urls) {
-               return communicate(urls[0]);
-          }
-
-          @Override
-          protected void onPostExecute(String result) {
-               Toast.makeText(getApplicationContext(), "Received!", Toast.LENGTH_LONG).show();
-               receiveMessageFromServer(result);
           }
      }
 

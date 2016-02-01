@@ -1,0 +1,26 @@
+Naming convention of directories:
+"remidiDirectory" - directory for ZIP files
+"disease_1" - Malaria folder
+"disease_2" - Filariasis folder
+"disease_3" - Ascariasis folder
+"disease_4" - Trichuriasis folder
+"disease_5" - Hookworm Infection folder
+"disease_6" - Schistosomiasis folder
+"disease_7" - Taeniasis folder
+"disease_8" - Heterophyidiasis folder
+"disease_9" - Paragonimiasis folder
+"disease_10" - Echinostomiasis folder
+"disease_11" - Capillariasis folder
+"disease_12" - Amoebiasis folder
+"disease_13" - Giardiasis folder
+"disease_14" - Unspecified Infection (Stool Parasite) folder
+"disease_15" - Tuberculosis folder
+"disease_16" - Leprosy folder
+"disease_17" - Gonorrhea folder
+"disease_18" - Bacterial Vaginosis folder
+"disease_19" - Candidiasis folder
+
+naming convention of images inside the folder: img<img id na hindi zero padded>.png
+naming convention of zip files inside remimdi directory: yung usual alam mo na yun.
+
+pm ka na lang kung may nakalimutan ako.

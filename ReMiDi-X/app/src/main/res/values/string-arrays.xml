@@ -2,6 +2,15 @@
 
 <resources>
 
+    <string-array name="drawer_sections">
+
+        <item>Label images</item>
+        <item>Profile</item>
+        <item>Settings</item>
+        <item>Logout</item>
+
+    </string-array>
+
     <!-- DISEASE ARRAYS -->
 
     <string-array name="all_diseases">

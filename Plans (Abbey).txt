@@ -1,0 +1,13 @@
+[ ] Progress file changes
+	- change name to "<disease num>-progress.txt"
+	- save in app data folder instead of disease folder
+	- remove progress file deletion and addition
+[ ] Add disease label counter file
+	- save in app data folder
+	- name "label-counter.txt"
+[ ] Rename "Labeler Malaria Main" to "Labeler Main"
+[ ] Rename "Main Activity" to "User Profile"
+[ ] Rename "XMLFileHandler" to "FileHandler"
+[x] Revise drawer
+	- Section names: "Label images", "Profile", "Settings", "Logout"
+[ ] Update labeler name and counters on Profile screen

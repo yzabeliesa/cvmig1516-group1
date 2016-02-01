@@ -11,70 +11,89 @@
               tools:context="com.remidi.cvmig1516.remidi_x.MainMenuActivity$PlaceholderFragment">
 
     <TextView
+        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Message"
-        android:layout_centerHorizontal="true"
+        android:text = "Hello,"/>
+
+    <TextView
+        android:id="@+id/profile_name_display"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "Name"
         android:textColor="@color/pink"/>
 
-    <EditText
-        android:id="@+id/message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:inputType="text"
-        android:hint="Type message here"
-        android:enabled="false" />
-
-    <EditText
-        android:id="@+id/url"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:inputType="text"
-        android:hint="Type IP address here"
-        android:enabled="false"/>
-
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="40dp">
 
-        <Button
-            android:id="@+id/message_send_button"
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send data"
-            android:onClick="sendMessageToServer" />
+            android:backgroundTint="@color/pink"
+            android:text="Button"
+            android:onClick="viewMessages"/>
 
-        <Button
+        <TextView
+            android:id="@+id/profile_message_display"
+            android:layout_marginLeft="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Get data"
-            android:onClick="getMessage" />
+            android:text = "You have x messages."
+            android:textColor="@color/black_overlay"/>
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/section_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Whut"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/yellow" />
-
-    <TextView
-        android:id="@+id/server_replies"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            android:text="Button"
+            android:onClick="viewLabels"/>
+
+        <TextView
+            android:id="@+id/profile_labeled_image_display"
+            android:layout_marginLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "You have x labeled images."
+            android:textColor="@color/black_overlay"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/yellow"
+            android:text="Button"
+            android:onClick="viewValidation"/>
+
+        <TextView
+            android:id="@+id/profile_validated_image_display"
+            android:layout_marginLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text = "You have x validated labels."
+            android:textColor="@color/black_overlay"/>
+
+    </LinearLayout>
 
 </LinearLayout>

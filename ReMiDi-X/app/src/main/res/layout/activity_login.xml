@@ -8,6 +8,7 @@
               android:paddingLeft="@dimen/activity_horizontal_margin"
               android:paddingRight="@dimen/activity_horizontal_margin"
               android:paddingTop="@dimen/activity_vertical_margin"
+              android:background="@color/teal"
               tools:context="com.remidi.cvmig1516.remidi_x.LoginActivity">
 
     <!-- Login progress -->
@@ -31,6 +32,8 @@
             android:orientation="vertical">
 
             <AutoCompleteTextView
+                android:textColor="#ffffff"
+                android:textColorHint="#bfd7ea"
                 android:id="@+id/email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -40,6 +43,8 @@
                 android:singleLine="true"/>
 
             <EditText
+                android:textColor="#ffffff"
+                android:textColorHint="#bfd7ea"
                 android:id="@+id/password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,9 +64,11 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/action_sign_in"
                 android:textStyle="bold"
+                android:backgroundTint="@color/yellow"
                 />
 
             <TextView
+                android:textColor="#ffffff"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/not_registered" />

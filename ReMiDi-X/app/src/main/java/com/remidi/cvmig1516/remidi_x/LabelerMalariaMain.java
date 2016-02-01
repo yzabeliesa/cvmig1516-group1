@@ -159,7 +159,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
           // Create handler for progress file
-          progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
+          progress_file = new XMLFileHandler(context,disease_num + "-progress.txt", disease, false);
           if (progress_file.readContents() == "") progress_file.write("0");
 
           // Set Activity title
@@ -767,7 +767,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
 
-          progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
+          //progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
           progress_file.write(current_image + "");
           initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
@@ -1020,8 +1020,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Compress all files in zip, send zip file, delete patch data files
-          String imageFolder = progress_file.filefolder;
-          String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
+          String imageFolder = context.getFilesDir() + "/" + disease;
+          String zipPath = context.getFilesDir() + "/" + disease + "/img" + patches.get(0).formatImgno() + ".zip";
           uploadZipfile(imageFolder, zipPath); //bring me to life
           //Toast.makeText(context, "SENTTT!!!", Toast.LENGTH_SHORT).show(); //test
           //uploadXMLFiles();
@@ -1033,7 +1033,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public void uploadXMLFiles() {
 
           // Delete progress_file
-          progress_file.delete();
+          //progress_file.delete();
 
           StringBuilder sb = new StringBuilder("PATCH MSG:"); //test
           // Delete patch data files
