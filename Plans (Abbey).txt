@@ -1,6 +1,6 @@
-[ ] Progress file changes
+[x] Progress file changes
 	- change name to "<disease num>-progress.txt"
-	- save in app data folder instead of disease folder
+	- save in progress file folder instead of disease folder
 	- remove progress file deletion and addition
 [ ] Add disease label counter file
 	- save in app data folder
@@ -11,3 +11,5 @@
 [x] Revise drawer
 	- Section names: "Label images", "Profile", "Settings", "Logout"
 [ ] Update labeler name and counters on Profile screen
+[ ] Checklist for diseases
+	- file???

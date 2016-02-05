@@ -926,6 +926,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           if (patches.size() > 0) {
                int patchno = current_patch;
+               (patches.get(patchno)).delete();
                patches.remove(patchno);
                for (int i = 0; i < patches.size(); i++) {
                     patches.get(i).patchno = i;
