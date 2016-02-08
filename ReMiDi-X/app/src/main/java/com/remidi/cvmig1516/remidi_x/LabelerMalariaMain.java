@@ -1,6 +1,5 @@
 package com.remidi.cvmig1516.remidi_x;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;

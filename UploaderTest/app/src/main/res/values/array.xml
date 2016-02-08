@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string-array name="drawer_sections">
+
+        <item>Label images</item>
+        <item>Profile</item>
+        <item>Settings</item>
+        <item>Logout</item>
+
+    </string-array>
+
+    <!-- DISEASE ARRAYS -->
+
+    <string-array name="all_diseases">
+
+        <item>Malaria</item>
+        <item>Filariasis</item>
+        <item>Ascariasis</item>
+        <item>Trichuriasis</item>
+        <item>Hookworm infection</item>
+        <item>Schistosomiasis</item>
+        <item>Taeniasis</item>
+        <item>Heterophyidiasis</item>
+        <item>Paragonimiasis</item>
+        <item>Echinostomiasis</item>
+        <item>Capillariasis</item>
+        <item>Giardiasis</item>
+        <item>Unspecified Infection</item>
+        <item>Tuberculosis</item>
+        <item>Leprosy</item>
+        <item>Gonorrhea</item>
+        <item>Bacterial vaginosis</item>
+        <item>Candidiasis</item>
+
+    </string-array>
+
+    <string-array name="specimen_array">
+        <item>Blood</item>
+        <item>Stool</item>
+        <item>Sputum</item>
+        <item>Skin slit</item>
+        <item>Reproductive tract specimen</item>
+    </string-array>
+
+    <string-array name="blood_disease_array">
+        <item>Malaria</item>
+        <item>Filariasis</item>
+    </string-array>
+
+    <string-array name="stool_disease_array">
+        <item>Ascariasis</item>
+        <item>Trichuriasis</item>
+        <item>Hookworm infection</item>
+        <item>Schistosomiasis</item>
+        <item>Taeniasis</item>
+        <item>Heterophyidiasis</item>
+        <item>Paragonimiasis</item>
+        <item>Echinostomiasis</item>
+        <item>Capillariasis</item>
+        <item>Giardiasis</item>
+        <item>Unspecified Infection</item>
+    </string-array>
+
+    <string-array name="sputum_disease_array">
+        <item>Tuberculosis</item>
+    </string-array>
+
+    <string-array name="skinslit_disease_array">
+        <item>Leprosy</item>
+    </string-array>
+
+    <string-array name="reprotract_disease_array">
+        <item>Gonorrhea</item>
+        <item>Bacterial vaginosis</item>
+        <item>Candidiasis</item>
+    </string-array>
+
+
+    <!-- SPECIES ARRAYS -->
+
+    <string-array name="malaria_species">
+        <item>Plasmodium falciparum</item>
+        <item>Plasmodium vivax</item>
+        <item>Plasmodium malariae</item>
+        <item>No malaria parasites seen</item>
+    </string-array>
+
+    <string-array name="filariasis_species">
+        <item>Wuchereria bancrofti</item>
+        <item>Brugia malayi</item>
+        <item>No microfilariae seen</item>
+    </string-array>
+
+    <string-array name="ascariasis_species">
+        <item>Ascaris lumbricoides egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="trichuriasis_species">
+        <item>Trichuris trichiura egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="hookworm_species">
+        <item>Hookworm egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="schistosomiasis_species">
+        <item>Schistosoma japonicum egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="taeniasis_species">
+        <item>Taenia  sp. egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="heterophyidiasis_species">
+        <item>Heterophyid egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="paragonimiasis_species">
+        <item>Paragonimus egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="echinostomiasis_species">
+        <item>Echinostoma egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="capillariasis_species">
+        <item>Capillaria egg</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="amoebiasis_species">
+        <item>Entamoeba histolytica/dispar</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="giardiasis_species">
+        <item>Giardia lamblia</item>
+        <item>No parasite seen</item>
+    </string-array>
+
+    <string-array name="unspecified_species">
+        <item>Blastocystis hominis</item>
+        <item>No ova/parasite seen</item>
+    </string-array>
+
+    <string-array name="tuberculosis_species">
+        <item>(+) Acid fast bacilli</item>
+        <item>(-) Acid fast bacilli</item>
+    </string-array>
+
+    <string-array name="leprosy_species">
+        <item>(+) Acid fast bacilli</item>
+        <item>(-) Acid fast bacilli</item>
+    </string-array>
+
+    <string-array name="gonorrhea_species">
+        <item>(-) Gram negative diplococci</item>
+    </string-array>
+
+    <string-array name="vaginosis_species">
+        <item>(+) Clue cells</item>
+    </string-array>
+
+    <string-array name="candidiasis_species">
+        <item>(+) Pseudohyphae/oval budding cells</item>
+    </string-array>
+
+
+
+    <!-- REGIONS -->
+
+    <string-array name="regions">
+        <item>Region I (Ilocos Region)</item>
+        <item>Region II (Cagayan Valley)</item>
+        <item>Region III (Central Luzon)</item>
+    </string-array>
+
+    <!-- PROVINCES -->
+
+    <string-array name="region1_provinces">
+        <item>Ilocos Norte</item>
+        <item>Ilocos Sur</item>
+        <item>La Union</item>
+        <item>Pangasinan</item>
+    </string-array>
+
+    <string-array name="region2_provinces">
+        <item>Batanes</item>
+        <item>Cagayan</item>
+        <item>Isabela</item>
+        <item>Nueva Vizcaya</item>
+        <item>Quirino</item>
+    </string-array>
+
+    <!-- MUNICIPALITIES -->
+
+    <string-array name="ilocos_norte_municipalities">
+        <item>Adams</item>
+        <item>Bacarra</item>
+        <item>Badoc</item>
+        <item>Bangui</item>
+    </string-array>
+
+    <string-array name="ilocos_sur_municipalities">
+        <item>Alilem</item>
+        <item>Banayoyo</item>
+        <item>Bantay</item>
+        <item>Burgos</item>
+    </string-array>
+
+</resources>

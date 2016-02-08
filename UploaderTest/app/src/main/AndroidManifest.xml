@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest package="com.remidi.cvmig1516.uploadertest"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity android:name=".DiseaseDetails"
+                  android:label="Settings" >
+        </activity>
+
+        <activity android:name=".SampleDetails"
+                  android:label="Information">
+        </activity>
+
+        <activity android:name=".LocationDetails"
+                  android:label="Location">
+        </activity>
+
+        <activity android:name=".Summary"
+                  android:label="Summary">
+        </activity>
+
+    </application>
+
+</manifest>

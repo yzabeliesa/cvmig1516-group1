@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.remidi.cvmig1516.uploadertest.Summary">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Summary"/>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1"
+        android:padding="5dp"
+        android:layout_marginTop="20dp">
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Date Created"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_date"
+                android:text="date"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Time Created"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_time"
+                android:text="time"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Latitude"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_latitude"
+                android:text="latitude"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Longitude"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_longitude"
+                android:text="longitude"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Specimen"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_specimen"
+                android:text="specimen"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Disease"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_disease"
+                android:text="disease"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Priority"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_priority"
+                android:text="priority"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Remarks"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_remarks"
+                android:text="remarks"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Region"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_region"
+                android:text="region"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Province"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_province"
+                android:text="province"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textStyle="bold"
+                android:text="Municipality"
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/summary_municipality"
+                android:text="municipality"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+    </TableLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:text="OK"
+        android:onClick="summaryOK" />
+
+</LinearLayout>
