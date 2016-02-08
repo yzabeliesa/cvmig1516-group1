@@ -74,7 +74,7 @@ public class Summary extends AppCompatActivity {
      public void summaryOK(View view) {
 
           Toast.makeText(context, "Great!", Toast.LENGTH_SHORT).show();
-          Intent intent = new Intent(getApplicationContext(), Summary.class);
+          Intent intent = new Intent(getApplicationContext(), DiseaseDetails.class);
           startActivity(intent);
 
      }

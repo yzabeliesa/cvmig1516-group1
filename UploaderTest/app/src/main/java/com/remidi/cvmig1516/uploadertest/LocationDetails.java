@@ -1,5 +1,6 @@
 package com.remidi.cvmig1516.uploadertest;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ public class LocationDetails extends AppCompatActivity {
      Spinner province_spinner;
      Spinner municipality_spinner;
      Context context;
+     Activity activity;
 
      String specimen = "";
      String disease = "";
@@ -28,6 +30,7 @@ public class LocationDetails extends AppCompatActivity {
           setContentView(R.layout.activity_location_details);
 
           context = getApplicationContext();
+          activity = this;
 
           AdapterView.OnItemSelectedListener region_listener = new AdapterView.OnItemSelectedListener() {
                @Override
@@ -37,13 +40,13 @@ public class LocationDetails extends AppCompatActivity {
 
                     switch (position) {
                          case 0:
-                              adapter = ArrayAdapter.createFromResource(context, R.array.region1_provinces, android.R.layout.simple_spinner_item);
+                              adapter = ArrayAdapter.createFromResource(activity, R.array.region1_provinces, android.R.layout.simple_spinner_item);
                               break;
                          case 1:
-                              adapter = ArrayAdapter.createFromResource(context, R.array.region2_provinces, android.R.layout.simple_spinner_item);
+                              adapter = ArrayAdapter.createFromResource(activity, R.array.region2_provinces, android.R.layout.simple_spinner_item);
                               break;
                          default:
-                              adapter = ArrayAdapter.createFromResource(context, R.array.reprotract_disease_array, android.R.layout.simple_spinner_item);
+                              adapter = ArrayAdapter.createFromResource(activity, R.array.reprotract_disease_array, android.R.layout.simple_spinner_item);
                               break;
                     }
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -65,13 +68,13 @@ public class LocationDetails extends AppCompatActivity {
 
                     switch (position) {
                          case 0:
-                              adapter = ArrayAdapter.createFromResource(context, R.array.ilocos_norte_municipalities, android.R.layout.simple_spinner_item);
+                              adapter = ArrayAdapter.createFromResource(activity, R.array.ilocos_norte_municipalities, android.R.layout.simple_spinner_item);
                               break;
                          case 1:
-                              adapter = ArrayAdapter.createFromResource(context, R.array.ilocos_sur_municipalities, android.R.layout.simple_spinner_item);
+                              adapter = ArrayAdapter.createFromResource(activity, R.array.ilocos_sur_municipalities, android.R.layout.simple_spinner_item);
                               break;
                          default:
-                              adapter = ArrayAdapter.createFromResource(context, R.array.reprotract_disease_array, android.R.layout.simple_spinner_item);
+                              adapter = ArrayAdapter.createFromResource(activity, R.array.reprotract_disease_array, android.R.layout.simple_spinner_item);
                               break;
                     }
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
