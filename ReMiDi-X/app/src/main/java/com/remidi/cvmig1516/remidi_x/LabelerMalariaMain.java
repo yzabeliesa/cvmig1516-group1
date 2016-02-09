@@ -1,5 +1,6 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -75,6 +76,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      int current_patch = 0;
      boolean currently_new = true;
      Context context;
+     Activity activity;
 
      String disease = "";
      String validator = "";
@@ -1053,7 +1055,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      public void uploadZipfile(String imageFolder, String zipPath) {
 
           // Delete progress_file
-          progress_file.delete();
+          //progress_file.delete();
 
           // Compress files in zip
           try {

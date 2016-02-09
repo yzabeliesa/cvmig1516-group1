@@ -18,10 +18,27 @@ LABELER
 [ ] Update labeler name and counters on Profile screen
 [ ] Checklist for diseases
 	- file???
+[ ] Add settings right after first sign-in
+	- Force-change password
+		- with reminder not to share
+	- Disease checklist
+[ ] Fix zoom functionality
+[ ] Fix patch coordinates
+	- Use scale factor calculated in zoom
+[ ] Add case screen
+	- Photo gallery of case samples
+	- 
 
 
 
 ============================================================================
 UPLOADER
 ============================================================================
-[ ] 
+[x] Expand to more diseases
+[ ] Load info (diseases, regions, provinces, municipalities) from file (to avoid hardcoding)
+	- Or wait for codes from Cat
+[ ] Attach disease number as intent extra
+[ ] Save all new entry info as a file
+[ ] Incorporate patient ID
+	- Allows option for uploader to link entry to previously submitted entries using ReportViewer data
+[ ] Include ReportViewer in screenshots/manual

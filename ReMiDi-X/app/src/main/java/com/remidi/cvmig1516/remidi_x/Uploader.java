@@ -36,14 +36,14 @@ public class Uploader {
      String HTTP_HOST;
      int HTTP_PORT;
      String HOME;
-     int disease;
+     int diseasenum;
 
      int getCurrentCode = -1;
 
      Uploader(Context context, File directory, int disease, String host, int port, String home) {
 
           this.context = context;
-          this.disease = disease;
+          this.diseasenum = disease;
           this.myDirectory = directory;
           this.HTTP_HOST = host;
           this.HTTP_PORT = port;
@@ -54,8 +54,8 @@ public class Uploader {
      public String uploadFile(File file, String filename, boolean isZipFile) {
           String msg;
           try {
-               if (isZipFile) file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + disease + "-" + file.getName()));
-               else file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + disease + "-" + filename));
+               if (isZipFile) file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + diseasenum + "-" + file.getName()));
+               else file.renameTo(new File(myDirectory.getAbsolutePath() + "/" + diseasenum + "-" + filename));
                String filetype;
                if (isZipFile) filetype = "zip";
                else filetype = "xml";

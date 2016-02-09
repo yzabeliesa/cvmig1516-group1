@@ -1,5 +1,5 @@
 Naming convention of directories:
-"remidiDirectory" - directory for ZIP files
+"remidiDatabase" - directory for ZIP files
 "disease_1" - Malaria folder
 "disease_2" - Filariasis folder
 "disease_3" - Ascariasis folder

@@ -1,0 +1,32 @@
+LEGEND
+=========================
+/ - folder
+* - file
+@ - zip file
+
+
+
+/appfolder (context)
+
+	/progress_files
+		"Progress files for all labelled disease"
+		*<diseasenum>-progress.txt
+
+	/<diseasename> <-- imagefolder, also where zip files are created and saved
+		/<imageno>_<patchno> <-- will be deleted once in a zip file
+			*textData.xml
+		@img<imgno>.zip <-- will be moved to remidiDatabase right after creation
+
+	/disease_<diseasenum>
+		"Directory for received disease images"
+		*img<imageno>.png
+
+	/remidiDatabase <-- myDirectory
+		"All diagnosis zip files to be sent"
+		@<diseasenum>-img<imgno>.zip
+			"Zipped files from /<diseasename>"
+			/<imageno>_<patchno>
+				*textData.xml
+
+	*disease-counter.txt
+
