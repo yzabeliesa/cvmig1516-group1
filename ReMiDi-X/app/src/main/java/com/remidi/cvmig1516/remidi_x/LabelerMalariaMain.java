@@ -1,29 +1,41 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,47 +58,6 @@ import java.util.zip.ZipOutputStream;
  */
 
 // File naming convention: img1234567_123
-
-     /*
-
-     #0. Initialize
-          #- Get intent data
-          #- Load images
-          #- Load dialog box contents based on disease
-               - Set species RadioGroup dependency on diagnosis RadioGroup
-               - Set species contents based on disease
-               - Set diagnosis based on disease
-     1. Create box
-          - Touch listener: Action up & down
-          - Get 2 points from Action up & down
-          - Create box based on 2 points
-               - fetchDialogDataFromPatch(int patchno)
-               - createPatch(float x1, float y1, float x2, float y2)
-               - Display patch number in middle
-          - Create new patch
-          - Show label dialog
-               - If tap + coors are within patches, show label dialog only (modify)
-     2. Show label dialog for patch
-          - Show patch number in title
-          - Cancel
-               - Close label dialog
-          - Delete
-               - Remove patch from patches
-               - Delete patch xml file if exists
-               - Reset patch numbers
-                    - Reset displayed patch numbers
-               - Close label dialog
-               - Toast: Patch deleted
-          - Save
-               #- Save data in patch
-               #- Close label dialog
-               #- Toast: Patch created/modified
-     3. Send patches
-          - Create xml files for all patches
-          - Zip all xml files
-          - Send zip file
-
-      */
 
 public class LabelerMalariaMain extends ActionBarActivity {
 
@@ -113,18 +84,43 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      float initX = 0;
      float initY = 0;
+     float bounds_left = 0;
+     float bounds_top = 0;
+     float scaleFactorX = 1;
      Bitmap origBitmap;
      File myDirectory;
 
-     private ImageView mContentView;
+     //private ImageView mContentView;
      private View mControlsView;
      private boolean mVisible;
+     int screen_width = 0;
 
-     public String HTTP_HOST = "192.168.1.10";
-     public String HOME = "/data/";
-     public int HTTP_PORT = 5000;
+     // Local url
+     //public String HTTP_IP_ADDRESS = "192.168.1.10";
+     //public String HTTP_HOME = "/data/";
+
+     // Web url
+     public String HTTP_IP_ADDRESS = "54.179.135.52";
+     public String HTTP_HOME = "/api/label/";
+
+     public int HTTP_PORT = 80;
      public boolean isThreadPause = false;
+
      Uploader uploader;
+     Drawable drawable;
+     DrawingView mContentView;
+     TouchImageView zoomContentView;
+     LinearLayout mDrawingPad;
+     int mContentView_top = 0;
+     int mContentView_bottom = 0;
+
+     final int MODE_PATCH = 0;
+     final int MODE_ZOOM = 1;
+     int mode = MODE_PATCH;
+
+     String image_directory = "";
+     File[] images;
+     int image_ctr = 0;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +128,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           setContentView(R.layout.activity_labeler_malaria_main);
 
           context = getApplicationContext();
-          myDirectory = new File(context.getFilesDir(), "myDatabase");
+          myDirectory = new File(context.getFilesDir(), "remidiDatabase");
 
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
@@ -144,19 +140,23 @@ public class LabelerMalariaMain extends ActionBarActivity {
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
+               /*String address = extras.getString("Address");
+               tokenizeAddress(address);*/
           }
 
           // Load uploader
-          int disease_num = 0;
+          int disease_num = 1;
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
           for (int i = 0; i<diseases.length; i++) {
                if (diseases[i].equals(disease)) {
-                    disease_num = i;
+                    disease_num = i+1;
                     break;
                }
           }
 
-          uploader = new Uploader(context,myDirectory, disease_num, HTTP_HOST, HTTP_PORT, HOME);
+          image_directory = context.getFilesDir() + "/disease_" + disease_num;
+
+          uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
           // Create handler for progress file
           progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
@@ -172,60 +172,77 @@ public class LabelerMalariaMain extends ActionBarActivity {
           labelDialog = new Dialog(LabelerMalariaMain.this);
           labelDialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
 
+          // Get image file from folder
+          File srcFile = new File(image_directory);
+          images = srcFile.listFiles();
+
+          if (image_ctr >= images.length) {
+               Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
+               startActivity(intent);
+          }
+
+          File image = images[image_ctr];
+          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+
+          current_image = tokenizeImageNum(image);
+
           // Initialize (turn into AsyncTask)
           mVisible = true;
-          mControlsView = findViewById(R.id.fullscreen_content_controls);
-          mContentView = (ImageView)findViewById(R.id.fullscreen_content);
-          new Initializer().execute(disease);
+          //mControlsView = findViewById(R.id.fullscreen_content_controls);
+          mContentView = new DrawingView(this);
+          //mContentView = (ImageView)findViewById(R.id.fullscreen_content);
+          initialize(disease);
+          mContentView.setImageBitmap(imageBitmap);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          drawable = mContentView.getDrawable();
 
-          // ----------------------------------------------
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          screen_width = size.x;
 
-          View.OnTouchListener patchBuilder = new View.OnTouchListener() {
+          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
+          //zoomContentView.setMinimumHeight(mContentView.height);
+          //zoomContentView.setMinimumWidth(mContentView.);
+          zoomContentView.setMaxZoom(4f);
+          //zoomContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          //zoomContentView.setAdjustViewBounds(true);
+
+          mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad);
+          mDrawingPad.addView(mContentView);
+          mContentView.invalidate();
+
+          final Button button = (Button)findViewById(R.id.button);
+          final TextView text = (TextView)findViewById(R.id.text_instructions);
+
+          View.OnClickListener clickListener = new View.OnClickListener() {
                @Override
-               public boolean onTouch(View v, MotionEvent event) {
-
-                    float currentX = event.getX();
-                    float currentY = event.getY();
-
-                    // Check if area is patched. If yes, open dialog box.
-                    for (int i = 0; i<patches.size(); i++) {
-                         Patch patch = patches.get(i);
-                         if (isBetween(currentX,patch.x1,patch.x2) && isBetween(currentY,patch.y1,patch.y2)) {
-                              current_patch = i;
-                              currently_new = false;
-                              showDialogBox();
-                              return true;
-                         }
+               public void onClick(View v) {
+                    if (mode == MODE_PATCH) {
+                         mode = MODE_ZOOM;
+                         // view location in 2
+                         mDrawingPad.removeView(mContentView);
+                         drawable = mContentView.getDrawable();
+                         mDrawingPad.addView(zoomContentView);
+                         button.setText("Zoom mode");
+                         text.setText(getResources().getText(R.string.zoom_instructions));
                     }
-
-                    // If area is unpatched, create new patch
-                    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                         initX = currentX;
-                         initY = currentY;
+                    else {
+                         mode = MODE_PATCH;
+                         mDrawingPad.removeView(zoomContentView);
+                         mDrawingPad.addView(mContentView);
+                         button.setText("Patch mode");
+                         text.setText(getResources().getText(R.string.labeler_instructions));
                     }
-                    else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-                         float finalX = currentX;
-                         float finalY = currentY;
-                         if (Math.abs(finalX-initX)>10 && Math.abs(finalY-initY)>10) {
-                              createPatch(initX, initY, finalX, finalY);
-                              new ProgressUpdater().execute();
-                         }
-                    }
-                    return true;
                }
           };
 
-          mContentView.setOnTouchListener(patchBuilder);
-          mContentView.setImageDrawable(sample_images[current_image]);
-          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+          button.setOnClickListener(clickListener);
 
-          /*
-          //FOR TESTING ONLY
-          Patch p = new Patch(context, current_image, patches.size(), 20, 20, 700, 700, disease);
-          patches.add(p);
-          */
-
-          drawBoxes(DRAW_ALL);
 
      }
 
@@ -233,23 +250,51 @@ public class LabelerMalariaMain extends ActionBarActivity {
      protected void onPostCreate(Bundle savedInstanceState) {
           super.onPostCreate(savedInstanceState);
 
+          int[] img_coordinates = new int[2];
+          mContentView.getLocationOnScreen(img_coordinates);
+          bounds_left = img_coordinates[0];
+          bounds_top = img_coordinates[1];
+          //
+
+          drawable = mContentView.getDrawable();
+          mContentView_top = drawable.getBounds().top;
+          mContentView_bottom = drawable.getBounds().bottom;
+          //Toast.makeText(getApplicationContext(), "Top: "+ mContentView_top + "\nBottom: " + mContentView_bottom, Toast.LENGTH_SHORT).show();
+
      }
 
-     @Override
-     protected void onPause() {
-          isThreadPause = true;
-          super.onPause();
-          uploader.setIsPaused(isThreadPause);
-          Toast.makeText(getApplicationContext(), "Paused", Toast.LENGTH_SHORT).show();
+     private Bitmap getScaledImage(ImageView view, int boundBoxInDp)
+     {
+          // Get the ImageView and its bitmap
+          Drawable drawing = view.getDrawable();
+          Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+          // Get current dimensions
+          int width = bitmap.getWidth();
+          int height = bitmap.getHeight();
+
+          // Determine how much to scale: the dimension requiring less scaling is
+          // closer to the its side. This way the image always stays inside your
+          // bounding box AND either x/y axis touches it.
+          float xScale = ((float) boundBoxInDp) / width ;
+          float yScale = ((float) boundBoxInDp) / height;
+          float scale = (xScale <= yScale) ? xScale : yScale;
+
+          // Create a matrix for the scaling and add the scaling data
+          Matrix matrix = new Matrix();
+          matrix.postScale(scale, scale);
+
+          // Create a new bitmap and convert it to a format understood by the ImageView
+          Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+          return scaledBitmap;
      }
 
-     @Override
-     protected void onResume(){
-          isThreadPause = false;
-          super.onResume();
-          uploader.setIsPaused(isThreadPause);
-          Toast.makeText(getApplicationContext(), "Resumed", Toast.LENGTH_SHORT).show();
+     private int dpToPx(int dp)
+     {
+          float density = getApplicationContext().getResources().getDisplayMetrics().density;
+          return Math.round((float)dp * density);
      }
+
 
      /*
       ------------------------------------------------------------------------------------------------------------------
@@ -261,21 +306,20 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           int imgno;
           int patchno;
-          float x1, y1, x2, y2;
+          float x, y, radius;
           String disease;
           ArrayList<String> analysis = new ArrayList<>();
           String remarks;
           int state;
 
-          Patch(Context context, int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
+          Patch(Context context, int imgno, int patchno, float x, float y, float radius, String disease) {
 
                super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno), disease, true);
                this.imgno = imgno;
                this.patchno = patchno;
-               this.x1 = x1;
-               this.y1 = y1;
-               this.x2 = x2;
-               this.y2 = y2;
+               this.x = x;
+               this.y = y;
+               this.radius = radius;
                this.disease = disease;
                this.remarks = "";
                this.state = PATCH_NEUTRAL;
@@ -283,11 +327,236 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           public String formatImgno() {
-               return String.format("%07d", imgno);
+               return imgno + "";
           }
           public String formatPatchno() {
                return String.format("%03d", patchno);
           }
+
+     }
+
+     class DrawingView extends ImageView {
+          Paint       mPaint;
+          Bitmap  mBitmap;
+          Canvas  mCanvas;
+          Paint   mBitmapPaint;
+          private float mX, mY;
+          private static final float TOUCH_TOLERANCE = 20;
+          float radius = 0;
+          float cx = 0;
+          float cy = 0;
+          int width = 1;
+          int height = 1;
+          boolean isPatching = false;
+          boolean initialized = false;
+
+          public DrawingView(Context context) {
+               super(context);
+               // TODO Auto-generated constructor stub
+               mPaint = new Paint();
+               mPaint.setStrokeWidth(10);
+               mPaint.setStyle(Paint.Style.STROKE);
+               mPaint.setShadowLayer(5, 2, 2, Color.BLACK);
+               mPaint.setTextSize(50);
+               mPaint.setAntiAlias(true);
+               mPaint.setColor(Color.WHITE);
+
+               //mPath = new Path();
+               mBitmapPaint = new Paint();
+               mBitmapPaint.setColor(getResources().getColor(R.color.teal));
+          }
+          @Override
+          protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+               super.onSizeChanged(w, h, oldw, oldh);
+               mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+               mCanvas = new Canvas(mBitmap);
+               width = w;
+               height = h;
+          }
+          @Override
+          public void draw(Canvas canvas) {
+               // TODO Auto-generated method stub
+               super.draw(canvas);
+               canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+
+               if (!initialized) {
+                    for (int i = 0; i < patches.size(); i++) {
+                         Patch patch = patches.get(i);
+
+                         if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
+                         else if (patch.state == PATCH_COMPLETE)
+                              mPaint.setColor(getResources().getColor(R.color.green));
+                         else mPaint.setColor(getResources().getColor(R.color.red));
+
+                         //mPaint.setStrokeWidth(5);
+                         mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+                         //mPaint.setStrokeWidth(3);
+                         mCanvas.drawText((patch.patchno + 1) + "", patch.x, patch.y, mPaint);
+                    }
+                    initialized = true;
+               }
+
+          }
+
+          public void resetDraw() {
+
+               clearDraw();
+
+               for (int i = 0; i<patches.size(); i++) {
+                    Patch patch = patches.get(i);
+
+                    if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
+                    else if (patch.state == PATCH_COMPLETE)
+                         mPaint.setColor(getResources().getColor(R.color.green));
+                    else mPaint.setColor(getResources().getColor(R.color.red));
+
+                    mPaint.setStrokeWidth(7);
+                    mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+                    mPaint.setStrokeWidth(5);
+                    mCanvas.drawText((patch.patchno+1) + "", patch.x, patch.y, mPaint);
+               }
+
+          }
+
+          public void clearDraw() {
+
+               mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+               mCanvas = new Canvas(mBitmap);
+               invalidate();
+
+          }
+
+
+          private void touch_start(float x, float y) {
+               initX = x;
+               initY = y;
+
+               // Check if area is patched. If yes, open dialog box.
+               isPatching = true;
+               for (int i = 0; i<patches.size(); i++) {
+                    Patch patch = patches.get(i);
+                    if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
+                         current_patch = i;
+                         currently_new = false;
+                         isPatching = false;
+                         showDialogBox();
+                         //Toast.makeText(context, "Patch exists", Toast.LENGTH_SHORT).show();
+                         break;
+                    }
+               }
+
+          }
+
+          private void touch_up(float x, float y) {
+
+               mX = x;
+               mY = y;
+               radius = getRadius(initX, initY, mX, mY);
+               //Toast.makeText(context, mX + ", " + mY, Toast.LENGTH_SHORT).show();
+
+               if (radius > TOUCH_TOLERANCE && isPatching) { //10
+
+                    cx = getMidpoint(initX, mX);
+                    cy = getMidpoint(initY, mY);
+                    getDrawBounds();
+                    int offset = (getBitmapOffset(false))[0];
+                    //Toast.makeText(context, "Top offset: " + offset + "\nBottom offset: " + (mContentView_bottom-offset), Toast.LENGTH_SHORT).show();
+
+                    if ((cy-radius) > offset && (cy+radius) < (mContentView.getHeight()-offset)) {
+                         //Toast.makeText(context, "Must create patch!!!", Toast.LENGTH_SHORT).show();
+                         createPatch(cx,cy,radius);
+                         Patch patch = patches.get(current_patch);
+
+                         if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
+                         else if (patch.state == PATCH_COMPLETE)
+                              mPaint.setColor(getResources().getColor(R.color.green));
+                         else mPaint.setColor(getResources().getColor(R.color.red));
+
+                         mPaint.setStrokeWidth(7);
+                         mCanvas.drawCircle(cx, cy, radius, mPaint);
+                         mPaint.setStrokeWidth(5);
+                         mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
+
+                         updateProgress();
+                    }
+                    else Toast.makeText(context, "Patch must not exceed image bounds.", Toast.LENGTH_SHORT).show();
+
+                    isPatching = false;
+               }
+
+               else {
+
+                    int i;
+                    for (i = 0; i<patches.size(); i++) {
+                         Patch patch = patches.get(i);
+                         if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
+                              current_patch = i;
+                              currently_new = false;
+                              isPatching = false;
+                              showDialogBox();
+                              //Toast.makeText(context, "Patch exists", Toast.LENGTH_SHORT).show();
+                              break;
+                         }
+                    }
+               }
+
+               //else {
+
+               //}
+
+          }
+
+          @Override
+          public boolean onTouchEvent(MotionEvent event) {
+               float x = event.getX();
+               float y = event.getY();
+
+               switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                         touch_start(x, y);
+                         invalidate();
+                         break;
+                    /*case MotionEvent.ACTION_MOVE:
+                         touch_move(x, y);
+                         invalidate();y
+                         break;
+                    */
+                    case MotionEvent.ACTION_UP:
+                         touch_up(x,y);
+                         invalidate();
+                         break;
+               }
+               return true;
+          }
+
+          public void getDrawBounds() {
+               drawable = mContentView.getDrawable();
+               mContentView_top = drawable.getBounds().top;
+               mContentView_bottom = drawable.getBounds().bottom;
+          }
+
+          public int[] getBitmapOffset(boolean includeLayout) {
+               int[] offset = new int[2];
+               float[] values = new float[9];
+
+               Matrix m = getImageMatrix();
+               m.getValues(values);
+
+               offset[0] = (int) values[5];
+               offset[1] = (int) values[2];
+
+               if (includeLayout) {
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) getLayoutParams();
+                    int paddingTop = getPaddingTop();
+                    int paddingLeft = getPaddingLeft();
+
+                    offset[0] += paddingTop + lp.topMargin;
+                    offset[1] += paddingLeft + lp.leftMargin;
+               }
+               return offset;
+          }
+
+
 
      }
 
@@ -353,6 +622,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
                case "Giardiasis":
                     species = getResources().getStringArray(R.array.giardiasis_species);
                     break;
+               case "Unspecified Infection":
+                    species = getResources().getStringArray(R.array.unspecified_species);
+                    break;
                case "Tuberculosis":
                     species = getResources().getStringArray(R.array.tuberculosis_species);
                     break;
@@ -395,7 +667,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                                         Patch patch = patches.get(current_patch);
                                         if (patch.analysis.size() == 0) patch.state = PATCH_INCOMPLETE;
                                         else patch.state = PATCH_COMPLETE;
-                                        drawBoxes(DRAW_CURRENT);
+                                        //drawBoxes(DRAW_CURRENT);
+                                        mContentView.resetDraw();
                                         labelDialog.hide();
                                         break;
                                    case DialogInterface.BUTTON_NEGATIVE:
@@ -469,14 +742,58 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      }
 
+     public int tokenizeImageNum(File image) {
+          StringTokenizer token1 = new StringTokenizer(image.getName(),"img");
+          StringTokenizer token2 = new StringTokenizer(token1.nextToken(),".png");
+          return Integer.parseInt(token2.nextToken());
+     }
+
      public void loadNextImage() {
-          current_image++;
-          current_image%=5; //temp
-          mContentView.setImageDrawable(sample_images[current_image]);
-          origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
+
+          /*
+          image_ctr++;
+
+
+          if (image_ctr >= images.length) {
+               Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
+               startActivity(intent);
+               return;
+          }
+          */
+
+          File image = images[image_ctr];
+
+          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+          current_image = tokenizeImageNum(image);
+
+          progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
+          progress_file.write(current_image + "");
+          initialize(disease);
+          mContentView.setImageBitmap(imageBitmap);
+          drawable = mContentView.getDrawable();
+          mContentView_top = drawable.getBounds().top;
+          mContentView_bottom = drawable.getBounds().bottom;
+
           patches.clear();
-          drawBoxes(DRAW_CLEAR);
-          new ProgressUpdater().execute();
+          mContentView.clearDraw();
+          updateProgress();
+
+          mContentView.setImageDrawable(sample_images[current_image]);
+          drawable = mContentView.getDrawable();
+          mContentView.resetDraw();
+          mContentView.invalidate();
+
+          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
+
+          if (mode == MODE_ZOOM) {
+               mDrawingPad.removeView(zoomContentView);
+               mDrawingPad.addView(mContentView);
+               mode = MODE_PATCH;
+          }
+
+
      }
 
      public void updateProgress() {
@@ -488,7 +805,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
                progress_file.append("$");
-               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2 + "|");
+               progress_file.append(patch.x + "|" + patch.y + "|" + patch.radius + "|");
                for (int j = 0; j<patch.analysis.size(); j++) {
                     if (j>0) progress_file.append(",");
                     progress_file.append(patch.analysis.get(j));
@@ -506,16 +823,19 @@ public class LabelerMalariaMain extends ActionBarActivity {
           StringTokenizer tokens = new StringTokenizer(contents, "$");
 
           current_image = Integer.parseInt(tokens.nextToken());
+          File image = new File(image_directory + "/img" + current_image + ".png");
+          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+          mContentView.setImageBitmap(imageBitmap);
 
           while (tokens.hasMoreTokens()) {
                String token = tokens.nextToken();
                StringTokenizer patchData = new StringTokenizer(token, "|");
-               float x1 = Float.parseFloat(patchData.nextToken());
-               float y1 = Float.parseFloat(patchData.nextToken());
-               float x2 = Float.parseFloat(patchData.nextToken());
-               float y2 = Float.parseFloat(patchData.nextToken());
+               float x = Float.parseFloat(patchData.nextToken());
+               float y = Float.parseFloat(patchData.nextToken());
+               float radius = Float.parseFloat(patchData.nextToken());
 
-               Patch patch = new Patch(context, current_image, patches.size(),x1,y1,x2,y2,disease);
+               Patch patch = new Patch(context, current_image, patches.size(),x,y,radius,disease);
                String analysisToken = patchData.nextToken();
                if (!analysisToken.equals("###*No data*###")) {
                     StringTokenizer analysisData = new StringTokenizer(analysisToken, ",");
@@ -533,6 +853,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                patches.add(patch);
 
           }
+
 
      }
 
@@ -567,6 +888,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           Patch patch = patches.get(patchno);
 
           RadioGroup rg = (RadioGroup)labelDialog.findViewById(R.id.labeler_species);
+          patch.analysis.clear();
           for (int i = 0; i<rg.getChildCount(); i++) {
                CheckBox cb = (CheckBox)rg.getChildAt(i);
                if (cb.isChecked()) {
@@ -581,23 +903,22 @@ public class LabelerMalariaMain extends ActionBarActivity {
           else {
                patch.remarks = ((EditText)labelDialog.findViewById(R.id.labeler_comments)).getText().toString();
                patch.state = PATCH_COMPLETE;
-               drawBoxes(DRAW_CURRENT);
+               mContentView.resetDraw();
                if (currently_new) Toast.makeText(context, "Patch created!", Toast.LENGTH_SHORT).show();
                else Toast.makeText(context, "Patch modified!", Toast.LENGTH_SHORT).show();
                labelDialog.hide();
-               new ProgressUpdater().execute();
+               updateProgress();
           }
 
      }
 
-     public void createPatch(float x1, float y1, float x2, float y2) {
+     public void createPatch(float x, float y, float radius) {
           final int patchno = patches.size();
-          Patch patch = new Patch(context, current_image, patchno, x1, y1, x2, y2, disease);
+          Patch patch = new Patch(context, current_image, patchno, x, y, radius, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
-          drawBoxes(DRAW_CURRENT);
-          new ProgressUpdater().execute();
+          updateProgress();
           showDialogBox();
      }
 
@@ -609,8 +930,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                for (int i = 0; i < patches.size(); i++) {
                     patches.get(i).patchno = i;
                }
-               drawBoxes(DRAW_ALL);
-               new ProgressUpdater().execute();
+               mContentView.resetDraw();
+               updateProgress();
                labelDialog.hide();
                Toast.makeText(context, "Patch deleted!", Toast.LENGTH_SHORT).show();
 
@@ -629,15 +950,11 @@ public class LabelerMalariaMain extends ActionBarActivity {
           patch.append("\n\t<validator>" + validator + "</validator>");
           patch.append("\n\t<imageno>" + patch.imgno + "</imageno>");
 
-          patch.append("\n\n\t<ulcoordinate>");
-          patch.append("\n\t\t<x>" + patch.x1 + "</x>");
-          patch.append("\n\t\t<y>" + patch.y1 + "</y>");
-          patch.append("\n\t</ulcoordinate>");
-
-          patch.append("\n\n\t<lrcoordinate>");
-          patch.append("\n\t\t<x>" + patch.x2 + "</x>");
-          patch.append("\n\t\t<y>" + patch.y2 + "</y>");
-          patch.append("\n\t</lrcoordinate>");
+          patch.append("\n\n\t<coordinates>");
+          patch.append("\n\t\t<x>" + patch.x + "</x>");
+          patch.append("\n\t\t<y>" + patch.y + "</y>");
+          patch.append("\n\t\t<radius>" + patch.radius + "</radius>");
+          patch.append("\n\t</coordinates>");
 
           patch.append("\n\n\t<disease>" + patch.disease + "</disease>");
           patch.append("\n\t<diagnosis>");
@@ -651,59 +968,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           patch.append("\n\t<timestamp>" + new Timestamp(Calendar.getInstance().getTime().getTime()) + "</timestamp>");
           patch.append("\n</validation>");
-
-     }
-
-     public void drawBoxes(int state) {
-
-          ImageView imageView = mContentView;
-
-          if (state == DRAW_CLEAR) {
-               imageView.setImageBitmap(origBitmap);
-               return;
-          }
-
-          Bitmap oldBitmap;
-          if (state == DRAW_CURRENT) oldBitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
-          else oldBitmap = origBitmap;
-
-          Paint paint = new Paint();
-          paint.setStrokeWidth(20);
-          paint.setStyle(Paint.Style.STROKE);
-          paint.setShadowLayer(5, 2, 2, Color.BLACK);
-          paint.setTextSize(100);
-
-          //Create a new image bitmap and attach a brand new canvas to it
-          Bitmap newBitmap = Bitmap.createBitmap(oldBitmap.getWidth(), oldBitmap.getHeight(), Bitmap.Config.RGB_565);
-          Canvas canvas = new Canvas(newBitmap);
-
-          //Draw the image bitmap into the canvas
-          canvas.drawBitmap(oldBitmap, 0, 0, null);
-
-          //Draw everything else into the canvas
-          if (state == DRAW_ALL) {
-               for (int i = 0; i < patches.size(); i++) {
-                    Patch patch = patches.get(i);
-                    if (patch.state == PATCH_NEUTRAL) paint.setColor(Color.WHITE);
-                    else if (patch.state == PATCH_COMPLETE)
-                         paint.setColor(getResources().getColor(R.color.green));
-                    else paint.setColor(getResources().getColor(R.color.red));
-                    canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
-                    canvas.drawText("" + (i + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1, patch.y2), paint);
-               }
-          }
-          else {
-               Patch patch = patches.get(current_patch);
-               if (patch.state == PATCH_NEUTRAL) paint.setColor(Color.WHITE);
-               else if (patch.state == PATCH_COMPLETE)
-                    paint.setColor(getResources().getColor(R.color.green));
-               else paint.setColor(getResources().getColor(R.color.red));
-               canvas.drawRoundRect(new RectF(patch.x1, patch.y1, patch.x2, patch.y2), 10, 10, paint);
-               canvas.drawText("" + (patch.patchno + 1), getMidpoint(patch.x1, patch.x2), getMidpoint(patch.y1, patch.y2), paint);
-          }
-
-          //Attach the canvas to the ImageView
-          imageView.setImageBitmap(newBitmap);
 
      }
 
@@ -751,14 +1015,15 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Create xml files for all patches
-          for (int i = 0; i<patches.size(); i++) {
+          for (int i = 0; i < patches.size(); i++) {
                createPatchXML(i);
           }
 
           // Compress all files in zip, send zip file, delete patch data files
           String imageFolder = progress_file.filefolder;
           String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          uploadZipfile(imageFolder, zipPath);
+          uploadZipfile(imageFolder, zipPath); //bring me to life
+          //Toast.makeText(context, "SENTTT!!!", Toast.LENGTH_SHORT).show(); //test
           //uploadXMLFiles();
 
           // Load next image
@@ -779,7 +1044,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                patch.delete();
                patch.deleteFolder();
           }
-          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show(); // test
+          //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show(); // test
 
      }
 
@@ -832,27 +1097,32 @@ public class LabelerMalariaMain extends ActionBarActivity {
           StringBuilder sb = new StringBuilder("MYDIRECTORY CONTENTS");
           File[] files = myDirectory.listFiles();
           for (int i = 0; i<files.length; i++) {
-               sb.append("\n" + files[i].getPath());
+               sb.append("\n" + files[i].getPath() + ": " + uploader.getCurrentCode);
           }
           if (files.length == 0) sb.append("\nNo files");
-          Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
+          //Toast.makeText(context, sb.toString(), Toast.LENGTH_SHORT).show();
      }
 
-     public boolean isBetween(float num, float a, float b) {
-          float larger;
-          float smaller;
-          if (a>b) {
-               larger = a;
-               smaller = b;
+     public void tokenizeAddress(String url) {
+          StringTokenizer tokenizer = new StringTokenizer(url,":");
+          if (tokenizer.countTokens()>1) {
+               HTTP_IP_ADDRESS = tokenizer.nextToken();
+               url = tokenizer.nextToken();
+               tokenizer = new StringTokenizer(url,"/");
+               String port = tokenizer.nextToken();
+               if (!port.equals("")) HTTP_PORT = Integer.parseInt(port);
+               else HTTP_PORT = -1;
           }
           else {
-               larger = b;
-               smaller = a;
+               tokenizer = new StringTokenizer(url,"/");
+               HTTP_IP_ADDRESS = tokenizer.nextToken();
           }
+          HTTP_HOME = tokenizer.nextToken();
+          //Toast.makeText(context, "IP address: " + HTTP_IP_ADDRESS + "\nPort: " + HTTP_PORT + "\nHome: " + HTTP_HOME, Toast.LENGTH_SHORT).show();
+     }
 
-          if (larger >= num && smaller <= num) return true;
-          else return false;
-
+     public boolean isBetween(float x1, float y1, float x2, float y2, float radius) {
+          return (getRadius(x1,y1,x2,y2) <= radius);
      }
 
      public float getMidpoint(float a, float b) {
@@ -861,6 +1131,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
           else smaller = b;
 
           return smaller + (Math.abs(a-b)/2);
+     }
+
+     public float getRadius(float x1, float y1, float x2, float y2) {
+          return (float)(Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))/2);
      }
 
 

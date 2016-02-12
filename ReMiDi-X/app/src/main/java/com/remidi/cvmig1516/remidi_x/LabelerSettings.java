@@ -7,8 +7,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import java.io.File;
 
 public class LabelerSettings extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
 
@@ -19,7 +22,7 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
      //public class SpecimenSpinnerActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
      public void onItemSelected(AdapterView<?> parent, View view,
-                                     int pos, long id) {
+                                int pos, long id) {
           // An item was selected. You can retrieve the selected item using
           //String value = (String)parent.getItemAtPosition(pos);
 
@@ -67,6 +70,9 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
           disease_spinner.setAdapter(adapter2);
 
           validator = "Test";
+
+          Intent myIntent = new Intent(this, LoopService.class);
+          getApplicationContext().startService(myIntent);
      }
 
      public void labelerSettingsOK(View view) {
@@ -74,15 +80,33 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
           Spinner disease_spinner = (Spinner) findViewById(R.id.disease_spinner);
           String disease = disease_spinner.getSelectedItem().toString();
 
+          int disease_num = 1;
+          String[] diseases = getResources().getStringArray(R.array.all_diseases);
+          for (int i = 0; i<diseases.length; i++) {
+               if (diseases[i].equals(disease)) {
+                    disease_num = i+1;
+                    break;
+               }
+          }
+
+          String image_directory = getApplicationContext().getFilesDir() + "/disease_" + disease_num;
+
+          File srcFile = new File(image_directory);
+          File[] images = srcFile.listFiles();
+
+          while (true) {
+               if (images.length > 0) break;
+          }
+
           Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
           //disease = (disease.toLowerCase()).replace(' ', '_');
+          //String address = ((EditText) findViewById(R.id.http_address)).getText().toString();
           intent.putExtra("Disease", disease);
           intent.putExtra("Validator", validator);
+          //intent.putExtra("Address", address);
           startActivity(intent);
 
      }
 
 
 }
-
-

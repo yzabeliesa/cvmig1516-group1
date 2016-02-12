@@ -1,0 +1,19 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/teal"
+    tools:context="com.remidi.cvmig1516.remidi_x.NoImagesActivity">
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="There are no images to display."
+        android:gravity="center|center_vertical"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        />
+
+
+</LinearLayout>

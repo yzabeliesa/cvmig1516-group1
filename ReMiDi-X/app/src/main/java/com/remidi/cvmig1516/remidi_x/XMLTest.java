@@ -1,170 +1,373 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
+import android.text.InputFilter;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class XMLTest extends ActionBarActivity {
 
-     XMLFileHandler progress_file;
-     int current_image = 0;
-
+     final int DELAY = 300;
      final int PATCH_NEUTRAL = 0;
      final int PATCH_COMPLETE = 1;
      final int PATCH_INCOMPLETE = 2;
 
-     ArrayList<Patch> patches = new ArrayList<>();
-     String disease = "Disease";
+     final int DRAW_CLEAR = 0; // erase all
+     final int DRAW_CURRENT = 1; // new patch
+     final int DRAW_ALL = 2; // delete, patch completion
+
+     Drawable[] sample_images;
+     Dialog labelDialog;
+     int current_image = 0;
+     int current_patch = 0;
+     boolean currently_new = true;
      Context context;
+
+     String disease = "Disease";
+     String validator = "Validator";
+     XMLFileHandler progress_file;
+     ArrayList<Patch> patches = new ArrayList<>();
+
+     int ctr = 0;
+     float initX = 0;
+     float initY = 0;
+     float scaleFactor = 1;
+     float bounds_left = 0;
+     float bounds_top = 0;
+     Bitmap origBitmap;
      File myDirectory;
+
+     private ImageView mContentView;
+     private View mControlsView;
+     private boolean mVisible;
+
+     // Web url
+     public String HTTP_IP_ADDRESS = "54.179.135.52";
+     public String HTTP_HOME = "/api/label/";
+
+     public int HTTP_PORT = 80;
+     public boolean isThreadPause = false;
+     Uploader uploader;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
           setContentView(R.layout.activity_xmltest);
           context = getApplicationContext();
-          myDirectory = new File(context.getFilesDir(), "database");
-          if( !myDirectory.exists() ) {
-               myDirectory.mkdirs();
-          }
-          /*
-          Bundle extras = getIntent().getExtras();
+          //mContentView = (ImageView)findViewById(R.id.imagetest);
+          //origBitmap = ((BitmapDrawable)mContentView.getDrawable()).getBitmap();
 
-          if (extras != null) {
-               ((TextView)findViewById(R.id.xmltester)).setText(extras.getString("XML Data"));
-          }
-          */
-          progress_file = new XMLFileHandler(context,"progress.txt",disease,false);
-          patches.add(new Patch(context, current_image, 0, 1, 2, 3, 4, disease));
-          patches.add(new Patch(context, current_image, 1, 1, 2, 3, 4, disease));
-          patches.add(new Patch(context,current_image,2,1,2,3,4,disease));
-          patches.add(new Patch(context,current_image,3,1,2,3,4,disease));
-          patches.add(new Patch(context,current_image,4,1,2,3,4,disease));
-          patches.get(2).remarks="hehehe";
-          patches.get(3).analysis.add("jajejejeje");
-          patches.get(3).analysis.add("hohohohoho");
-          updateProgress();
+          final LinearLayout mDrawingPad=(LinearLayout)findViewById(R.id.test_drawpad);
+          final DrawingView mDrawingView = new DrawingView(this);
+          Drawable drawable = getResources().getDrawable(R.drawable.img0000000_000);
+          mDrawingView.setImageDrawable(drawable);
 
-          String imageFolder = progress_file.filefolder;
-          String zipPath = progress_file.filefolder + "/img" + patches.get(0).formatImgno() + ".zip";
-          createZipfile(imageFolder, zipPath);
-          uploadZipfile(zipPath);
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          int width = size.x;
+          int height = size.y;
 
-     }
+          int idealWidth = width;
+          int idealHeight;
+          int actualWidth = drawable.getIntrinsicWidth();
+          int actualHeight = drawable.getIntrinsicHeight();
+          float scaleFactor = ((float)idealWidth)/((float)actualWidth);
+          idealHeight = (int)(scaleFactor*actualHeight);
 
-     public void updateProgress() {
-          // updates current image file as well as patches created in image
-          /* PROTOCOL:
-          current_image$x1|y1|x2|y2|Species (comma-separated)|Remarks$x1|y1|x2|y2|Species (comma-separated)|Remarks
-          */
-          progress_file.write(current_image + "");
-          for (int i = 0; i<patches.size(); i++) {
-               Patch patch = patches.get(i);
-               progress_file.append("$");
-               progress_file.append(patch.x1 + "|" + patch.y1 + "|" + patch.x2 + "|" + patch.y2 + "|");
-               for (int j = 0; j<patch.analysis.size(); j++) {
-                    if (j>0) progress_file.append(",");
-                    progress_file.append(patch.analysis.get(j));
+          mDrawingPad.setMinimumWidth(width);
+
+          Button b = new Button(context);
+          View.OnClickListener clicker = new View.OnClickListener() {
+               @Override
+               public void onClick(View v) {
+                    patches.remove(0);
+                    mDrawingView.resetDraw();
                }
-               if (patch.analysis.size() == 0) progress_file.append("###*No data*###");
-               progress_file.append("|" + patch.remarks);
-               if (patch.remarks.equals("")) progress_file.append("###*No data*###");
-          }
+          };
+          b.setOnClickListener(clicker);
+          b.setText("BUTTON");
+          mDrawingPad.addView(b);
+          mDrawingPad.addView(mDrawingView);
+
 
      }
 
-     public void uploadZipfile(String zipPath) {
+     class DrawingView extends ImageView {
+          Paint       mPaint;
+          Paint textPaint;
+          Bitmap  mBitmap;
+          Canvas  mCanvas;
+          Paint   mBitmapPaint;
+          private float mX, mY;
+          private static final float TOUCH_TOLERANCE = 4;
+          float radius = 0;
+          float cx = 0;
+          float cy = 0;
+          int width = 1;
+          int height = 1;
 
-          File file = new File(zipPath);
+          public DrawingView(Context context) {
+               super(context);
+               // TODO Auto-generated constructor stub
+               mPaint = new Paint();
+               mPaint.setStrokeWidth(10);
+               mPaint.setStyle(Paint.Style.STROKE);
+               mPaint.setShadowLayer(5, 2, 2, Color.BLACK);
+               mPaint.setTextSize(50);
+               mPaint.setAntiAlias(true);
+               mPaint.setColor(Color.WHITE);
 
-          // run uploader
-          //Uploader uploader = new Uploader(myDirectory);
-          //String msg = uploader.uploadFile(file, disease);
-          //Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-
-          //Toast.makeText(context, "Sent image diagnosis!", Toast.LENGTH_SHORT).show();
-          for (int i = 0; i<patches.size(); i++) { //deletes patch data
-               Patch patch = patches.get(i);
-               patch.delete();
-               patch.deleteFolder();
+               //mPath = new Path();
+               mBitmapPaint = new Paint();
+               mBitmapPaint.setColor(Color.RED);
+          }
+          @Override
+          protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+               super.onSizeChanged(w, h, oldw, oldh);
+               mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+               mCanvas = new Canvas(mBitmap);
+               width = w;
+               height = h;
+          }
+          @Override
+          public void draw(Canvas canvas) {
+               // TODO Auto-generated method stub
+               super.draw(canvas);
+               canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+               //canvas.drawCircle(cx, cy, radius, mPaint);
           }
 
-          // FOR TESTING ONLY
-          File[] files = myDirectory.listFiles();
-          StringBuilder sb = new StringBuilder("myDirectory Contents");
-          for (int i = 0; i < files.length; i++) {
-               sb.append("\n");
-               sb.append(files[i].getName());
+          public void resetDraw() {
+
+               clearDraw();
+
+               for (int i = 0; i<patches.size(); i++) {
+                    Patch patch = patches.get(i);
+
+                    mPaint.setStrokeWidth(5);
+                    mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+                    mPaint.setStrokeWidth(3);
+                    mCanvas.drawText((patch.patchno+1) + "", patch.x, patch.y, mPaint);
+               }
+
           }
 
-          ((TextView) findViewById(R.id.xmltester)).setText(sb.toString());
+          public void clearDraw() {
 
-     }
+               mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+               mCanvas = new Canvas(mBitmap);
+               invalidate();
 
-     public void createZipfile(String imageFolder, String zipPath) {
+          }
 
-          progress_file.delete();
 
-          try {
-               FileOutputStream fos = new FileOutputStream(zipPath);
-               ZipOutputStream zos = new ZipOutputStream(fos);
-               File srcFile = new File(imageFolder);
-               File[] files = srcFile.listFiles();
-               for (int i = 0; i < files.length; i++) {
-                    String filename = files[i].getPath();
-                    String extension = filename.substring(filename.length()-4,filename.length());
-                    if (!extension.equals(".zip")) {
-                         byte[] buffer = new byte[1024];
-                         FileInputStream fis = new FileInputStream(files[i] + "/textData.xml");
-                         zos.putNextEntry(new ZipEntry(files[i].getName() + "/textData.xml"));
-                         int length;
-                         while ((length = fis.read(buffer)) > 0) {
-                              zos.write(buffer, 0, length);
+          private void touch_start(float x, float y) {
+               initX = x;
+               initY = y;
+          }
+          private void touch_move(float x, float y) {
+               float dx = Math.abs(x - mX);
+               float dy = Math.abs(y - mY);
+               if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+                    mX = x;
+                    mY = y;
+               }
+          }
+          private void touch_up() {
+
+               radius = getRadius(initX, initY, mX, mY);
+
+               if (radius > 4) { //10
+                    //createPatch(initX,initY,finalX,finalY);
+                    //Toast.makeText(getApplicationContext(), getMidpoint(initX,finalX) + ", " + getMidpoint(initY,finalY), Toast.LENGTH_SHORT).show();
+                    cx = getMidpoint(initX, mX);
+                    cy = getMidpoint(initY, mY);
+
+                    Patch patch = new Patch(context, current_image, patches.size(),cx,cy,radius,disease);
+                    patches.add(patch);
+                    mPaint.setStrokeWidth(5);
+                    mCanvas.drawCircle(cx, cy, radius, mPaint);
+                    mPaint.setStrokeWidth(3);
+                    mCanvas.drawText((patch.patchno+1) + "", cx, cy, mPaint);
+                    Toast.makeText(context, "Patch exists", Toast.LENGTH_SHORT).show();
+                    //new ProgressUpdater().execute();
+               }
+
+               /*
+               else {
+                    // Check if area is patched. If yes, open dialog box.
+                    for (int i = 0; i<patches.size(); i++) {
+                         Patch patch = patches.get(i);
+                         if (isBetween(patch.x1,patch.x2,finalX) && isBetween(patch.y1,patch.y2,finalY)) {
+                              current_patch = i;
+                              currently_new = false;
+                              Toast.makeText(context, "Patch exists", Toast.LENGTH_SHORT).show();
                          }
-                         zos.closeEntry();
-                         fis.close();
                     }
                }
-               zos.close();
-               Toast.makeText(context, "Zip created!", Toast.LENGTH_SHORT).show(); //test
-          } catch (Exception ex) {
-               //sb.append("\nEXCEPTION!!! " + ex.getMessage());
+               */
+
+
+
+
+               // commit the path to our offscreen
+               // mCanvas.drawPath(mPath, mPaint);
+
+               // PAINT OPERATION HERE
+               // PUT PATCH SHIZNIZ HERE
+
+               //float radius = 0;
+               //float cx = 0;
+               //float cy = 0;
           }
 
-          //((TextView) findViewById(R.id.xmltester2)).setText(sb.toString());
+          @Override
+          public boolean onTouchEvent(MotionEvent event) {
+               float x = event.getX();
+               float y = event.getY();
+
+               switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                         touch_start(x, y);
+                         invalidate();
+                         break;
+                    case MotionEvent.ACTION_MOVE:
+                         touch_move(x, y);
+                         invalidate();
+                         break;
+                    case MotionEvent.ACTION_UP:
+                         touch_up();
+                         invalidate();
+                         break;
+               }
+               return true;
+          }
+     }
+
+     public float getRadius(float x1, float y1, float x2, float y2) {
+          return (float)(Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))/2);
+     }
+
+     public float getMidpoint(float a, float b) {
+          float smaller;
+          if (a<b) smaller = a;
+          else smaller = b;
+
+          return smaller + (Math.abs(a-b)/2);
+     }
+
+     // ==============================================================================================
+
+     public void drawBoxes(int state) {
+
+          ImageView imageView = mContentView;
+
+          if (state == DRAW_CLEAR) {
+               imageView.setImageBitmap(origBitmap);
+               return;
+          }
+
+          Bitmap oldBitmap;
+          if (state == DRAW_CURRENT) oldBitmap = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
+          else oldBitmap = origBitmap;
+
+          Paint paint = new Paint();
+          paint.setStrokeWidth(20);
+          paint.setStyle(Paint.Style.STROKE);
+          paint.setShadowLayer(5, 2, 2, Color.BLACK);
+          paint.setTextSize(100);
+
+          //Create a new image bitmap and attach a brand new canvas to it
+          Bitmap newBitmap = Bitmap.createBitmap(oldBitmap.getWidth(), oldBitmap.getHeight(), Bitmap.Config.RGB_565);
+          Canvas canvas = new Canvas(newBitmap);
+
+          //Draw the image bitmap into the canvas
+          canvas.drawBitmap(oldBitmap, 0, 0, null);
+
+          //Draw everything else into the canvas
+          if (state == DRAW_ALL) {
+               for (int i = 0; i < patches.size(); i++) {
+                    Patch patch = patches.get(i);
+                    if (patch.state == PATCH_NEUTRAL) paint.setColor(Color.WHITE);
+                    else if (patch.state == PATCH_COMPLETE)
+                         paint.setColor(getResources().getColor(R.color.green));
+                    else paint.setColor(getResources().getColor(R.color.red));
+                    canvas.drawCircle(patch.x,patch.y,patch.radius,paint);
+                    canvas.drawText("" + (patch.patchno + 1), patch.x, patch.y, paint);
+               }
+          }
+          else {
+               Patch patch = patches.get(current_patch);
+               if (patch.state == PATCH_NEUTRAL) paint.setColor(Color.WHITE);
+               else if (patch.state == PATCH_COMPLETE)
+                    paint.setColor(getResources().getColor(R.color.green));
+               else paint.setColor(getResources().getColor(R.color.red));
+               canvas.drawCircle(patch.x,patch.y,patch.radius,paint);
+               canvas.drawText("" + (patch.patchno+1), patch.x, patch.y, paint);
+          }
+
+          //Attach the canvas to the ImageView
+          imageView.setImageBitmap(newBitmap);
 
      }
 
-     private class Patch extends XMLFileHandler {
+     private class Patch extends XMLFileHandler{
 
           int imgno;
           int patchno;
-          float x1, y1, x2, y2;
+          float x, y, radius;
           String disease;
           ArrayList<String> analysis = new ArrayList<>();
           String remarks;
           int state;
 
-          Patch(Context context, int imgno, int patchno, float x1, float y1, float x2, float y2, String disease) {
+          Patch(Context context, int imgno, int patchno, float x, float y, float radius, String disease) {
 
                super(context, "img" + String.format("%07d", imgno) + "_" + String.format("%03d", patchno), disease, true);
                this.imgno = imgno;
                this.patchno = patchno;
-               this.x1 = x1;
-               this.y1 = y1;
-               this.x2 = x2;
-               this.y2 = y2;
+               this.x = x;
+               this.y = y;
+               this.radius = radius;
                this.disease = disease;
                this.remarks = "";
                this.state = PATCH_NEUTRAL;
