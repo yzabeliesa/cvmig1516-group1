@@ -38,12 +38,27 @@ public class MakeTextFile {
 
         if (isEntry) {
             tags = new String[]{
+                    /* DA ORIGINAL --Abbey
                     "date-created",
                     "time-created",
                     "latitude",
                     "longitude",
                     "priority",
                     "species",
+                    "description",
+                    "region",
+                    "province",
+                    "municipality",
+                    "flags"
+                    */
+                    "date-created",
+                    "time-created",
+                    "latitude",
+                    "longitude",
+                    "specimen",
+                    "disease",
+                    "disease-num",
+                    "priority",
                     "description",
                     "region",
                     "province",

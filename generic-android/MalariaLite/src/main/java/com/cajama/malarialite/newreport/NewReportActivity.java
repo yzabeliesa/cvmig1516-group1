@@ -709,17 +709,42 @@ public class NewReportActivity extends SherlockActivity {
         entries.add(putEntry(getString(R.string.longitude),longitude));
         entryList.add(longitude);
 
+        //Specimen  -- by Abbey
+        Spinner specimen = (Spinner) findViewById(R.id.specimen_spinner);
+        String spec = checkEmpty(specimen.getSelectedItem().toString());
+        entries.add(putEntry("Specimen", spec));
+        entryList.add(spec);
+
+        //Disease  -- by Abbey
+        Spinner disease = (Spinner) findViewById(R.id.disease_spinner);
+        String dis = checkEmpty(disease.getSelectedItem().toString());
+        entries.add(putEntry("Disease", dis));
+        entryList.add(dis);
+
+        //Disease Number  -- by Abbey (not included in summary)
+        int disease_num = 1;
+        String[] diseases = getResources().getStringArray(R.array.all_diseases);
+        for (int i = 0; i<diseases.length; i++) {
+            if (diseases[i].equals(disease)) {
+                disease_num = i+1;
+                break;
+            }
+        }
+        entryList.add(disease_num + "");
+
         //CheckBox priority = (CheckBox) findViewById(R.id.priority);
         RadioGroup priority = (RadioGroup) findViewById(R.id.priorityRadioGroup);
         String prior = String.valueOf(((RadioButton) findViewById(priority.getCheckedRadioButtonId())).getText());
         entryList.add(prior);
         entries.add(putEntry("Priority", prior));
 
+        /* -- Commented out by Abbey
         //parasite
         EditText editText2 = (EditText) findViewById(R.id.parasite);
         parasite = checkEmpty(editText2.getText().toString().trim());
         entries.add(putEntry("Diagnosis", parasite));
         entryList.add(parasite);
+        */
 
         /*DiagnosisDataBaseHelper helper = new DiagnosisDataBaseHelper(this);
         try {
@@ -738,7 +763,7 @@ public class NewReportActivity extends SherlockActivity {
             }
         }*/
 
-        //description
+        //description (remarks, actually --Abbey)
         EditText editText = (EditText) findViewById(R.id.description);
         description = checkEmpty(editText.getText().toString());
         entries.add(putEntry("Remarks", description));
