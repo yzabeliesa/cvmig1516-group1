@@ -232,6 +232,7 @@ public class NewReportActivity extends SherlockActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // VIEWFLIPPER NEXT
         removeToasts();
         InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(VF.getWindowToken(), 0);
