@@ -127,7 +127,7 @@
     <string name="connection_pref">connection_address</string>
     <string name="connection_summary">Ilagay saan kokonekta ang app</string>
     <string name="connection_dialog_title">Magbigay ng tamang Server Address</string>
-    <string name="no_input">Walang input</string>
+    <string name="no_input">--</string> <!-- used to be "Walang input" -->
     <string name="settings_pref">open_settings_page</string>
     <string name="settings_title">Settings</string>
     <string name="settings_summary">Buksan ang System Settings at baguhin ang locale</string>

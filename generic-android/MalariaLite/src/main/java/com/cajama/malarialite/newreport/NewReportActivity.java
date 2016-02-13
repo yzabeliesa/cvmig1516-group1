@@ -1,5 +1,6 @@
 package com.cajama.malarialite.newreport;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -138,6 +140,76 @@ public class NewReportActivity extends SherlockActivity {
             }
         });
         municipality.setAdapter(new CustomAdapter(NewReportActivity.this, R.layout.spinner_municipality, getResources().getStringArray(R.array.Ilocos_Norte)));
+
+
+        // ABBEY'S SHIT STARTS HERE -->
+        final Activity activity = this;
+        final Spinner specimen_spinner = (Spinner) findViewById(R.id.specimen_spinner);
+        final Spinner disease_spinner = (Spinner) findViewById(R.id.disease_spinner);
+
+        /*
+        specimen_spinner = (Spinner) findViewById(R.id.specimen_spinner);
+          ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.specimen_array, android.R.layout.simple_spinner_item);
+          adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+          specimen_spinner.setAdapter(adapter1);
+          specimen_spinner.setOnItemSelectedListener(this);
+
+          disease_spinner = (Spinner) findViewById(R.id.disease_spinner);
+          ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
+          adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+          disease_spinner.setAdapter(adapter2);
+
+         */
+
+        final AdapterView.OnItemSelectedListener specimen_listener = new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+                //String value = (String)parent.getItemAtPosition(pos);
+
+                ArrayAdapter<CharSequence> adapter;
+
+                switch (pos) {
+                    case 0:
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
+                        break;
+                    case 1:
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.stool_disease_array, android.R.layout.simple_spinner_item);
+                        break;
+                    case 2:
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.sputum_disease_array, android.R.layout.simple_spinner_item);
+                        break;
+                    case 3:
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.skinslit_disease_array, android.R.layout.simple_spinner_item);
+                        break;
+                    default:
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.reprotract_disease_array, android.R.layout.simple_spinner_item);
+                        break;
+                }
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                disease_spinner.setAdapter(adapter);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+
+        };
+
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.specimen_array, android.R.layout.simple_spinner_item);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        specimen_spinner.setAdapter(adapter1);
+        specimen_spinner.setOnItemSelectedListener(specimen_listener);
+
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        disease_spinner.setAdapter(adapter2);
+
+        // <-- ABBEY'S SHIT ENDS HERE
+
 
         VF = (ViewFlipper) findViewById(R.id.viewFlipperLite);
         getSupportActionBar().setSubtitle("Step 1 of " + VF.getChildCount());

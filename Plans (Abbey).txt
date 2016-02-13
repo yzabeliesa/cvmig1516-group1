@@ -27,7 +27,9 @@ LABELER
 	- Use scale factor calculated in zoom
 [ ] Add case screen
 	- Photo gallery of case samples
-	- 
+	- Tap image to label
+	- Change "Send diagnosis label" to "Label next image"
+		- Saves 
 
 
 
@@ -35,10 +37,11 @@ LABELER
 UPLOADER
 ============================================================================
 [x] Expand to more diseases
-[ ] Load info (diseases, regions, provinces, municipalities) from file (to avoid hardcoding)
+[x] Load info (diseases, regions, provinces, municipalities) from file (to avoid hardcoding)
 	- Or wait for codes from Cat
-[ ] Attach disease number as intent extra
-[ ] Save all new entry info as a file
+[x] Attach disease number as intent extra
+[x] Save all new entry info as a file
 [ ] Incorporate patient ID
 	- Allows option for uploader to link entry to previously submitted entries using ReportViewer data
-[ ] Include ReportViewer in screenshots/manual
+[ ] Edit ReportViewer
+[ ] Test changes
