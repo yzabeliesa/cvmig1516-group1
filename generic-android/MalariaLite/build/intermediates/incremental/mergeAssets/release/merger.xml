@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="unspecified"><source path="/home/kristofer/Documents/generic-android/MalariaLite/build/intermediates/exploded-aar/generic-android.libraries.ActionBarSherlock/actionbarsherlock/unspecified/assets"/></dataSet><dataSet config="main"><source path="/home/kristofer/Documents/generic-android/MalariaLite/src/main/assets"/></dataSet><dataSet config="release"><source path="/home/kristofer/Documents/generic-android/MalariaLite/src/release/assets"/></dataSet></merger>

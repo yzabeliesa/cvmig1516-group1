@@ -1,1 +1,1 @@
-//include ':libraries:ActionBarSherlock:actionbarsherlock', ':MalariaLite'
+include ':libraries:ActionBarSherlock:actionbarsherlock', ':MalariaLite'

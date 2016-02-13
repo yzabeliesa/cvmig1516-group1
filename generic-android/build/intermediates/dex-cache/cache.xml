@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\libs\android-async-http-1.4.3.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="f70e680861fdf9449819003e7799a4e9aca047f8">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\android-async-http-1.4.3-a7cb30b719c60985b82ec972fbd001cd8548880b.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-v4\13.0.0\support-v4-13.0.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3fe75433da602500cc71fcc1c46e5550291dd45d">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\support-v4-13.0.0-20bf2245e22aa14f778873f0b75b104e0d4d14ed.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\libs\java-xmlbuilder-0.6.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="5f14951799047e7704231585c72b4c9d01d73228">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\java-xmlbuilder-0.6-3fef7a44297850d88b6afe89c5ff22907b1bc18c.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\libs\guava-16.0.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="5fa98cd1a63c99a44dd8d3b77e4762b066a5d0c5">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\guava-16.0.1-5f5a9b6b456ba53a58b2d6d8954ea3b5d22743f5.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\libs\httpclient-4.2.5.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3bfeb9062b12d5b340445336790dbc14c59c2d79">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\httpclient-4.2.5-46f525dda73346b35383fd1d6a55d57d5b264a17.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\libs\httpmime-4.2.5.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="6efc2f9df23c2ac4d3b701a11cab9f9fa6a641d4">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\httpmime-4.2.5-de545c97ff038f0ae8e7df08457499e01694b1e9.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\libs\httpcore-4.2.4.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3b7f38df6de5dd8b500e602ae8c2dd5ee446f883">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\httpcore-4.2.4-269fa1bb89d2707cb8fe3869b2afd8f292d55e5d.jar" />
+    </item>
+    <item
+        jar="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\exploded-aar\generic-android.libraries.ActionBarSherlock\actionbarsherlock\unspecified\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="19bb2efac26a6c65cdfdf884865af2ffec2233ba">
+        <dex dex="C:\Users\Abbey\Documents\GitHub\cvmig1516-group1\generic-android\MalariaLite\build\intermediates\pre-dexed\debug\classes-2282a3028647d9e642c11926d5fd4c122efd5bb3.jar" />
+    </item>
+
+</items>
