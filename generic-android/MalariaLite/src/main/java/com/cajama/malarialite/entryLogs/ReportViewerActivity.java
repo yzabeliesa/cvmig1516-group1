@@ -261,6 +261,7 @@ public class ReportViewerActivity extends SherlockActivity {
                 "remarks"
         };
         String[] label = new String[]{
+                /* DA ORIGINAL  -- Abbey
                 "Date Created",
                 "Time Created",
                 "Latitude",
@@ -271,14 +272,39 @@ public class ReportViewerActivity extends SherlockActivity {
                 "Region",
                 "Province",
                 "Municipality"
+                */
+                "Date Created",
+                "Time Created",
+                "Latitude",
+                "Longitude",
+                "Specimen",
+                "Disease",
+                "Priority",
+                "Remarks",
+                "Region",
+                "Province",
+                "Municipality"
         };
         String[] tags = new String[]{
+                /* DA ORIGINAL  -- Abbey
                 "date-created",
                 "time-created",
                 "latitude",
                 "longitude",
                 "priority",
                 "species",
+                "description",
+                "region",
+                "province",
+                "municipality"
+                */
+                "date-created",
+                "time-created",
+                "latitude",
+                "longitude",
+                "specimen",
+                "disease",
+                "priority",
                 "description",
                 "region",
                 "province",

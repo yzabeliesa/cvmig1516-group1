@@ -29,7 +29,7 @@ LABELER
 	- Photo gallery of case samples
 	- Tap image to label
 	- Change "Send diagnosis label" to "Label next image"
-		- Saves 
+	- CONFIRM FIRST IF THIS WILL BE IMPLEMENTED!!!
 
 
 
@@ -43,5 +43,6 @@ UPLOADER
 [x] Save all new entry info as a file
 [ ] Incorporate patient ID
 	- Allows option for uploader to link entry to previously submitted entries using ReportViewer data
-[ ] Edit ReportViewer
+	- CONFIRM FIRST IF THIS WILL BE IMPLEMENTED!!!
+[x] Edit ReportViewer
 [ ] Test changes
