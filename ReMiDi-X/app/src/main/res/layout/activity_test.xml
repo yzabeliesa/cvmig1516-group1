@@ -25,8 +25,8 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Upload Task"
-                android:onClick="upload"/>
+                android:text="Download Task"
+                android:onClick="download"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -39,7 +39,7 @@
         <LinearLayout android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:orientation="horizontal" >
-            <Button
+            <!--<Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Send a File"
@@ -51,45 +51,46 @@
                 android:text="Delete all"
                 android:onClick="deleteAllFiles"/>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Download img"
-                android:onClick="download"/>
-
-
-        </LinearLayout>
-
-    <!--
-                <LinearLayout android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:orientation="horizontal" >
-
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="doUpload"
-                        android:onClick="doUpload"/>
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Get status"
-                        android:onClick="getStatus"/>
-
-                </LinearLayout>
-
-                <LinearLayout android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:orientation="horizontal" >
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Send Chunk"
-                        android:onClick="sendToFile"/>
-
-                </LinearLayout>
+                        android:text="Download img"
+                        android:onClick="download"/>
             -->
+
+
+                </LinearLayout>
+
+            <!--
+                        <LinearLayout android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:orientation="horizontal" >
+
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="doUpload"
+                                android:onClick="doUpload"/>
+
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Get status"
+                                android:onClick="getStatus"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:orientation="horizontal" >
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Send Chunk"
+                                android:onClick="sendToFile"/>
+
+                        </LinearLayout>
+                    -->
                 <TextView
                     android:id="@+id/some_textview"
                     android:layout_width="wrap_content"

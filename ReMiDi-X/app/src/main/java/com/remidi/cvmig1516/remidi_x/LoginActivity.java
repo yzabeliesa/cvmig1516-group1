@@ -285,7 +285,9 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                showProgress(false);
 
                if (success) {
-                    finish();
+                    //finish();
+                    Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
+                    startActivity(intent);
                } else {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();

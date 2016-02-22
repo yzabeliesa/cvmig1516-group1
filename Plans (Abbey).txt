@@ -10,9 +10,9 @@ LABELER
 [ ] Add disease label counter file
 	- save in app data folder
 	- name "label-counter.txt"
-[ ] Rename "Labeler Malaria Main" to "Labeler Main"
-[ ] Rename "Main Activity" to "User Profile"
-[ ] Rename "XMLFileHandler" to "FileHandler"
+[ ] Rename "Labeler Malaria Main" to "Labeler Main" (Low priority)
+[ ] Rename "Main Activity" to "User Profile" (Low priority)
+[ ] Rename "XMLFileHandler" to "FileHandler" (Low priority)
 [x] Revise drawer
 	- Section names: "Label images", "Profile", "Settings", "Logout"
 [ ] Update labeler name and counters on Profile screen
@@ -25,11 +25,6 @@ LABELER
 [ ] Fix zoom functionality
 [ ] Fix patch coordinates
 	- Use scale factor calculated in zoom
-[ ] Add case screen
-	- Photo gallery of case samples
-	- Tap image to label
-	- Change "Send diagnosis label" to "Label next image"
-	- CONFIRM FIRST IF THIS WILL BE IMPLEMENTED!!!
 
 
 
@@ -41,8 +36,6 @@ UPLOADER
 	- Or wait for codes from Cat
 [x] Attach disease number as intent extra
 [x] Save all new entry info as a file
-[ ] Incorporate patient ID
-	- Allows option for uploader to link entry to previously submitted entries using ReportViewer data
-	- CONFIRM FIRST IF THIS WILL BE IMPLEMENTED!!!
 [x] Edit ReportViewer
 [ ] Test changes
+	- huhu Ma'am

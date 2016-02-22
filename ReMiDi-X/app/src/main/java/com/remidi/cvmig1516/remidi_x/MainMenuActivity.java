@@ -1,6 +1,8 @@
 package com.remidi.cvmig1516.remidi_x;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -40,6 +42,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -57,6 +60,11 @@ public class MainMenuActivity extends ActionBarActivity
      int labeled_image_count = 5;
      int validated_image_count = 10;
      int message_count = 15;
+     int DISEASE_COUNT = 19;
+     int DISEASE_IMAGE_THRESHOLD = 0;
+     Activity activity;
+     Context context;
+     ProgressDialog pd;
 
      /**
       * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -73,6 +81,119 @@ public class MainMenuActivity extends ActionBarActivity
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
           setContentView(R.layout.activity_main_menu);
+
+          context = getApplicationContext();
+
+          Intent myIntent = new Intent(context, LoopService.class);
+          getApplicationContext().startService(myIntent);
+
+
+
+          pd = new ProgressDialog(this);
+          pd.setMessage("Retrieving images");
+          pd.setCancelable(false);
+          pd.setIndeterminate(true);
+          pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+          /*
+          pd.setOnShowListener(new DialogInterface.OnShowListener() {
+               @Override
+               public void onShow(DialogInterface dialogInterface) {
+                    Thread thread = new Thread() {
+                         public void run() {
+                              try {
+                                   int populated = 0;
+                                   while (true) {
+                                        for (int i = 1; i < 19; i++) {
+                                             String image_directory = getApplicationContext().getFilesDir() + "/disease_" + i;
+
+                                             File srcFile = new File(image_directory);
+                                             File[] images = srcFile.listFiles();
+
+                                             if (images.length > 0) populated++;
+                                        }
+                                        if (populated < 19) populated = 0;
+                                        else break;
+                                   }
+
+                                   Intent intent = new Intent(getApplicationContext(), LabelerSettings.class);
+                                   startActivity(intent);
+
+                              } catch (Exception e) {
+                                   e.printStackTrace();
+                              }
+                              pd.cancel();
+                         }
+                    };
+                    thread.start();
+               }
+          });
+          */
+
+          pd.setOnShowListener(new DialogInterface.OnShowListener() {
+               @Override
+               public void onShow(DialogInterface dialogInterface) {
+                    Thread thread = new Thread() {
+                         public void run() {
+                              try {
+                                   int timeElapsed = 0;
+                                   while (true) {
+
+                                        int populated = 0;
+                                        for (int i = 1; i < DISEASE_COUNT; i++) {
+                                             String image_directory = getApplicationContext().getFilesDir() + "/disease_" + i;
+
+                                             File srcFile = new File(image_directory);
+                                             File[] images = srcFile.listFiles();
+
+                                             if (images.length > DISEASE_IMAGE_THRESHOLD) populated++;
+                                        }
+
+                                        // Check if no internet
+                                        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                                        NetworkInfo ani = cm.getActiveNetworkInfo();
+                                        if ((ani == null || !ani.isConnected()) && timeElapsed == 2) this.interrupt();
+                                        else timeElapsed += 2;
+
+                                        sleep(2000);
+                                        Log.d("main" + ".pd.Thread", "sleep");
+                                        if (populated == DISEASE_COUNT || timeElapsed >=20) this.interrupt();
+                                   }
+                              } catch (InterruptedException e) {
+                                   e.printStackTrace();
+                              }
+                              pd.cancel();
+                         }
+                    };
+                    thread.start();
+               }
+          });
+
+          pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+               @Override
+               public void onDismiss(DialogInterface dialogInterface) {
+
+                    int populated = 0;
+                    for (int i = 1; i < DISEASE_COUNT; i++) {
+                         String image_directory = getApplicationContext().getFilesDir() + "/disease_" + i;
+
+                         File srcFile = new File(image_directory);
+                         File[] images = srcFile.listFiles();
+
+                         if (images.length > 0) populated++;
+                    }
+
+                    if (populated >= DISEASE_COUNT) { // Retrieving images successful
+                         Intent intent = new Intent(getApplicationContext(), LabelerSettings.class);
+                         startActivity(intent);
+                    }
+                    else { // Retrieving images failed
+                         Toast.makeText(getApplicationContext(), "Retrieving images failed. Check your internet connection.", Toast.LENGTH_LONG).show();
+                    }
+
+               }
+          });
+
+
 
           mNavigationDrawerFragment = (NavigationDrawerFragment)
                   getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -112,8 +233,7 @@ public class MainMenuActivity extends ActionBarActivity
                Toast toast = null;
                switch (position) {
                     case 0: // Label images
-                         intent = new Intent(getApplicationContext(), LabelerSettings.class);
-                         startActivity(intent);
+                         pd.show();
                          break;
                     case 1: // Profile
                          intent = new Intent(getApplicationContext(), MainMenuActivity.class);

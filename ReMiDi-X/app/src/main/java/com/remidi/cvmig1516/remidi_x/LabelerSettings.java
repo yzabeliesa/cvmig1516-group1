@@ -71,8 +71,6 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
 
           validator = "Test";
 
-          Intent myIntent = new Intent(this, LoopService.class);
-          getApplicationContext().startService(myIntent);
      }
 
      public void labelerSettingsOK(View view) {
@@ -87,15 +85,6 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
                     disease_num = i+1;
                     break;
                }
-          }
-
-          String image_directory = getApplicationContext().getFilesDir() + "/disease_" + disease_num;
-
-          File srcFile = new File(image_directory);
-          File[] images = srcFile.listFiles();
-
-          while (true) {
-               if (images.length > 0) break;
           }
 
           Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
