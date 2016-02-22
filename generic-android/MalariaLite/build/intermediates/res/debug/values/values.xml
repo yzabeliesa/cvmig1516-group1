@@ -1985,6 +1985,32 @@
         <item>Tukuran</item>
         <item>Vincenzo A. Sagun</item>
     </string-array>
+    <string-array name="all_diseases">
+
+        <item>Malaria</item>
+        <item>Filariasis</item>
+        <item>Ascariasis</item>
+        <item>Trichuriasis</item>
+        <item>Hookworm infection</item>
+        <item>Schistosomiasis</item>
+        <item>Taeniasis</item>
+        <item>Heterophyidiasis</item>
+        <item>Paragonimiasis</item>
+        <item>Echinostomiasis</item>
+        <item>Capillariasis</item>
+        <item>Giardiasis</item>
+        <item>Unspecified Infection</item>
+        <item>Tuberculosis</item>
+        <item>Leprosy</item>
+        <item>Gonorrhea</item>
+        <item>Bacterial vaginosis</item>
+        <item>Candidiasis</item>
+
+    </string-array>
+    <string-array name="blood_disease_array">
+        <item>Malaria</item>
+        <item>Filariasis</item>
+    </string-array>
     <string-array name="case_array">
         <item>Uncomplicated</item>
         <item>Severe</item>
@@ -2022,12 +2048,43 @@
         <item>NCR - National Capital Region (Metro Manila)</item>
         <item>CAR - Cordillera Administrative Region</item>
     </string-array>
+    <string-array name="reprotract_disease_array">
+        <item>Gonorrhea</item>
+        <item>Bacterial vaginosis</item>
+        <item>Candidiasis</item>
+    </string-array>
+    <string-array name="skinslit_disease_array">
+        <item>Leprosy</item>
+    </string-array>
     <string-array name="species_array">
         <item>Plasmodium falciparum</item>
         <item>Plasmodium vivax</item>
         <item>Plasmodium ovale</item>
         <item>Plasmodium malariae</item>
         <item>None</item>
+    </string-array>
+    <string-array name="specimen_array">
+        <item>Blood</item>
+        <item>Stool</item>
+        <item>Sputum</item>
+        <item>Skin slit</item>
+        <item>Reproductive tract specimen</item>
+    </string-array>
+    <string-array name="sputum_disease_array">
+        <item>Tuberculosis</item>
+    </string-array>
+    <string-array name="stool_disease_array">
+        <item>Ascariasis</item>
+        <item>Trichuriasis</item>
+        <item>Hookworm infection</item>
+        <item>Schistosomiasis</item>
+        <item>Taeniasis</item>
+        <item>Heterophyidiasis</item>
+        <item>Paragonimiasis</item>
+        <item>Echinostomiasis</item>
+        <item>Capillariasis</item>
+        <item>Giardiasis</item>
+        <item>Unspecified Infection</item>
     </string-array>
     <!-- From: file:/C:/Users/Abbey/Documents/GitHub/cvmig1516-group1/generic-android/MalariaLite/build/intermediates/exploded-aar/generic-android.libraries.ActionBarSherlock/actionbarsherlock/unspecified/res/values/values.xml -->
     <eat-comment/>
@@ -2157,7 +2214,7 @@
     <string name="new_entry">New Entry\n(Bagong Entry)</string>
     <string name="new_report_cancel_warning">This report will be discarded. All progress including photos will be lost.\n\n(Ang report na ito ay mabubura. Lahat ay mawawala kasama na ang mga photos.)</string>
     <string name="next">Next</string>
-    <string name="no_input">No input</string>
+    <string name="no_input">--</string>
     <string name="num_photos">No. of Photos (Bilang ng Photos)</string>
     <string name="ok">OK</string>
     <string name="password">Password</string>
@@ -2168,13 +2225,14 @@
     <string name="region">Region</string>
     <string name="remarks">Remarks</string>
     <string name="sent_entries">Sent Entries\n(Naipadalang Entries)</string>
-    <string name="server_address">http://remotemicroscopy.org/</string>
+    <string name="server_address">http://192.168.43.236/</string>
     <string name="settings_pref">open_settings_page</string>
     <string name="settings_summary">Open System Settings and change locale</string>
     <string name="settings_title">Settings</string>
     <string name="sex">Sex\n(Kasarian)</string>
     <string name="slide_number">Slide Number</string>
     <string name="slide_photos">Slide Photos</string>
+    <string name="specimen_disease">Choose specimen and disease</string>
     <string name="submit">Submit</string>
     <string name="submit_new_report">Submit New Report</string>
     <string name="summary">Summary</string>

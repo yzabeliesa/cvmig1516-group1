@@ -2,6 +2,7 @@ package com.cajama.background;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -20,6 +21,7 @@ import java.io.InputStreamReader;
  * Created by Jasper on 8/8/13.
  */
 public class SyncDBAsyncTask extends AsyncTask<String, Void, String> {
+    String status = ""; // Abbey
     String url;
     String TAG = "SyncDBAsyncTask";
     OnAsyncResult onAsyncResult;
@@ -54,7 +56,7 @@ public class SyncDBAsyncTask extends AsyncTask<String, Void, String> {
         Log.d(TAG, String.valueOf(post.getRequestLine()));
 
         try {
-        	HttpResponse response = client.execute(post);
+                    HttpResponse response = client.execute(post);
 
             InputStream is = response.getEntity().getContent();//getResponse.getEntity().getContent();
 
@@ -83,6 +85,7 @@ public class SyncDBAsyncTask extends AsyncTask<String, Void, String> {
             //line = sb.toString();
             Log.d(TAG, sb.toString());
             //Log.d(TAG, "OK");
+            status = sb.toString();
 
             if (sb.toString().trim().equals("OK")) {
             	onAsyncResult.onResult(0, "updated");
@@ -92,6 +95,7 @@ public class SyncDBAsyncTask extends AsyncTask<String, Void, String> {
 
         } catch (Exception e) {
             e.printStackTrace();
+            status = e.getMessage();
             Log.d(TAG, "error!");
             onAsyncResult.onResult(-1, "failed");
         }
@@ -101,5 +105,9 @@ public class SyncDBAsyncTask extends AsyncTask<String, Void, String> {
 
     public interface OnAsyncResult {
         public abstract void onResult(int resultCode, String message);
+    }
+
+    public String getSyncStatus() {
+        return status;
     }
 }

@@ -84,6 +84,7 @@
     <string name="longitude">Longitude</string>
     <string name="submit">Submit</string>
     <string name="summary">Summary</string>
+    <string name="specimen_disease">Choose specimen and disease</string>
 
     <string name="entry_name">Entry Name</string>
     <string name="date_created">Date Created</string>
@@ -105,8 +106,10 @@
     <string name="description">Remarks</string>
     <string name="title_activity_picture">PictureActivity</string>
 
-    <string name="server_address">http://remotemicroscopy.org/</string>
+    <!--string name="server_address">http://remotemicroscopy.org/</string-->
     <!--<string name="server_address">http://10.40.93.115/</string>-->
+    <!--string name="server_address">http://54.179.135.52/</string-->
+    <string name="server_address">http://192.168.43.236/</string>
     <string name="api_key">api/key/</string>
     <string name="api_send">api/send/</string>
     <string name="api_db">api/db/</string>

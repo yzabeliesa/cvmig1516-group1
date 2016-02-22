@@ -132,6 +132,7 @@ public class MainActivity extends Activity {
 
     public void submitNewReport(View view) {
         //turnGPSOn();
+
         if (NetworkUtil.dbExists(this)) {
             Log.d("main" + ".submitNewReport", "db exists");
             if (checkGps()) {
@@ -170,6 +171,14 @@ public class MainActivity extends Activity {
                 startService(intent);
             }
         }
+
+        /*
+        if (checkGps()) {
+            Intent intent = new Intent(this, NewReportActivity.class);
+            startActivity(intent);
+        }
+        */ //This shit was edited by Abbey
+
     }
 
     private void turnGPSOn(){

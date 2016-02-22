@@ -232,6 +232,7 @@ public class NewReportActivity extends SherlockActivity {
 
         res = getResources();
         step_subtitles = new String[]{
+                res.getString(R.string.specimen_disease),
                 res.getString(R.string.slide_photos),
                 res.getString(R.string.diagnosis),
                 res.getString(R.string.region),
@@ -265,11 +266,11 @@ public class NewReportActivity extends SherlockActivity {
 
         switch(displayedchild) {
             case 0: menu.findItem(R.id.action_prev).setTitle(R.string.cancel);
-                    menu.findItem(R.id.action_photo).setVisible(true);
+                    menu.findItem(R.id.action_photo).setVisible(false);
                     menu.findItem(R.id.action_next).setTitle(R.string.next);
                     break;
             case 1: menu.findItem(R.id.action_prev).setTitle(R.string.back);
-                    menu.findItem(R.id.action_photo).setVisible(false);
+                    menu.findItem(R.id.action_photo).setVisible(true);
                     menu.findItem(R.id.action_next).setTitle(R.string.next);
                     break;
             case 2: menu.findItem(R.id.action_prev).setTitle(R.string.back);
@@ -279,11 +280,20 @@ public class NewReportActivity extends SherlockActivity {
             case 3: menu.findItem(R.id.action_prev).setTitle(R.string.back);
                     menu.findItem(R.id.action_photo).setVisible(false);
                     menu.findItem(R.id.action_next).setTitle(R.string.next);
+                    /*
                     if (submitting) {
                         menu.findItem(R.id.action_prev).setEnabled(false);
                     }
+                    */
                     break;
             case 4: menu.findItem(R.id.action_prev).setTitle(R.string.back);
+                menu.findItem(R.id.action_photo).setVisible(false);
+                menu.findItem(R.id.action_next).setTitle(R.string.next);
+                if (submitting) {
+                    menu.findItem(R.id.action_prev).setEnabled(false);
+                }
+                break;
+            case 5: menu.findItem(R.id.action_prev).setTitle(R.string.back);
                     menu.findItem(R.id.action_photo).setVisible(false);
                     menu.findItem(R.id.action_next).setTitle(R.string.submit);
                     if (submitting){
@@ -440,14 +450,16 @@ public class NewReportActivity extends SherlockActivity {
     private boolean checkRequiredFields(int display) {
         switch (display) {
             case 1:
+                /*
                 EditText diagnosis = (EditText) findViewById(R.id.parasite);
                 if (diagnosis.getText().toString()!=null &&  diagnosis.getText().toString().trim().length() == 0) {
                     requiredToast.setText("Diagnosis " + required);
                     requiredToast.show();
                     return false;
                 }
+                */
                 return true;
-            case 4:
+            case 5:
                 EditText username = (EditText) findViewById(R.id.username);
                 EditText password = (EditText) findViewById(R.id.password);
                 File temp = new File(getExternalFilesDir(null), "db.db");

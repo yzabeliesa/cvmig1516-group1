@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.cajama.malarialite.R;
 
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat;
  * Created by Jasper on 8/4/13.
  */
 public class SyncService extends Service {
+
     final String TAG = "SyncService";
     String message1;
     static SyncDBAsyncTask asyncTask;
@@ -58,6 +60,7 @@ public class SyncService extends Service {
                     fos.write(byteKey);
                     fos.close();
                 } catch (IOException e) {
+                     Toast.makeText(getApplicationContext(), "Something wrong with SyncService: \n" + e.getMessage() , Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
                 //syncIntent.putExtra("init", "init");
@@ -95,7 +98,8 @@ public class SyncService extends Service {
     public void onCreate() {
     	
     	Log.d(TAG, "SyncService onCreate()");
-    	asyncTask = new SyncDBAsyncTask(/*getString(R.string.server_address), getString(R.string.api_db));//*/PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.connection_pref), getString(R.string.server_address)), getString(R.string.api_db));
+    	asyncTask = new SyncDBAsyncTask(getString(R.string.server_address), getString(R.string.api_db));///*PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.connection_pref), getString(R.string.server_address)), getString(R.string.api_db));*/
+
     	asyncTask.setOnResultListener(onAsyncResult);
     }
 
@@ -108,6 +112,7 @@ public class SyncService extends Service {
 	    	if (!dbFile.exists()) {
                 Log.d(TAG, "db does not exists");
 			    getDB("1970-01-01-01-01-01");
+
 	    	}
 	    	else {
 	    		// send ung date modified ng current db file sa phone, device id, etc.
@@ -140,7 +145,8 @@ public class SyncService extends Service {
 	        else if(asyncTask.getStatus() == AsyncTask.Status.FINISHED){
 	        	Log.d(TAG, "asyncTask finished");
                 Log.d(TAG, "Date Modified: " + dateModified);
-                asyncTask = new SyncDBAsyncTask(/*getString(R.string.server_address), getString(R.string.api_db));//*/PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.connection_pref), getString(R.string.server_address)), getString(R.string.api_db));
+                asyncTask = new SyncDBAsyncTask(getString(R.string.server_address), getString(R.string.api_db)); /*
+PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.connection_pref), getString(R.string.server_address)), getString(R.string.api_db))*/;
                 asyncTask.setOnResultListener(onAsyncResult);
                 asyncTask.execute(dateModified);
 	        }
@@ -152,6 +158,7 @@ public class SyncService extends Service {
             handler.removeCallbacks(sync);
             handler.postDelayed(sync, 1000);
 	    }
+         Toast.makeText(getApplicationContext(), "Get DB: " + asyncTask.getSyncStatus(), Toast.LENGTH_LONG).show();
     }
 
     private Runnable sync = new Runnable() {
