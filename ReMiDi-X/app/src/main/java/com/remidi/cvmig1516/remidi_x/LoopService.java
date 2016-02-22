@@ -156,7 +156,7 @@ public class LoopService extends Service {
                          no_more_img = 0;
                          no_more_disease_space = 0;
 
-                         for (int x = 0; x < 19; x++) {
+                    for(int x=0; x<19; x++) {
                               if (tries == 3) { // after 3 tries of getting internet, timeout for 5 mins
                                    Thread.sleep(1000 * 60 * 10); // 10 minutes
                                    tries = 0;
@@ -292,7 +292,7 @@ public class LoopService extends Service {
                          if( (zipfile != null) && (!isCorrupted(zipfile)) ) { // unzip then save the file to disease number
                               unzip( zipfile.getAbsolutePath() , diseaseDir);
                               success = true;
-                         }
+                              }
 
                          success_response(success, zipfile, JSON_URL, diseaseDir); // return response and delete the zipfile
 
@@ -303,7 +303,7 @@ public class LoopService extends Service {
                     else {
                          no_more_img++;
                     }
-               }
+                    }
                else {
                     no_more_disease_space++;
                }
@@ -400,7 +400,7 @@ public class LoopService extends Service {
 
      public String fileToMD5(String filePath) {
           InputStream is = null;
-          try {
+                         try {
                is = new FileInputStream(filePath);
                byte[] buffer = new byte[1024];
                MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -418,14 +418,14 @@ public class LoopService extends Service {
                return convertHashToString(md5Bytes);
           } catch (Exception e) {
                return null;
-          } finally {
-               if (is != null) {
+                         } finally {
+                              if (is != null) {
                     try {
-                         is.close();
+                                   is.close();
                     } catch (Exception e) { }
                }
           }
-     }
+                              }
 
      private String convertHashToString(byte[] md5Bytes) {
           String md5str = "";
