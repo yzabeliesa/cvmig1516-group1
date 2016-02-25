@@ -769,16 +769,17 @@ public class NewReportActivity extends SherlockActivity {
         today.setToNow();
         entries.clear();
         entryList.clear();
-        //date
+
+        // Date
         dateCreated = today.format("%Y/%m/%d");
         entries.add(putEntry(getString(R.string.date_created), dateCreated));
         entryList.add(dateCreated);
-        //time
+        // Time
         timeCreated = today.format("%H:%M:%S");
         entries.add(putEntry(getString(R.string.time_created),timeCreated));
         entryList.add(timeCreated);
 
-        //latitude
+        // Latitude & Longitude
         if (location == null) {
             latitude = "";
             longitude = "";
@@ -847,33 +848,29 @@ public class NewReportActivity extends SherlockActivity {
             }
         }*/
 
-        //description (remarks, actually --Abbey)
+        // Description
         EditText editText = (EditText) findViewById(R.id.description);
         description = checkEmpty(editText.getText().toString());
         entries.add(putEntry("Remarks", description));
         entryList.add(description);
 
-        // region
+        // Region
         Spinner region = (Spinner) findViewById(R.id.region);
         String reg = checkEmpty(region.getSelectedItem().toString());
         entries.add(putEntry("Region", reg));
         entryList.add(reg);
 
-        // province
+        // Province
         Spinner province = (Spinner) findViewById(R.id.province);
         String prov = checkEmpty(province.getSelectedItem().toString());
         entries.add(putEntry("Province", prov));
         entryList.add(prov);
 
-        // municipality
+        // Municipality
         Spinner municipality = (Spinner) findViewById(R.id.municipality);
         String munic = checkEmpty(municipality.getSelectedItem().toString());
         entries.add(putEntry("Municipality", munic));
         entryList.add(munic);
-
-        //test only
-        Toast.makeText(getApplicationContext(), "LOCATION: \nRegion: " + reg + "\nProvince: " + prov + "\nMunicipality: " + munic, Toast.LENGTH_LONG).show();
-
 
         boolean testFlag = false;//PreferenceManager.getDefaultSharedPreferences(this).getBoolean("test_data_flag", false);
         entryList.add(String.valueOf(testFlag));
