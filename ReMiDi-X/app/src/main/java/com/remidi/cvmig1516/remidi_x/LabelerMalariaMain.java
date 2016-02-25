@@ -87,7 +87,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      float initY = 0;
      float bounds_left = 0;
      float bounds_top = 0;
-     float scaleFactorX = 1;
+     float scaleFactor = 1;
      Bitmap origBitmap;
      File myDirectory;
 
@@ -205,6 +205,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           display.getSize(size);
           screen_width = size.x;
 
+          scaleFactor = getScaleFactor(mContentView,screen_width);
+
           zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
           //zoomContentView.setMinimumHeight(mContentView.height);
@@ -276,10 +278,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           // Determine how much to scale: the dimension requiring less scaling is
           // closer to the its side. This way the image always stays inside your
-          // bounding box AND either x/y axis touches it.
-          float xScale = ((float) boundBoxInDp) / width ;
-          float yScale = ((float) boundBoxInDp) / height;
-          float scale = (xScale <= yScale) ? xScale : yScale;
+          // bounding box AND either x/y axis touches it
+          float scale = getScaleFactor(bitmap, boundBoxInDp);
 
           // Create a matrix for the scaling and add the scaling data
           Matrix matrix = new Matrix();
@@ -288,6 +288,44 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Create a new bitmap and convert it to a format understood by the ImageView
           Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
           return scaledBitmap;
+     }
+
+     private float getScaleFactor(Bitmap bitmap, int boundBoxInDp) {
+
+          // Get current dimensions
+          int width = bitmap.getWidth();
+          int height = bitmap.getHeight();
+
+          // Determine how much to scale: the dimension requiring less scaling is
+          // closer to the its side. This way the image always stays inside your
+          // bounding box AND either x/y axis touches it.
+          float xScale = ((float) boundBoxInDp) / width ;
+          float yScale = ((float) boundBoxInDp) / height;
+          float scale = (xScale <= yScale) ? xScale : yScale;
+
+          return scale;
+
+     }
+
+     private float getScaleFactor(ImageView view, int boundBoxInDp) {
+
+          // Get the ImageView and its bitmap
+          Drawable drawing = view.getDrawable();
+          Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+          // Get current dimensions
+          int width = bitmap.getWidth();
+          int height = bitmap.getHeight();
+
+          // Determine how much to scale: the dimension requiring less scaling is
+          // closer to the its side. This way the image always stays inside your
+          // bounding box AND either x/y axis touches it.
+          float xScale = ((float) boundBoxInDp) / width ;
+          float yScale = ((float) boundBoxInDp) / height;
+          float scale = (xScale <= yScale) ? xScale : yScale;
+
+          return scale;
+
      }
 
      private int dpToPx(int dp)
@@ -390,9 +428,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
                          else mPaint.setColor(getResources().getColor(R.color.red));
 
                          //mPaint.setStrokeWidth(5);
-                         mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+                         mCanvas.drawCircle(patch.x*scaleFactor, patch.y*scaleFactor, patch.radius*scaleFactor, mPaint);
                          //mPaint.setStrokeWidth(3);
-                         mCanvas.drawText((patch.patchno + 1) + "", patch.x, patch.y, mPaint);
+                         mCanvas.drawText((patch.patchno + 1) + "", patch.x*scaleFactor, patch.y*scaleFactor, mPaint);
                     }
                     initialized = true;
                }
@@ -412,7 +450,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     else mPaint.setColor(getResources().getColor(R.color.red));
 
                     mPaint.setStrokeWidth(7);
-                    mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+                    mCanvas.drawCircle(patch.x*scaleFactor, patch.y*scaleFactor, patch.radius*scaleFactor, mPaint);
                     mPaint.setStrokeWidth(5);
                     mCanvas.drawText((patch.patchno+1) + "", patch.x, patch.y, mPaint);
                }
@@ -436,7 +474,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                isPatching = true;
                for (int i = 0; i<patches.size(); i++) {
                     Patch patch = patches.get(i);
-                    if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
+                    if (isBetween(patch.x*scaleFactor,patch.y*scaleFactor,x,y,patch.radius*scaleFactor)) {
                          current_patch = i;
                          currently_new = false;
                          isPatching = false;
@@ -465,7 +503,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
                     if ((cy-radius) > offset && (cy+radius) < (mContentView.getHeight()-offset)) {
                          //Toast.makeText(context, "Must create patch!!!", Toast.LENGTH_SHORT).show();
-                         createPatch(cx,cy,radius);
+                         createPatch(cx, cy, radius);
+
                          Patch patch = patches.get(current_patch);
 
                          if (patch.state == PATCH_NEUTRAL) mPaint.setColor(Color.WHITE);
@@ -477,6 +516,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                          mCanvas.drawCircle(cx, cy, radius, mPaint);
                          mPaint.setStrokeWidth(5);
                          mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
+
+                         Toast.makeText(context, "Patch created! \\:D/\nX: " + patch.x + "\nY: " + patch.y + "\nRadius: " + patch.radius, Toast.LENGTH_LONG).show();
 
                          updateProgress();
                     }
@@ -490,7 +531,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     int i;
                     for (i = 0; i<patches.size(); i++) {
                          Patch patch = patches.get(i);
-                         if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
+                         if (isBetween(patch.x*scaleFactor,patch.y*scaleFactor,x,y,patch.radius*scaleFactor)) {
                               current_patch = i;
                               currently_new = false;
                               isPatching = false;
@@ -785,6 +826,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           mContentView.resetDraw();
           mContentView.invalidate();
 
+          scaleFactor = getScaleFactor(mContentView,screen_width);
+
           zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
 
@@ -915,7 +958,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public void createPatch(float x, float y, float radius) {
           final int patchno = patches.size();
-          Patch patch = new Patch(context, current_image, patchno, x, y, radius, disease);
+          Patch patch = new Patch(context, current_image, patchno, x/scaleFactor, y/scaleFactor, radius/scaleFactor, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;

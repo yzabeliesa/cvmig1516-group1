@@ -356,7 +356,7 @@ public class NewReportActivity extends SherlockActivity {
                 invalidateOptionsMenu();
                 return true;
             case R.id.action_next:
-                if(VF.getDisplayedChild() == 2){
+                if(VF.getDisplayedChild() == 3){
                     if (getLoc.getLocation() != null) {
                         generateSummary();
                         //buildSummary();
@@ -853,20 +853,27 @@ public class NewReportActivity extends SherlockActivity {
         entries.add(putEntry("Remarks", description));
         entryList.add(description);
 
+        // region
         Spinner region = (Spinner) findViewById(R.id.region);
         String reg = checkEmpty(region.getSelectedItem().toString());
         entries.add(putEntry("Region", reg));
         entryList.add(reg);
 
+        // province
         Spinner province = (Spinner) findViewById(R.id.province);
         String prov = checkEmpty(province.getSelectedItem().toString());
         entries.add(putEntry("Province", prov));
         entryList.add(prov);
 
+        // municipality
         Spinner municipality = (Spinner) findViewById(R.id.municipality);
         String munic = checkEmpty(municipality.getSelectedItem().toString());
         entries.add(putEntry("Municipality", munic));
         entryList.add(munic);
+
+        //test only
+        Toast.makeText(getApplicationContext(), "LOCATION: \nRegion: " + reg + "\nProvince: " + prov + "\nMunicipality: " + munic, Toast.LENGTH_LONG).show();
+
 
         boolean testFlag = false;//PreferenceManager.getDefaultSharedPreferences(this).getBoolean("test_data_flag", false);
         entryList.add(String.valueOf(testFlag));

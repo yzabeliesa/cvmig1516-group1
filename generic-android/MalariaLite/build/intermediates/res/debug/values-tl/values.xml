@@ -2149,7 +2149,7 @@
     <string name="region">Rehiyon</string>
     <string name="remarks">Pagmamasid</string>
     <string name="sent_entries">Naipadalang Ulat</string>
-    <string name="server_address">http://192.168.43.236/</string>
+    <string name="server_address">http://54.179.135.52/</string>
     <string name="settings_pref">open_settings_page</string>
     <string name="settings_summary">Buksan ang System Settings at baguhin ang locale</string>
     <string name="settings_title">Settings</string>

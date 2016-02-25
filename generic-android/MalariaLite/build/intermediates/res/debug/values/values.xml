@@ -2225,7 +2225,7 @@
     <string name="region">Region</string>
     <string name="remarks">Remarks</string>
     <string name="sent_entries">Sent Entries\n(Naipadalang Entries)</string>
-    <string name="server_address">http://192.168.43.236/</string>
+    <string name="server_address">http://54.179.135.52/</string>
     <string name="settings_pref">open_settings_page</string>
     <string name="settings_summary">Open System Settings and change locale</string>
     <string name="settings_title">Settings</string>

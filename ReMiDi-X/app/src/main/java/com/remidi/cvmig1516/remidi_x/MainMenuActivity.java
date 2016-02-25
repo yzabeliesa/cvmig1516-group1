@@ -87,8 +87,6 @@ public class MainMenuActivity extends ActionBarActivity
           Intent myIntent = new Intent(context, LoopService.class);
           getApplicationContext().startService(myIntent);
 
-
-
           pd = new ProgressDialog(this);
           pd.setMessage("Retrieving images");
           pd.setCancelable(false);
@@ -156,7 +154,7 @@ public class MainMenuActivity extends ActionBarActivity
 
                                         sleep(2000);
                                         Log.d("main" + ".pd.Thread", "sleep");
-                                        if (populated == DISEASE_COUNT || timeElapsed >=20) this.interrupt();
+                                        if (populated == DISEASE_COUNT || (timeElapsed >=20 && populated == 0)) this.interrupt();
                                    }
                               } catch (InterruptedException e) {
                                    e.printStackTrace();

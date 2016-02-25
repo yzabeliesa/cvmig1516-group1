@@ -23,7 +23,7 @@ LABELER
 		- with reminder not to share
 	- Disease checklist
 [ ] Fix zoom functionality
-[ ] Fix patch coordinates
+[/] Fix patch coordinates
 	- Use scale factor calculated in zoom
 
 

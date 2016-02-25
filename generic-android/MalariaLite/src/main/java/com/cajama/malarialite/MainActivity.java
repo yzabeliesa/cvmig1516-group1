@@ -11,6 +11,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -85,7 +87,7 @@ public class MainActivity extends Activity {
                                 timeElapsed += 2;
                                 sleep(2000);
                                 Log.d("main" + ".pd.Thread", "sleep");
-                                if (NetworkUtil.dbExists(getApplicationContext()) || timeElapsed >= 20) this.interrupt();
+                                if (NetworkUtil.dbExists(getApplicationContext()) || timeElapsed >= 40) this.interrupt();
                             }
                         } catch (InterruptedException e) {
                             e.printStackTrace();
@@ -102,6 +104,8 @@ public class MainActivity extends Activity {
                 thread.interrupt();
                 if (NetworkUtil.dbExists(getApplicationContext())) {
                     Toast.makeText(getApplicationContext(), "Connection Successful!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(ctx, NewReportActivity.class);
+                    startActivity(intent);
                 }
                 else {
                     Toast.makeText(getApplicationContext(), "Connection failed. Try again.", Toast.LENGTH_LONG).show();
@@ -131,6 +135,11 @@ public class MainActivity extends Activity {
     }
 
     public void submitNewReport(View view) {
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ani = cm.getActiveNetworkInfo();
+        if (ani != null && ani.isConnected()) Toast.makeText(getApplicationContext(), "Connected to internet!", Toast.LENGTH_LONG).show();
+        else Toast.makeText(getApplicationContext(), "Not connected :(", Toast.LENGTH_LONG).show();
         //turnGPSOn();
 
         if (NetworkUtil.dbExists(this)) {

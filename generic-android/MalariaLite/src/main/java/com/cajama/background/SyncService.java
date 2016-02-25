@@ -158,7 +158,6 @@ PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string
             handler.removeCallbacks(sync);
             handler.postDelayed(sync, 1000);
 	    }
-         Toast.makeText(getApplicationContext(), "Get DB: " + asyncTask.getSyncStatus(), Toast.LENGTH_LONG).show();
     }
 
     private Runnable sync = new Runnable() {
