@@ -16,15 +16,16 @@ LABELER
 [x] Revise drawer
 	- Section names: "Label images", "Profile", "Settings", "Logout"
 [ ] Update labeler name and counters on Profile screen
-[ ] Checklist for diseases
+[ ] Checklist for diseases (Low priority)
 	- file???
 [ ] Add settings right after first sign-in
 	- Force-change password
 		- with reminder not to share
-	- Disease checklist
+	- Disease checklist 
 [ ] Fix zoom functionality
 [/] Fix patch coordinates
 	- Use scale factor calculated in zoom
+	- to test nalang
 
 
 

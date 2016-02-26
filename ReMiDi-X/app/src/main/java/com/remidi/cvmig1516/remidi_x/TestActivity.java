@@ -110,6 +110,14 @@ public class TestActivity extends ActionBarActivity {
      public int getCurrentCode;
 
 
+     public int no_more_img = 0;
+     public int no_more_disease_space = 0;
+     public int tries = 0;
+     public long ave_getting_time = 0;
+
+     public int disease_count_id = 1;
+
+
      /**
       * ATTENTION: This was auto-generated to implement the App Indexing API.
       * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -145,7 +153,7 @@ public class TestActivity extends ActionBarActivity {
          // Intent myIntent = new Intent(this, LoopService.class);
          // context.startService(myIntent);
          // new Thread(null, send, "SendThread").start();
-         //new Thread(null, receive_zip, "GetZipThread").start();
+         new Thread(null, receive_zip, "GetZipThread").start();
      }
 
      //-----------------------------------------------------------------------------------------------------------------
@@ -176,15 +184,38 @@ public class TestActivity extends ActionBarActivity {
           @Override
           public void run() {
                while (true) {
-                    for(int x=0; x<19; x++) {
-                         get_images_from_json(x);
-                    }
+                    try {
+                         no_more_img = 0;
+                         no_more_disease_space = 0;
 
-                    if(ctr >= 10) {
-                         //this.notifyAll();
-                    }
+                         for(int x=0; x<19; x++) {
+                              if (tries == 3) { // after 3 tries of getting internet, timeout for 5 mins
+                                   Thread.sleep(1000 * 60 * 10); // 10 minutes
+                                   tries = 0;
+                              } else {
+                                   if (isNetworkAvailable()) { // if there's net edi wow successful try so back to 0
+                                        tries = 0;
+                                        ave_getting_time = System.currentTimeMillis();
+                                        get_images_from_json(x);
+                                        ave_getting_time = System.currentTimeMillis() - ave_getting_time;
+                                        Thread.sleep(10000); // 10 seconds
+                                   } else {
+                                        // if no net, timeout for 30 seconds increment the number of tries
+                                        Thread.sleep(1000 * 30); // 30 seconds
+                                        tries++;
+                                   }
+                              }
+                         }
 
-                    ctr++;
+                         // after scanning through the disease folders, check if either no more space in all folder
+                         // or no more pictures to retrieve in all disease,
+                         // if yes then,
+                         if (no_more_img >= 18 || no_more_disease_space >= 18) {
+                              Thread.sleep(1000 * 60 * 60); // 1 hour
+                         }
+                    } catch(Exception e) {
+                         e.printStackTrace();
+                    }
                }
           }
      };
@@ -229,7 +260,7 @@ public class TestActivity extends ActionBarActivity {
           iv.setImageBitmap(BitmapFactory.decodeFile(myGallery[0].listFiles()[0].getAbsolutePath()));*/
           ((TextView)findViewById(R.id.some_textview)).setText("disease1_length: " + myGallery[DISEASE_ID-1].listFiles().length
                           + "\nresponded: " + RESPONDED + "\ndisease: " + DISEASE_ID + "\nlabeler: " + VALIDATOR_ID
-                          + "\nmid5sum: " + MD5 + "\nsize: " + IMAGE_COUNTS + "\nurl: " + DOWNLOAD_URL);
+                          + "\nmid5sum: " + MD5 + "\nsize: " + IMAGE_COUNTS + "\nurl: " + DOWNLOAD_URL  + "\nctr: " + ctr);
      }
 
      public void deleteAllFiles(View view) {
@@ -658,4 +689,33 @@ public class TestActivity extends ActionBarActivity {
                System.out.println(e);
           }
      }
+
+     public void loadCountFile() {
+
+          TextView tv = (TextView)findViewById(R.id.file_contents);
+          DiseaseCountFile diseaseCountFile = new DiseaseCountFile(getApplicationContext());
+
+          StringBuilder sb = new StringBuilder();
+          for (int i = 0; i<19; i++) {
+               int count = diseaseCountFile.disease_counts.get(i);
+               if (i != 0) sb.append("\n");
+               sb.append("[" + (i+1) + "]: " + count);
+          }
+
+          tv.setText(sb.toString());
+
+     }
+
+     public void addCount(View view) {
+
+          DiseaseCountFile diseaseCountFile = new DiseaseCountFile(getApplicationContext());
+          diseaseCountFile.incrementCount(disease_count_id);
+
+          disease_count_id++;
+          if (disease_count_id > 19) disease_count_id = 1;
+
+          loadCountFile();
+
+     }
+
 }

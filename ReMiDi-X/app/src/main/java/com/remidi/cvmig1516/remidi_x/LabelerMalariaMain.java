@@ -123,6 +123,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
      File[] images;
      int image_ctr = 0;
 
+     DiseaseCountFile disease_count_file;
+     int disease_num;
+
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
@@ -146,7 +149,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           }
 
           // Load uploader
-          int disease_num = 1;
+          disease_num = 1;
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
           for (int i = 0; i<diseases.length; i++) {
                if (diseases[i].equals(disease)) {
@@ -162,6 +165,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Create handler for progress file
           progress_file = new XMLFileHandler(context,disease_num + "-progress.txt", disease, false);
           if (progress_file.readContents() == "") progress_file.write("0");
+
+          // Initialize disease count file
+          disease_count_file = new DiseaseCountFile(context);
 
           // Set Activity title
           this.setTitle("Labeler: " + disease);
@@ -836,6 +842,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
                mDrawingPad.addView(mContentView);
                mode = MODE_PATCH;
           }
+
+          disease_count_file.incrementCount(disease_num);
 
 
      }
