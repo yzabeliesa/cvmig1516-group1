@@ -4,15 +4,36 @@
               android:gravity="center"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
               tools:context="com.remidi.cvmig1516.remidi_x.MainMenuActivity$PlaceholderFragment">
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "Hello,"/>
+
+    <TextView
+        android:id="@+id/profile_name_display"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:text="insert name here"
+        android:textColor="@color/green"/>
+
+    <TextView
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "RECORDS"
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/pink"/>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:id ="@+id/profile_layout"
@@ -22,29 +43,6 @@
             android:gravity="center_horizontal"
             android:paddingBottom="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin" >
-
-            <TextView
-                android:layout_marginTop="20dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text = "Hello,"/>
-
-            <TextView
-                android:id="@+id/profile_name_display"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="40dp"
-                android:text="insert name here"
-                android:textColor="@color/green"/>
-
-            <TextView
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text = "RECORDS"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/pink"/>
 
         </LinearLayout>
     </ScrollView>
