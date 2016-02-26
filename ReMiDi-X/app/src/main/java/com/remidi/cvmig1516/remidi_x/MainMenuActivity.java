@@ -6,62 +6,31 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainMenuActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-     String labeler_name = "some random labeler";
-     int labeled_image_count = 5;
-     int validated_image_count = 10;
-     int message_count = 15;
      int DISEASE_COUNT = 18;
      int DISEASE_IMAGE_THRESHOLD = 0;
      Activity activity;
@@ -94,40 +63,6 @@ public class MainMenuActivity extends ActionBarActivity
           pd.setCancelable(false);
           pd.setIndeterminate(true);
           pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-          /*
-          pd.setOnShowListener(new DialogInterface.OnShowListener() {
-               @Override
-               public void onShow(DialogInterface dialogInterface) {
-                    Thread thread = new Thread() {
-                         public void run() {
-                              try {
-                                   int populated = 0;
-                                   while (true) {
-                                        for (int i = 1; i < 19; i++) {
-                                             String image_directory = getApplicationContext().getFilesDir() + "/disease_" + i;
-
-                                             File srcFile = new File(image_directory);
-                                             File[] images = srcFile.listFiles();
-
-                                             if (images.length > 0) populated++;
-                                        }
-                                        if (populated < 19) populated = 0;
-                                        else break;
-                                   }
-
-                                   Intent intent = new Intent(getApplicationContext(), LabelerSettings.class);
-                                   startActivity(intent);
-
-                              } catch (Exception e) {
-                                   e.printStackTrace();
-                              }
-                              pd.cancel();
-                         }
-                    };
-                    thread.start();
-               }
-          });
-          */
 
           pd.setOnShowListener(new DialogInterface.OnShowListener() {
                @Override
@@ -207,15 +142,6 @@ public class MainMenuActivity extends ActionBarActivity
           ListView drawer = (ListView) findViewById(R.id.drawer_menu);
           drawer.setOnItemClickListener(new DrawerItemClickListener());
 
-
-
-
-          /*
-               GET NAME HERE
-
-
-
-          */
      }
 
      @Override
@@ -293,6 +219,7 @@ public class MainMenuActivity extends ActionBarActivity
 
           private static final String ARG_SECTION_NUMBER = "section_number";
           int DISEASE_COUNT = 18;
+          String labeler_name = "some random labeler";
 
           /**
            * Returns a new instance of this fragment for the given section
@@ -330,50 +257,12 @@ public class MainMenuActivity extends ActionBarActivity
 
                for (int i = 0; i<DISEASE_COUNT; i++) {
 
-               /*
-
-               <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="5dp">
-
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/pink"
-                    android:text="Button"
-                    android:onClick="viewMessages"/>
-
-                <TextView
-                    android:id="@+id/profile_message_display"
-                    android:layout_marginLeft="20dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text = "You have x messages."
-                    android:textColor="@color/black_overlay"/>
-
-               </LinearLayout>
-
-                */
-
                     LinearLayout layout = new LinearLayout(activity);
                     LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     layout.setOrientation(LinearLayout.HORIZONTAL);
                     lParams.gravity = Gravity.CENTER_HORIZONTAL;
                     if (i < DISEASE_COUNT - 1) lParams.setMargins(0, 20, 0, 0);
                     else lParams.setMargins(0, 20, 0, 20);
-
-                    /*
-
-                    <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/pink"
-                    android:text="Button"
-                    android:onClick="viewMessages"/>
-                     */
 
                     ImageButton imageButton = new ImageButton(activity);
                     imageButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -405,6 +294,11 @@ public class MainMenuActivity extends ActionBarActivity
                tv.setTextColor(getResources().getColor(R.color.green));
 
                root.addView(tv);
+
+               // Get labeler name
+               TextView name_tv = (TextView)rootView.findViewById(R.id.profile_name_display);
+               // labeler_name = something???
+               name_tv.setText(labeler_name);
 
                return rootView;
           }
