@@ -25,6 +25,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,7 +62,7 @@ public class MainMenuActivity extends ActionBarActivity
      int labeled_image_count = 5;
      int validated_image_count = 10;
      int message_count = 15;
-     int DISEASE_COUNT = 19;
+     int DISEASE_COUNT = 18;
      int DISEASE_IMAGE_THRESHOLD = 0;
      Activity activity;
      Context context;
@@ -205,8 +207,11 @@ public class MainMenuActivity extends ActionBarActivity
           ListView drawer = (ListView) findViewById(R.id.drawer_menu);
           drawer.setOnItemClickListener(new DrawerItemClickListener());
 
+
+
+
           /*
-               GET NAME AND COUNT INFO HERE
+               GET NAME HERE
 
 
 
@@ -287,6 +292,7 @@ public class MainMenuActivity extends ActionBarActivity
            */
 
           private static final String ARG_SECTION_NUMBER = "section_number";
+          int DISEASE_COUNT = 18;
 
           /**
            * Returns a new instance of this fragment for the given section
@@ -311,6 +317,95 @@ public class MainMenuActivity extends ActionBarActivity
                                    Bundle savedInstanceState) {
                View rootView = inflater.inflate(R.layout.fragment_main_menu, container, false);
 
+
+               // Setup count info
+               final LinearLayout root = (LinearLayout) rootView.findViewById(R.id.profile_layout);
+               Activity activity = getActivity();
+
+               DiseaseCountFile diseaseCountFile = new DiseaseCountFile(activity);
+               ArrayList<Integer> counts = diseaseCountFile.disease_counts;
+               String[] diseases = getResources().getStringArray(R.array.all_diseases);
+
+               int totalLabeledCount = 0;
+
+               for (int i = 0; i<DISEASE_COUNT; i++) {
+
+               /*
+
+               <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp">
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/pink"
+                    android:text="Button"
+                    android:onClick="viewMessages"/>
+
+                <TextView
+                    android:id="@+id/profile_message_display"
+                    android:layout_marginLeft="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text = "You have x messages."
+                    android:textColor="@color/black_overlay"/>
+
+               </LinearLayout>
+
+                */
+
+                    LinearLayout layout = new LinearLayout(activity);
+                    LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    layout.setOrientation(LinearLayout.HORIZONTAL);
+                    lParams.gravity = Gravity.CENTER_HORIZONTAL;
+                    if (i < DISEASE_COUNT - 1) lParams.setMargins(0, 20, 0, 0);
+                    else lParams.setMargins(0, 20, 0, 20);
+
+                    /*
+
+                    <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/pink"
+                    android:text="Button"
+                    android:onClick="viewMessages"/>
+                     */
+
+                    ImageButton imageButton = new ImageButton(activity);
+                    imageButton.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    imageButton.setBackgroundColor(getResources().getColor(R.color.pink));
+
+                    LinearLayout.LayoutParams tv_layout = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    tv_layout.setMargins(20,0,0,0);
+
+                    int count = counts.get(i);
+                    totalLabeledCount+=count;
+                    TextView tv = new TextView(activity);
+                    tv.setLayoutParams(tv_layout);
+                    tv.setTextColor(getResources().getColor(R.color.black_overlay));
+                    tv.setText(count + " " + diseases[i] + " images labeled");
+
+                    layout.addView(imageButton);
+                    layout.addView(tv);
+                    root.addView(layout);
+
+               }
+
+               LinearLayout.LayoutParams tv_layout = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+               tv_layout.setMargins(0, 10, 0, 0);
+
+               TextView tv = new TextView(activity);
+               tv.setLayoutParams(tv_layout);
+               tv.setText("TOTAL NUMBER OF IMAGES LABELED: " + totalLabeledCount);
+               tv.setTextAppearance(activity, android.R.style.TextAppearance_Medium);
+               tv.setTextColor(getResources().getColor(R.color.green));
+
+               root.addView(tv);
+
                return rootView;
           }
 
@@ -323,8 +418,3 @@ public class MainMenuActivity extends ActionBarActivity
      }
 
 }
-
-
-
-
-

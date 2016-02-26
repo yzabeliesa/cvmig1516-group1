@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
  */
 public class DiseaseCountFile {
 
-     final int DISEASE_COUNT = 19;
+     final int DISEASE_COUNT = 18;
      String filename;
      String filepath;
      String filefolder;
