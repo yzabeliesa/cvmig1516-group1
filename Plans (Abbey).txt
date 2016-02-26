@@ -7,7 +7,7 @@ LABELER
 	- change name to "<disease num>-progress.txt"
 	- save in progress file folder instead of disease folder
 	- remove progress file deletion and addition
-[ ] Add disease label counter file
+[x] Add disease label counter file
 	- save in app data folder
 	- name "label-counter.txt"
 [ ] Rename "Labeler Malaria Main" to "Labeler Main" (Low priority)
@@ -15,7 +15,8 @@ LABELER
 [ ] Rename "XMLFileHandler" to "FileHandler" (Low priority)
 [x] Revise drawer
 	- Section names: "Label images", "Profile", "Settings", "Logout"
-[ ] Update labeler name and counters on Profile screen
+[ ] Update labeler name on Profile screen
+[ ] Update counters on Profile screen
 [ ] Checklist for diseases (Low priority)
 	- file???
 [ ] Add settings right after first sign-in
