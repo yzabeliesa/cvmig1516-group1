@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
     <color name="teal">#475869</color>
     <color name="pink">#ff8e72</color>
     <color name="yellow">#ffcf56</color>
     <color name="green">#87d769</color>
     <color name="red">#ff4f54</color>
+    -->
+
+    <color name="teal">#475869</color>
+    <color name="pink">#fa919b</color>
+    <color name="yellow">#f0c49b</color>
+    <color name="green">#8fb37f</color>
+    <color name="red">#d65a60</color>
 
     <color name="black_overlay">#66000000</color>
 </resources>
