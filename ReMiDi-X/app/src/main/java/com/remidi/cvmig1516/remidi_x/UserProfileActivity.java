@@ -52,7 +52,7 @@ public class UserProfileActivity extends ActionBarActivity
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
-          setContentView(R.layout.activity_main_menu);
+          setContentView(R.layout.activity_user_profile);
 
           context = getApplicationContext();
 
@@ -242,7 +242,7 @@ public class UserProfileActivity extends ActionBarActivity
           @Override
           public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                    Bundle savedInstanceState) {
-               View rootView = inflater.inflate(R.layout.fragment_main_menu, container, false);
+               View rootView = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
 
                // Setup count info
