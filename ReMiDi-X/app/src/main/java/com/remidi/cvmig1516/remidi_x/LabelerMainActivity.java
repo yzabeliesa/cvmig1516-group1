@@ -12,23 +12,17 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.provider.MediaStore;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,8 +34,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -59,7 +51,7 @@ import java.util.zip.ZipOutputStream;
 
 // File naming convention: img1234567_123
 
-public class LabelerMalariaMain extends ActionBarActivity {
+public class LabelerMainActivity extends ActionBarActivity {
 
      final int DELAY = 300;
      final int PATCH_NEUTRAL = 0;
@@ -80,7 +72,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      String disease = "";
      String validator = "";
-     XMLFileHandler progress_file;
+     FileHandler progress_file;
      ArrayList<Patch> patches = new ArrayList<>();
 
      float initX = 0;
@@ -129,7 +121,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
-          setContentView(R.layout.activity_labeler_malaria_main);
+          setContentView(R.layout.activity_labeler_main);
 
           HTTP_IP_ADDRESS = getString(R.string.server_address);
           HTTP_HOME = getString(R.string.api_label);
@@ -164,7 +156,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
           // Create handler for progress file
-          progress_file = new XMLFileHandler(context,disease_num + "-progress.txt", disease, false);
+          progress_file = new FileHandler(context,disease_num + "-progress.txt", disease, false);
           if (progress_file.readContents() == "") progress_file.write("0");
 
           // Initialize disease count file
@@ -177,8 +169,8 @@ public class LabelerMalariaMain extends ActionBarActivity {
           sample_images = initializeImageArray();
 
           // Load dialog box
-          labelDialog = new Dialog(LabelerMalariaMain.this);
-          labelDialog.setContentView(R.layout.fragment_labeler_malaria_dialog);
+          labelDialog = new Dialog(LabelerMainActivity.this);
+          labelDialog.setContentView(R.layout.fragment_labeler_dialog);
 
           // Get image file from folder
           File srcFile = new File(image_directory);
@@ -340,7 +332,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
       ------------------------------------------------------------------------------------------------------------------
      */
 
-     private class Patch extends XMLFileHandler{
+     private class Patch extends FileHandler {
 
           int imgno;
           int patchno;
@@ -815,7 +807,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
 
-          //progress_file = new XMLFileHandler(context,"progress.txt", disease, false);
+          //progress_file = new FileHandler(context,"progress.txt", disease, false);
           progress_file.write(current_image + "");
           initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
@@ -1041,7 +1033,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
                     }
                }
           };
-          AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMalariaMain.this);
+          AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMainActivity.this);
           builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
                   .setNegativeButton("No", dialogClickListener).show();
 

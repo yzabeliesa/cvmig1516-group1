@@ -15,14 +15,14 @@ import java.util.Scanner;
  * Created by Abbey on 18/12/2015.
  */
 
-public class XMLFileHandler {
+public class FileHandler {
 
      String filename;
      String filepath;
      String filefolder;
      File file;
 
-     public XMLFileHandler(Context context, String name) {
+     public FileHandler(Context context, String name) {
 
           filename = name;
           filefolder = context.getFilesDir().toString();
@@ -40,7 +40,7 @@ public class XMLFileHandler {
 
      }
 
-     public XMLFileHandler(Context context, String name, String disease, boolean isTextData) {
+     public FileHandler(Context context, String name, String disease, boolean isTextData) {
           if (isTextData) { // Patch data
                filename = "textData.xml";
                filefolder = context.getFilesDir() + "/" + disease + "/" + name; // name = imageno_patch

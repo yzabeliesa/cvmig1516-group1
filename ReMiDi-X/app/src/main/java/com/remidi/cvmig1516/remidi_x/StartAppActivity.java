@@ -38,7 +38,7 @@ public class StartAppActivity extends ActionBarActivity {
                          }
                          sleep(500);
                          if (file.exists()) {
-                              Intent intent = new Intent(context, MainMenuActivity.class);
+                              Intent intent = new Intent(context, UserProfileActivity.class);
                               startActivity(intent);
                          }
                          else {

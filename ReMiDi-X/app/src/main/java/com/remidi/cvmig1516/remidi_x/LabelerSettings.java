@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -96,7 +94,7 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
                return;
           }
 
-          Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
+          Intent intent = new Intent(getApplicationContext(), LabelerMainActivity.class);
           intent.putExtra("Disease", disease);
           intent.putExtra("Validator", validator);
           startActivity(intent);

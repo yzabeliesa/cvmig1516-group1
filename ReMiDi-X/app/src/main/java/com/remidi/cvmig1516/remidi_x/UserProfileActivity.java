@@ -28,7 +28,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
-public class MainMenuActivity extends ActionBarActivity
+public class UserProfileActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
      int DISEASE_COUNT = 18;
@@ -165,7 +165,7 @@ public class MainMenuActivity extends ActionBarActivity
                          pd.show();
                          break;
                     case 1: // Profile
-                         intent = new Intent(getApplicationContext(), MainMenuActivity.class);
+                         intent = new Intent(getApplicationContext(), UserProfileActivity.class);
                          startActivity(intent);
                          break;
                     case 2: // Settings
@@ -307,7 +307,7 @@ public class MainMenuActivity extends ActionBarActivity
           @Override
           public void onAttach(Activity activity) {
                super.onAttach(activity);
-               ((MainMenuActivity) activity).onSectionAttached(
+               ((UserProfileActivity) activity).onSectionAttached(
                        getArguments().getInt(ARG_SECTION_NUMBER));
           }
      }

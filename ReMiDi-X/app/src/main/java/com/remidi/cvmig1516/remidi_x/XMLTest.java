@@ -1,47 +1,26 @@
 package com.remidi.cvmig1516.remidi_x;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
-import android.text.InputFilter;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.StringTokenizer;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class XMLTest extends ActionBarActivity {
 
@@ -63,7 +42,7 @@ public class XMLTest extends ActionBarActivity {
 
      String disease = "Disease";
      String validator = "Validator";
-     XMLFileHandler progress_file;
+     FileHandler progress_file;
      ArrayList<Patch> patches = new ArrayList<>();
 
      int ctr = 0;
@@ -350,7 +329,7 @@ public class XMLTest extends ActionBarActivity {
 
      }
 
-     private class Patch extends XMLFileHandler{
+     private class Patch extends FileHandler {
 
           int imgno;
           int patchno;

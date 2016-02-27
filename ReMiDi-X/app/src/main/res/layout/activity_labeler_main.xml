@@ -4,7 +4,7 @@
              android:layout_height="match_parent"
              android:background="@color/teal"
               android:orientation="vertical"
-             tools:context="com.remidi.cvmig1516.remidi_x.LabelerMalariaMain">
+             tools:context=".LabelerMainActivity">
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->

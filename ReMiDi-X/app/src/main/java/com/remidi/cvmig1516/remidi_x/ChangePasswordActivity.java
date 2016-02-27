@@ -32,7 +32,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                               findViewById(R.id.password_button).setVisibility(View.VISIBLE);
                               break;
                          case DialogInterface.BUTTON_NEGATIVE:
-                              Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
+                              Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
                               startActivity(intent);
                               finish();
                               break;
@@ -60,7 +60,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                          case DialogInterface.BUTTON_NEUTRAL:
-                              Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
+                              Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
                               startActivity(intent);
                               finish();
                               break;

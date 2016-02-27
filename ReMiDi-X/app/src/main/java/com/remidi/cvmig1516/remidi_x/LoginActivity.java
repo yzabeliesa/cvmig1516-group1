@@ -311,7 +311,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                     //finish();
                     mPasswordView.setError("labeler id: " + VALIDATOR_ID);
                     mPasswordView.requestFocus();
-                    Intent intent = new Intent(getApplicationContext(), /*MainMenuActivity.class*/ChangePasswordActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), /*UserProfileActivity.class*/ChangePasswordActivity.class);
                     startActivity(intent);
                } else {
                     //mPasswordView.setError(getString(R.string.error_incorrect_password));
