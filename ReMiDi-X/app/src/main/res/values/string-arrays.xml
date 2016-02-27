@@ -175,4 +175,12 @@
         <item>(+) Pseudohyphae/oval budding cells</item>
     </string-array>
 
+    <string-array name="image_file_types">
+        <item>jpg</item>
+        <item>png</item>
+        <item>gif</item>
+        <item>bmp</item>
+        <item>jpeg</item>
+    </string-array>
+
 </resources>

@@ -101,10 +101,10 @@ public class LabelerMalariaMain extends ActionBarActivity {
      //public String HTTP_HOME = "/data/";
 
      // Web url
-     public String HTTP_IP_ADDRESS = "54.179.135.52";
-     public String HTTP_HOME = "/api/label/";
-
+     public String HTTP_IP_ADDRESS = ""; // Retrieved upon start
+     public String HTTP_HOME = ""; // Retrieved upon start
      public int HTTP_PORT = 80;
+
      public boolean isThreadPause = false;
 
      Uploader uploader;
@@ -131,6 +131,9 @@ public class LabelerMalariaMain extends ActionBarActivity {
           super.onCreate(savedInstanceState);
           setContentView(R.layout.activity_labeler_malaria_main);
 
+          HTTP_IP_ADDRESS = getString(R.string.server_address);
+          HTTP_HOME = getString(R.string.api_label);
+
           context = getApplicationContext();
           myDirectory = new File(context.getFilesDir(), "remidiDatabase");
 
@@ -144,8 +147,6 @@ public class LabelerMalariaMain extends ActionBarActivity {
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
-               /*String address = extras.getString("Address");
-               tokenizeAddress(address);*/
           }
 
           // Load uploader
@@ -190,15 +191,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
           File image = images[image_ctr];
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
           current_image = tokenizeImageNum(image);
 
           // Initialize (turn into AsyncTask)
           mVisible = true;
-          //mControlsView = findViewById(R.id.fullscreen_content_controls);
           mContentView = new DrawingView(this);
-          //mContentView = (ImageView)findViewById(R.id.fullscreen_content);
           initialize(disease);
           mContentView.setImageBitmap(imageBitmap);
           mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -214,12 +212,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
           scaleFactor = getScaleFactor(mContentView,screen_width);
 
           zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
-          //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
-          //zoomContentView.setMinimumHeight(mContentView.height);
-          //zoomContentView.setMinimumWidth(mContentView.);
           zoomContentView.setMaxZoom(4f);
-          //zoomContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-          //zoomContentView.setAdjustViewBounds(true);
 
           mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad);
           mDrawingPad.addView(mContentView);
@@ -792,7 +785,14 @@ public class LabelerMalariaMain extends ActionBarActivity {
 
      public int tokenizeImageNum(File image) {
           StringTokenizer token1 = new StringTokenizer(image.getName(),"image");
-          StringTokenizer token2 = new StringTokenizer(token1.nextToken(),".jpg");
+
+          String[] image_file_types = getResources().getStringArray(R.array.image_file_types);
+          StringTokenizer token2 = token1;
+          for (int i = 0; i<image_file_types.length; i++) {
+               String file_type = image_file_types[i];
+               if (file_type.contains(file_type)) token2 = new StringTokenizer(token1.nextToken(), "." + file_type);
+          }
+
           return Integer.parseInt(token2.nextToken());
      }
 
@@ -1090,12 +1090,12 @@ public class LabelerMalariaMain extends ActionBarActivity {
           // Delete progress_file
           //progress_file.delete();
 
-          StringBuilder sb = new StringBuilder("PATCH MSG:"); //test
+          // StringBuilder sb = new StringBuilder("PATCH MSG:"); //test
           // Delete patch data files
           for (int i = 0; i<patches.size(); i++) { //deletes patch data
                Patch patch = patches.get(i);
                String msg = uploader.uploadFile(patch.file,patch.formatImgno()+"_"+patch.formatPatchno()+".xml",false);
-               sb.append("\n" + msg); //test
+               // sb.append("\n" + msg); //test
                patch.delete();
                patch.deleteFolder();
           }

@@ -56,9 +56,6 @@ public class MainMenuActivity extends ActionBarActivity
 
           context = getApplicationContext();
 
-          Intent myIntent = new Intent(context, LoopService.class);
-          getApplicationContext().startService(myIntent);
-
           pd = new ProgressDialog(this);
           pd.setMessage("Retrieving images");
           pd.setCancelable(false);
@@ -280,6 +277,7 @@ public class MainMenuActivity extends ActionBarActivity
                     tv.setLayoutParams(tv_layout);
                     tv.setTextColor(getResources().getColor(R.color.black_overlay));
                     tv.setText(count + " " + diseases[i] + " images labeled");
+                    tv.setPadding(20,0,0,0);
 
                     layout.addView(imageButton);
                     layout.addView(tv);

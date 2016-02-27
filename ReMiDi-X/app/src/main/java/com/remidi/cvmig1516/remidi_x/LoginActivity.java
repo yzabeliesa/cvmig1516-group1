@@ -53,8 +53,8 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
       * TODO: remove after connecting to a real authentication system.
       */
      public int VALIDATOR_ID = -2;
-     public String HTTP_HOST = "54.179.135.52";
-     public String HTTP_HOME = "/api/label/";
+     public String HTTP_HOST = ""; // Retrieved upon start
+     public String HTTP_HOME = ""; // Retrieved upon start
      public int HTTP_PORT = 80;
 
      private static final String[] DUMMY_CREDENTIALS = new String[]{
@@ -78,6 +78,9 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
           // Set up the login form.
           mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
           populateAutoComplete();
+
+          HTTP_HOST = getString(R.string.server_address);
+          HTTP_HOME = getString(R.string.api_label);
 
           mPasswordView = (EditText) findViewById(R.id.password);
           mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -308,7 +311,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                     //finish();
                     mPasswordView.setError("labeler id: " + VALIDATOR_ID);
                     mPasswordView.requestFocus();
-                    Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), /*MainMenuActivity.class*/ChangePasswordActivity.class);
                     startActivity(intent);
                } else {
                     //mPasswordView.setError(getString(R.string.error_incorrect_password));

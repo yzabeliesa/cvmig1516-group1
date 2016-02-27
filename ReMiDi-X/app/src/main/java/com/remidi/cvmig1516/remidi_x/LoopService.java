@@ -55,8 +55,8 @@ public class LoopService extends Service {
      //public int HTTP_PORT = 5000;
 
      // Web url
-     public String HTTP_HOST = "54.179.135.52";
-     public String HTTP_HOME = "/api/label/";
+     public String HTTP_HOST = ""; // Retrieved upon start
+     public String HTTP_HOME = ""; // Retrieved upon start
      public int HTTP_PORT = 80;
 
      public String send_result = "";
@@ -101,6 +101,9 @@ public class LoopService extends Service {
      public int onStartCommand(Intent intent, int flags, int startId) {
 
           context = getApplicationContext();
+
+          HTTP_HOST = getString(R.string.server_address);
+          HTTP_HOME = getString(R.string.api_label);
 
           myDirectory = new File(context.getFilesDir(), "remidiDatabase");
           if( !myDirectory.exists() ) {

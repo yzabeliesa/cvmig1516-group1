@@ -88,8 +88,8 @@ public class TestActivity extends ActionBarActivity {
      public String RESPONDED = "";
 
      // Web url
-     public String HTTP_HOST = "54.179.135.52";
-     public String HTTP_HOME = "/api/label/";
+     public String HTTP_HOST = getString(R.string.server_address);
+     public String HTTP_HOME = getString(R.string.api_label);
      public int HTTP_PORT = 80;
      public boolean CONFIRM = false;
 
