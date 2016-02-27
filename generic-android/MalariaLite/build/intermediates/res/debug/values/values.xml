@@ -1999,7 +1999,7 @@
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
         <item>Giardiasis</item>
-        <item>Unspecified Infection</item>
+        <item>Unspecified Infection (Stool parasite)</item>
         <item>Tuberculosis</item>
         <item>Leprosy</item>
         <item>Gonorrhea</item>
@@ -2084,7 +2084,7 @@
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
         <item>Giardiasis</item>
-        <item>Unspecified Infection</item>
+        <item>Unspecified Infection (Stool parasite)</item>
     </string-array>
     <!-- From: file:/C:/Users/Abbey/Documents/GitHub/cvmig1516-group1/generic-android/MalariaLite/build/intermediates/exploded-aar/generic-android.libraries.ActionBarSherlock/actionbarsherlock/unspecified/res/values/values.xml -->
     <eat-comment/>

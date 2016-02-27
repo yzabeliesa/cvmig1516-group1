@@ -1999,7 +1999,7 @@
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
         <item>Giardiasis</item>
-        <item>Unspecified Infection</item>
+        <item>Unspecified Infection (Stool parasite)</item>
         <item>Tuberculosis</item>
         <item>Leprosy</item>
         <item>Gonorrhea</item>
@@ -2084,7 +2084,7 @@
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
         <item>Giardiasis</item>
-        <item>Unspecified Infection</item>
+        <item>Unspecified Infection (Stool parasite)</item>
     </string-array>
     <string name="Password">Password</string>
     <string name="Username">Username</string>
