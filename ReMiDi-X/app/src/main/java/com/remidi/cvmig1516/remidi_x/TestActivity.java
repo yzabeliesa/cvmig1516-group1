@@ -116,6 +116,7 @@ public class TestActivity extends ActionBarActivity {
      public long ave_getting_time = 0;
 
      public int disease_count_id = 1;
+     public int DISEASE_COUNT = 18;
 
 
      /**
@@ -142,8 +143,8 @@ public class TestActivity extends ActionBarActivity {
                myDirectory.mkdirs();
           }
 
-          myGallery = new File[19];
-          for(int x=0; x<19; x++) {
+          myGallery = new File[DISEASE_COUNT];
+          for(int x=0; x<DISEASE_COUNT; x++) {
                myGallery[x] = new File(context.getFilesDir(), "disease_" + (x+1));
                if( !myGallery[x].exists() ) {
                     myGallery[x].mkdirs();
@@ -188,9 +189,9 @@ public class TestActivity extends ActionBarActivity {
                          no_more_img = 0;
                          no_more_disease_space = 0;
 
-                         for(int x=0; x<19; x++) {
+                         for(int x=0; x<DISEASE_COUNT; x++) {
                               if (tries == 3) { // after 3 tries of getting internet, timeout for 5 mins
-                                   Thread.sleep(1000 * 60 * 10); // 10 minutes
+                                   //Thread.sleep(1000 * 60 * 10); // 10 minutes
                                    tries = 0;
                               } else {
                                    if (isNetworkAvailable()) { // if there's net edi wow successful try so back to 0
@@ -198,10 +199,10 @@ public class TestActivity extends ActionBarActivity {
                                         ave_getting_time = System.currentTimeMillis();
                                         get_images_from_json(x);
                                         ave_getting_time = System.currentTimeMillis() - ave_getting_time;
-                                        Thread.sleep(10000); // 10 seconds
+                                        //Thread.sleep(10000); // 10 seconds
                                    } else {
                                         // if no net, timeout for 30 seconds increment the number of tries
-                                        Thread.sleep(1000 * 30); // 30 seconds
+                                        //Thread.sleep(1000 * 30); // 30 seconds
                                         tries++;
                                    }
                               }
@@ -211,7 +212,7 @@ public class TestActivity extends ActionBarActivity {
                          // or no more pictures to retrieve in all disease,
                          // if yes then,
                          if (no_more_img >= 18 || no_more_disease_space >= 18) {
-                              Thread.sleep(1000 * 60 * 60); // 1 hour
+                              //Thread.sleep(1000 * 60 * 60); // 1 hour
                          }
                     } catch(Exception e) {
                          e.printStackTrace();
@@ -696,7 +697,7 @@ public class TestActivity extends ActionBarActivity {
           DiseaseCountFile diseaseCountFile = new DiseaseCountFile(getApplicationContext());
 
           StringBuilder sb = new StringBuilder();
-          for (int i = 0; i<19; i++) {
+          for (int i = 0; i<DISEASE_COUNT; i++) {
                int count = diseaseCountFile.disease_counts.get(i);
                if (i != 0) sb.append("\n");
                sb.append("[" + (i+1) + "]: " + count);
@@ -712,7 +713,7 @@ public class TestActivity extends ActionBarActivity {
           diseaseCountFile.incrementCount(disease_count_id);
 
           disease_count_id++;
-          if (disease_count_id > 19) disease_count_id = 1;
+          if (disease_count_id > DISEASE_COUNT) disease_count_id = 1;
 
           loadCountFile();
 

@@ -791,7 +791,7 @@ public class LabelerMalariaMain extends ActionBarActivity {
      }
 
      public int tokenizeImageNum(File image) {
-          StringTokenizer token1 = new StringTokenizer(image.getName(),"img");
+          StringTokenizer token1 = new StringTokenizer(image.getName(),"image");
           StringTokenizer token2 = new StringTokenizer(token1.nextToken(),".png");
           return Integer.parseInt(token2.nextToken());
      }

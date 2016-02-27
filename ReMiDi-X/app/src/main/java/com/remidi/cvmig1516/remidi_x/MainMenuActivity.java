@@ -33,6 +33,7 @@ public class MainMenuActivity extends ActionBarActivity
 
      int DISEASE_COUNT = 18;
      int DISEASE_IMAGE_THRESHOLD = 0;
+     int POPULATED_IMAGE_THRESHOLD = 1;
      Activity activity;
      Context context;
      ProgressDialog pd;
@@ -74,7 +75,8 @@ public class MainMenuActivity extends ActionBarActivity
                                    while (true) {
 
                                         int populated = 0;
-                                        for (int i = 1; i < DISEASE_COUNT; i++) {
+                                        //for (int i = 1; i < DISEASE_COUNT+1; i++) {
+                                        for (int i = 1; i < 2; i++) { //test only
                                              String image_directory = getApplicationContext().getFilesDir() + "/disease_" + i;
 
                                              File srcFile = new File(image_directory);
@@ -91,7 +93,8 @@ public class MainMenuActivity extends ActionBarActivity
 
                                         sleep(2000);
                                         Log.d("main" + ".pd.Thread", "sleep");
-                                        if (populated == DISEASE_COUNT || (timeElapsed >=20 && populated == 0)) this.interrupt();
+
+                                        if (populated == POPULATED_IMAGE_THRESHOLD || (timeElapsed >=20 && populated == 0)) this.interrupt(); //TEST ONLY
                                    }
                               } catch (InterruptedException e) {
                                    e.printStackTrace();
@@ -108,7 +111,7 @@ public class MainMenuActivity extends ActionBarActivity
                public void onDismiss(DialogInterface dialogInterface) {
 
                     int populated = 0;
-                    for (int i = 1; i < DISEASE_COUNT; i++) {
+                    for (int i = 1; i < DISEASE_COUNT+1; i++) {
                          String image_directory = getApplicationContext().getFilesDir() + "/disease_" + i;
 
                          File srcFile = new File(image_directory);
@@ -117,7 +120,7 @@ public class MainMenuActivity extends ActionBarActivity
                          if (images.length > 0) populated++;
                     }
 
-                    if (populated >= DISEASE_COUNT) { // Retrieving images successful
+                    if (populated >= POPULATED_IMAGE_THRESHOLD) { // Retrieving images
                          Intent intent = new Intent(getApplicationContext(), LabelerSettings.class);
                          startActivity(intent);
                     }

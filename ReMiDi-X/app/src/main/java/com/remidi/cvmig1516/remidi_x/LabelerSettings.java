@@ -87,12 +87,18 @@ public class LabelerSettings extends ActionBarActivity implements AdapterView.On
                }
           }
 
+          String image_directory = getApplicationContext().getFilesDir() + "/disease_" + disease_num;
+
+          File srcFile = new File(image_directory);
+          File[] images = srcFile.listFiles();
+          if (images.length == 0) {
+               Toast.makeText(getApplicationContext(), "No images in disease.", Toast.LENGTH_SHORT).show();
+               return;
+          }
+
           Intent intent = new Intent(getApplicationContext(), LabelerMalariaMain.class);
-          //disease = (disease.toLowerCase()).replace(' ', '_');
-          //String address = ((EditText) findViewById(R.id.http_address)).getText().toString();
           intent.putExtra("Disease", disease);
           intent.putExtra("Validator", validator);
-          //intent.putExtra("Address", address);
           startActivity(intent);
 
      }

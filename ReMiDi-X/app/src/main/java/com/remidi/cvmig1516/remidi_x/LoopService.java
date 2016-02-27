@@ -71,6 +71,7 @@ public class LoopService extends Service {
      public int IMAGE_COUNTS = 5;
      public int VALIDATOR_ID = 1;
      public String RESPONDED = "";
+     public int DISEASE_COUNT = 18;
 
      public int no_more_img = 0;
      public int no_more_disease_space = 0;
@@ -104,15 +105,15 @@ public class LoopService extends Service {
                myDirectory.mkdirs();
           }
 
-          myGallery = new File[19];
-          for(int x=0; x<19; x++) {
+          myGallery = new File[DISEASE_COUNT];
+          for(int x=0; x<DISEASE_COUNT; x++) {
                myGallery[x] = new File(context.getFilesDir(), "disease_" + (x+1));
                if( !myGallery[x].exists() ) {
                     myGallery[x].mkdirs();
                }
           }
 
-          new Thread(null, receive_img, "ReceiveImageThread").start();
+          new Thread(null, receive_zip, "ReceiveZipThread").start();
           new Thread(null, send, "SendThread").start();
 
           super.onStartCommand(intent, flags, startId);
@@ -148,7 +149,7 @@ public class LoopService extends Service {
           }
      };
 
-     Runnable receive_img = new Runnable() {
+     Runnable receive_zip = new Runnable() {
           @Override
           public void run() {
                while (true) {
@@ -156,7 +157,7 @@ public class LoopService extends Service {
                          no_more_img = 0;
                          no_more_disease_space = 0;
 
-                    for(int x=0; x<19; x++) {
+                    for(int x=0; x<DISEASE_COUNT; x++) {
                               if (tries == 3) { // after 3 tries of getting internet, timeout for 5 mins
                                    Thread.sleep(1000 * 60 * 10); // 10 minutes
                                    tries = 0;
@@ -292,7 +293,7 @@ public class LoopService extends Service {
                          if( (zipfile != null) && (!isCorrupted(zipfile)) ) { // unzip then save the file to disease number
                               unzip( zipfile.getAbsolutePath() , diseaseDir);
                               success = true;
-                              }
+                         }
 
                          success_response(success, zipfile, JSON_URL, diseaseDir); // return response and delete the zipfile
 
@@ -303,7 +304,7 @@ public class LoopService extends Service {
                     else {
                          no_more_img++;
                     }
-                    }
+               }
                else {
                     no_more_disease_space++;
                }
@@ -400,7 +401,7 @@ public class LoopService extends Service {
 
      public String fileToMD5(String filePath) {
           InputStream is = null;
-                         try {
+          try {
                is = new FileInputStream(filePath);
                byte[] buffer = new byte[1024];
                MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -418,14 +419,14 @@ public class LoopService extends Service {
                return convertHashToString(md5Bytes);
           } catch (Exception e) {
                return null;
-                         } finally {
-                              if (is != null) {
+          } finally {
+               if (is != null) {
                     try {
-                                   is.close();
+                         is.close();
                     } catch (Exception e) { }
                }
           }
-                              }
+     }
 
      private String convertHashToString(byte[] md5Bytes) {
           String md5str = "";
@@ -474,7 +475,10 @@ public class LoopService extends Service {
                HttpResponse httpResponse = httpclient.execute(httpPost);
                is = httpResponse.getEntity().getContent();
 
+
                if (httpResponse != null) {
+                    /*BasicResponseHandler responseHandler = new BasicResponseHandler();
+                    result = responseHandler.handleResponse(httpResponse);*/
                     int statusCode = httpResponse.getStatusLine().getStatusCode();
 
                     if (statusCode == HttpStatus.SC_OK)

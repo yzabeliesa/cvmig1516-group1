@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +27,17 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +52,11 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
       * A dummy authentication store containing known user names and passwords.
       * TODO: remove after connecting to a real authentication system.
       */
+     public int VALIDATOR_ID = -2;
+     public String HTTP_HOST = "54.179.135.52";
+     public String HTTP_HOME = "/api/label/";
+     public int HTTP_PORT = 80;
+
      private static final String[] DUMMY_CREDENTIALS = new String[]{
              "foo@example.com:hello", "bar@example.com:world"
      };
@@ -113,7 +130,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
           View focusView = null;
 
           // Check for a valid password, if the user entered one.
-          if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+          if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
                mPasswordView.setError(getString(R.string.error_invalid_password));
                focusView = mPasswordView;
                cancel = true;
@@ -145,7 +162,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
 
      private boolean isEmailValid(String email) {
           //TODO: Replace this with your own logic
-          return email.contains("@");
+          return true;
      }
 
      private boolean isPasswordValid(String password) {
@@ -267,16 +284,19 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                     return false;
                }
 
-               for (String credential : DUMMY_CREDENTIALS) {
+               /*for (String credential : DUMMY_CREDENTIALS) {
                     String[] pieces = credential.split(":");
                     if (pieces[0].equals(mEmail)) {
                          // Account exists, return true if the password matches.
                          return pieces[1].equals(mPassword);
                     }
-               }
+               }*/
+
+               String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + "/labeler_login/";
+               return verify_account(mEmail, mPassword, urlstr);
 
                // TODO: register the new account here.
-               return true;
+               //return true;
           }
 
           @Override
@@ -286,10 +306,13 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
 
                if (success) {
                     //finish();
+                    mPasswordView.setError("labeler id: " + VALIDATOR_ID);
+                    mPasswordView.requestFocus();
                     Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
                     startActivity(intent);
                } else {
-                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    //mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.setError("labeler id: " + VALIDATOR_ID);
                     mPasswordView.requestFocus();
                }
           }
@@ -298,6 +321,49 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
           protected void onCancelled() {
                mAuthTask = null;
                showProgress(false);
+          }
+     }
+
+     public boolean verify_account(String username, String password, String urlstr) {
+          // Create a new HttpClient and Post Header
+          HttpClient httpclient = new DefaultHttpClient();
+          HttpPost httppost = new HttpPost(urlstr);
+
+          try {
+               // Add your data
+               List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+               nameValuePairs.add(new BasicNameValuePair("username", username));
+               nameValuePairs.add(new BasicNameValuePair("password", password));
+               httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+               // Execute HTTP Post Request
+               HttpResponse response = httpclient.execute(httppost);
+               if(response != null) {
+                    int status = response.getStatusLine().getStatusCode();
+                    if (status == HttpStatus.SC_OK) {
+                         String result = EntityUtils.toString(response.getEntity());
+                         JSONObject json = new JSONObject(result);
+                         VALIDATOR_ID = Integer.parseInt(json.getString("id"));
+
+                         if ( VALIDATOR_ID <= -1 )
+                              return false;
+                         else
+                              return true;
+                    }
+                    else {
+                         VALIDATOR_ID = status;
+                         return false;
+                    }
+               }
+               else {
+                    VALIDATOR_ID = -3;
+                    return false;
+               }
+
+          } catch (Exception e) {
+               e.printStackTrace();
+               Log.d("OutputStream", e.getLocalizedMessage());
+               return false;
           }
      }
 }
