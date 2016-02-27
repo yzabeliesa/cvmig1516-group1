@@ -101,6 +101,7 @@ public class TestActivity extends ActionBarActivity {
      public int stat = 0;
      public int ctr = 0;
      public File myDirectory;
+     public File myZipDirectory;
      public File[] myGallery;
      public Context context;
 
@@ -117,6 +118,7 @@ public class TestActivity extends ActionBarActivity {
 
      public int disease_count_id = 1;
      public int DISEASE_COUNT = 18;
+     public int DISEASE_IMAGE_THRESHOLD = 10;
 
 
      /**
@@ -141,6 +143,11 @@ public class TestActivity extends ActionBarActivity {
           myDirectory = new File(context.getFilesDir(), "remidiDatabase");
           if( !myDirectory.exists() ) {
                myDirectory.mkdirs();
+          }
+
+          myZipDirectory = new File(context.getFilesDir(), "zipStorage");
+          if( !myZipDirectory.exists() ) {
+               myZipDirectory.mkdirs();
           }
 
           myGallery = new File[DISEASE_COUNT];
@@ -361,7 +368,7 @@ public class TestActivity extends ActionBarActivity {
                String JSON_URL = "http://" + HTTP_HOST + ":" + HTTP_PORT + "/api/labeler/get_images?" + "disease_id=" + (x+1) + "&labeler_id=" + VALIDATOR_ID + "&size=" + IMAGE_COUNTS;
                // "http://54.179.135.52/api/labeler/get_images?disease_id=1&labeler_id=2&size=10"
 
-               if (myGallery[x].listFiles().length <= 10) { // Maximum of 10 images
+               if (myGallery[x].listFiles().length <= DISEASE_IMAGE_THRESHOLD) { // Maximum of 10 images
                     //no_more_disease_space = 0;
                     new DownloadTask().execute(JSON_URL);
                }
@@ -397,7 +404,7 @@ public class TestActivity extends ActionBarActivity {
                     //no_more_img = 0;
                     boolean success = false;
                     String diseaseDir = myGallery[DISEASE_ID-1].getAbsolutePath();
-                    File zipfile = Download_Zip(DOWNLOAD_URL, diseaseDir);
+                    File zipfile = Download_Zip(DOWNLOAD_URL, myZipDirectory.getAbsolutePath());
 
                     if( (zipfile != null) && (!isCorrupted(zipfile)) ) { // unzip then save the file to disease number
                          unzip( zipfile.getAbsolutePath() , diseaseDir);
