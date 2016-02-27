@@ -1,5 +1,6 @@
 package com.remidi.cvmig1516.remidi_x;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -39,7 +40,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                     }
                }
           };
-          AlertDialog.Builder builder = new AlertDialog.Builder(context);
+          AlertDialog.Builder builder = new AlertDialog.Builder(ChangePasswordActivity.this);
           builder.setMessage("Would you like to change your password?").setPositiveButton("Yes", dialogClickListener)
                   .setNegativeButton("No", dialogClickListener).show();
 
@@ -59,7 +60,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                @Override
                public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
-                         case DialogInterface.BUTTON_NEUTRAL:
+                         case DialogInterface.BUTTON_POSITIVE:
                               Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);
                               startActivity(intent);
                               finish();
@@ -67,8 +68,10 @@ public class ChangePasswordActivity extends ActionBarActivity {
                     }
                }
           };
-          AlertDialog.Builder builder = new AlertDialog.Builder(context);
-          builder.setMessage("Reminder: Do not share your password with anyone.").setNeutralButton("OK", dialogClickListener);
+          AlertDialog.Builder builder = new AlertDialog.Builder(this);
+          builder.setTitle("Reminder");
+          builder.setMessage("Do not share your password with anyone.").setPositiveButton("OK", dialogClickListener);
+          builder.show();
      }
 
 }

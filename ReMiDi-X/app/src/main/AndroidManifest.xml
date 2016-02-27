@@ -18,6 +18,19 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".StartAppActivity"
+            android:label="@string/app_name">
+
+            <!-- insert intent and shit here -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+        </activity>
+
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login">
@@ -64,17 +77,6 @@
             android:exported="true">
         </service>
 
-        <activity
-            android:name=".StartAppActivity"
-            android:label="@string/app_name">
-
-            <!-- insert intent and shit here -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-
-        </activity>
         <activity android:name=".ChangePasswordActivity">
         </activity>
 

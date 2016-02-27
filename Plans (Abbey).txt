@@ -10,9 +10,9 @@ LABELER
 [x] Add disease label counter file
 	- save in app data folder
 	- name "label-counter.txt"
-[ ] Rename "Labeler Malaria Main" to "Labeler Main" (Low priority)
-[ ] Rename "Main Activity" to "User Profile" (Low priority)
-[ ] Rename "XMLFileHandler" to "FileHandler" (Low priority)
+[x] Rename "Labeler Malaria Main" to "Labeler Main" (Low priority)
+[x] Rename "Main Activity" to "User Profile" (Low priority)
+[x] Rename "XMLFileHandler" to "FileHandler" (Low priority)
 [x] Revise drawer
 	- Section names: "Label images", "Profile", "Settings", "Logout"
 [ ] Update labeler name on Profile screen
@@ -21,9 +21,9 @@ LABELER
 	- file???
 [x] Add settings right after first sign-in
 	- Force-change password
-		- with reminder not to share
-	- Disease checklist 
+		- with reminder not to share 
 [ ] Fix zoom functionality
+	- huhu how to :(
 [/] Fix patch coordinates
 	- Use scale factor calculated in zoom
 	- to test nalang
