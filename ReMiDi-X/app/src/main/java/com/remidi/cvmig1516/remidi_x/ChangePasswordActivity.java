@@ -34,6 +34,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                          case DialogInterface.BUTTON_NEGATIVE:
                               Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
                               startActivity(intent);
+                              finish();
                               break;
                     }
                }
@@ -53,6 +54,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
           // Do server communication & database change shit here
 
 
+          // Do following once password update is successful:
           DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                @Override
                public void onClick(DialogInterface dialog, int which) {
@@ -60,6 +62,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                          case DialogInterface.BUTTON_NEUTRAL:
                               Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
                               startActivity(intent);
+                              finish();
                               break;
                     }
                }

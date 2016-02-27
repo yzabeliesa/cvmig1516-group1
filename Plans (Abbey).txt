@@ -16,10 +16,10 @@ LABELER
 [x] Revise drawer
 	- Section names: "Label images", "Profile", "Settings", "Logout"
 [ ] Update labeler name on Profile screen
-[ ] Update counters on Profile screen
+[x] Update counters on Profile screen
 [ ] Checklist for diseases (Low priority)
 	- file???
-[ ] Add settings right after first sign-in
+[x] Add settings right after first sign-in
 	- Force-change password
 		- with reminder not to share
 	- Disease checklist 
@@ -39,5 +39,5 @@ UPLOADER
 [x] Attach disease number as intent extra
 [x] Save all new entry info as a file
 [x] Edit ReportViewer
-[ ] Test changes
+[x] Test changes
 	- huhu Ma'am
