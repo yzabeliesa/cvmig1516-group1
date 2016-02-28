@@ -40,6 +40,24 @@ public class FileHandler {
 
      }
 
+     public FileHandler(String folderpath, String name) {
+
+          filename = name;
+          filefolder = folderpath;
+          filepath =  filefolder + "/" + filename;
+          file = new File(filefolder, filename);
+          try {
+               Log.d("FILE PROCESS", "CHECKING NEW FILE");
+               if (!file.exists()) {
+                    Log.d("FILE PROCESS", "CREATED NEW FILE");
+                    file.createNewFile();
+               }
+          } catch (IOException e) {
+               Log.d("FILE ERROR", "Could not create text file!");
+          }
+
+     }
+
      public FileHandler(Context context, String name, String disease, boolean isTextData) {
           if (isTextData) { // Patch data
                filename = "textData.xml";

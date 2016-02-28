@@ -3,7 +3,10 @@ package com.remidi.cvmig1516.remidi_x;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -27,6 +30,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -39,6 +43,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +62,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
      public String HTTP_HOST = ""; // Retrieved upon start
      public String HTTP_HOME = ""; // Retrieved upon start
      public int HTTP_PORT = 80;
+     public File myUserDirectory;
 
      private static final String[] DUMMY_CREDENTIALS = new String[]{
              "foo@example.com:hello", "bar@example.com:world"
@@ -74,6 +81,12 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
      @Override
      protected void onCreate(Bundle savedInstanceState) {
           super.onCreate(savedInstanceState);
+
+          myUserDirectory = new File(getApplicationContext().getFilesDir(), "labelerInfo");
+          if( !myUserDirectory.exists() ) {
+               myUserDirectory.mkdirs();
+          }
+
           setContentView(R.layout.activity_login);
           // Set up the login form.
           mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -157,9 +170,14 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
           } else {
                // Show a progress spinner, and kick off a background task to
                // perform the user login attempt.
-               showProgress(true);
-               mAuthTask = new UserLoginTask(email, password);
-               mAuthTask.execute((Void) null);
+               if (isNetworkAvailable()) {
+                    showProgress(true);
+                    mAuthTask = new UserLoginTask(email, password);
+                    mAuthTask.execute((Void) null);
+               }
+               else {
+                    Toast.makeText(getApplicationContext(), "No Internet Access", Toast.LENGTH_LONG).show();
+               }
           }
      }
 
@@ -309,13 +327,14 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
 
                if (success) {
                     //finish();
-                    mPasswordView.setError("labeler id: " + VALIDATOR_ID);
-                    mPasswordView.requestFocus();
+                    FileHandler fh = new FileHandler(myUserDirectory.getAbsolutePath(), "labeler_id.txt");
+                    fh.write("" + VALIDATOR_ID);
+
                     Intent intent = new Intent(getApplicationContext(), /*UserProfileActivity.class*/ChangePasswordActivity.class);
                     startActivity(intent);
                } else {
-                    //mPasswordView.setError(getString(R.string.error_incorrect_password));
-                    mPasswordView.setError("labeler id: " + VALIDATOR_ID);
+                    mPasswordView.setError("Password not matched with Username");
+                    //mPasswordView.setError("labeler id: " + VALIDATOR_ID);
                     mPasswordView.requestFocus();
                }
           }
@@ -368,6 +387,12 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                Log.d("OutputStream", e.getLocalizedMessage());
                return false;
           }
+     }
+
+     public boolean isNetworkAvailable() {
+          ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+          NetworkInfo ani = cm.getActiveNetworkInfo();
+          return (ani != null && ani.isConnected());
      }
 }
 

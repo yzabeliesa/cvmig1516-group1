@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
+import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -64,13 +65,14 @@ public class LoopService extends Service {
      public File myDirectory;
      public File myZipDirectory;
      public File[] myGallery;
+     public File myUserDirectory;
      public Context context;
 
      public int DISEASE_ID = 1;
      public String DOWNLOAD_URL = "";
      public String MD5 = "";
      public int IMAGE_COUNTS = 5;
-     public int VALIDATOR_ID = 1;
+     public int VALIDATOR_ID;
      public String RESPONDED = "";
      public int DISEASE_COUNT = 18;
      public int DISEASE_IMAGE_THRESHOLD = 10;
@@ -123,10 +125,23 @@ public class LoopService extends Service {
                }
           }
 
-          new Thread(null, receive_zip, "ReceiveZipThread").start();
-          new Thread(null, send, "SendThread").start();
+          myUserDirectory = new File(getApplicationContext().getFilesDir(), "labelerInfo");
+          if( !myUserDirectory.exists() ) {
+               myUserDirectory.mkdirs();
+          }
 
-          super.onStartCommand(intent, flags, startId);
+          FileHandler fh = new FileHandler(myUserDirectory.getAbsolutePath(), "labeler_id.txt");
+          String vi = fh.readContents();
+          if(!vi.equals("") && Integer.parseInt(vi) >= 0 ) {
+
+               VALIDATOR_ID = Integer.parseInt(vi);
+
+               new Thread(null, receive_zip, "ReceiveZipThread").start();
+               new Thread(null, send, "SendThread").start();
+
+               super.onStartCommand(intent, flags, startId);
+          }
+
           return 0;
      }
 
