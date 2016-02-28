@@ -19,9 +19,6 @@ public class StartAppActivity extends ActionBarActivity {
 
           final Context context = getApplicationContext();
 
-          Intent myIntent = new Intent(context, LoopService.class);
-          getApplicationContext().startService(myIntent);
-
           final ProgressBar progressBar = (ProgressBar)findViewById(R.id.startProgressBar);
           progressBar.setMax(100);
 

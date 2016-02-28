@@ -330,6 +330,9 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                     FileHandler fh = new FileHandler(myUserDirectory.getAbsolutePath(), "labeler_id.txt");
                     fh.write("" + VALIDATOR_ID);
 
+                    Intent myIntent = new Intent(getApplicationContext(), LoopService.class);
+                    getApplicationContext().startService(myIntent);
+
                     Intent intent = new Intent(getApplicationContext(), /*UserProfileActivity.class*/ChangePasswordActivity.class);
                     startActivity(intent);
                } else {
