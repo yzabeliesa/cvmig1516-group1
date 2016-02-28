@@ -160,9 +160,10 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           // Initialize images // TEST ONLY
           sample_images = initializeImageArray(); // HERE IN TESTZOOM ONLY
 
-          // Get image file from folder
+
           /* //UNCOMMENT ME IN MAIN
 
+          // Get image file from folder
           File[] images = new File(image_directory).listFiles();
 
           if (images.length == 0) {
@@ -196,12 +197,15 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           // Initialize uploader
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
-          // Load custom display image
+
+
           Display display = getWindowManager().getDefaultDisplay();
           Point size = new Point();
           display.getSize(size);
           screen_width = size.x;
 
+          /*
+          // TEST ZOOM
           mVisible = true;
           mContentView = new DrawingView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
           mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -216,14 +220,13 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
           scaleFactor = getScaleFactor(mContentView,screen_width);
 
-          // Initialize UI
-          initializeUI(disease);
+          */
 
-          /*
+
           // Initialize (turn into AsyncTask)
           mVisible = true;
           mContentView = new DrawingView(this);
-          initializeUI(disease);
+          //initializeUI(disease);
           mContentView.setImageBitmap(imageBitmap);
           mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
           mContentView.setAdjustViewBounds(true);
@@ -263,7 +266,10 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           };
 
           button.setOnClickListener(clickListener);
-          */
+
+
+          // Initialize UI
+          initializeUI(disease);
 
      }
 
@@ -284,12 +290,16 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
      }
 
+     private Bitmap getScaledImage(ImageView view, int boundBoxInDp) {
+          // Get the ImageView and its bitmap
+          Drawable drawing = view.getDrawable();
+          Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+          return getScaledImage(bitmap, boundBoxInDp);
+     }
+
      private Bitmap getScaledImage(Bitmap bitmap, int boundBoxInDp)
      {
-          // Get the ImageView and its bitmap
-          //Drawable drawing = view.getDrawable();
-          //Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-
           // Get current dimensions
           int width = bitmap.getWidth();
           int height = bitmap.getHeight();
@@ -392,7 +402,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
      }
 
-     class DrawingView extends ZoomImageView {
+     class DrawingView extends ImageView {
           Paint       mPaint;
           Bitmap  mBitmap;
           Canvas  mCanvas;
@@ -428,6 +438,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                mBitmapPaint.setColor(getResources().getColor(R.color.teal));
           }
 
+          /* // if extending ZoomImageView
           public DrawingView(Context context, Bitmap bitmap, ViewGroup vg) {
                super(context,bitmap,vg);
                mPaint = new Paint();
@@ -443,6 +454,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                mBitmapPaint = new Paint();
                mBitmapPaint.setColor(getResources().getColor(R.color.teal));
           }
+          */
 
 
           @Override
@@ -856,6 +868,9 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           }
 
           File image = images[0]; // Gets first image in image_directory
+          image.delete();
+          image = images[0];
+
           //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
@@ -883,11 +898,14 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           mContentView.clearDraw();
           updateProgress();
 
-          // Load custom display image
           Display display = getWindowManager().getDefaultDisplay();
           Point size = new Point();
           display.getSize(size);
           screen_width = size.x;
+
+          /*
+          // TEST ZOOM
+
 
           mVisible = true;
           mContentView = new DrawingView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
@@ -896,16 +914,16 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
           mContentView.invalidate();
           mContentView.setMaxZoom(4f);
-          //drawable = mContentView.getDrawable();
 
           mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad_test);
           mDrawingPad.addView(mContentView);
 
           scaleFactor = getScaleFactor(mContentView,screen_width);
+          */
 
-          /*
-          mContentView.setImageDrawable(sample_images[current_image]);
-          drawable = mContentView.getDrawable();
+          // MAIN
+          //mContentView.setImageDrawable(sample_images[current_image]);
+          //drawable = mContentView.getDrawable();
           mContentView.resetDraw();
           mContentView.invalidate();
 
@@ -919,7 +937,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                mDrawingPad.addView(mContentView);
                mode = MODE_PATCH;
           }
-          */
+
 
           disease_count_file.incrementCount(disease_num);
 

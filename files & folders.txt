@@ -12,7 +12,7 @@ LEGEND
 		"Progress files for all labelled disease"
 		*<diseasenum>-progress.txt
 
-	/<diseasename> <-- imagefolder, also where zip files are created and saved
+	/<diseasename> <-- where zip files are created and saved
 		/<imageno>_<patchno> <-- will be deleted once in a zip file
 			*textData.xml
 		@img<imgno>.zip <-- will be moved to remidiDatabase right after creation

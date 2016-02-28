@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -64,7 +63,7 @@ public class LabelerMainActivity extends ActionBarActivity {
 
      Drawable[] sample_images;
      Dialog labelDialog;
-     int current_image = 0;
+     int current_image = 0; // Actual image number
      int current_patch = 0;
      boolean currently_new = true;
      Context context;
@@ -111,12 +110,10 @@ public class LabelerMainActivity extends ActionBarActivity {
      final int MODE_ZOOM = 1;
      int mode = MODE_PATCH;
 
-     String image_directory = "";
-     File[] images;
-     int image_ctr = 0;
+     String image_directory = ""; // Directory of where image to be patched are located
 
      DiseaseCountFile disease_count_file;
-     int disease_num;
+     int disease_num = 1;
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -134,15 +131,18 @@ public class LabelerMainActivity extends ActionBarActivity {
           }
 
           // Get intent data
+          /* // UNCOMMENT ME WHEN NO LONGER TESTING
           Bundle extras = getIntent().getExtras();
 
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
           }
+          */
+          disease = "Malaria"; // HERE IN TESTZOOM ONLY
+          validator = "some validator"; // HERE IN TESTZOOM ONLY
 
           // Load uploader
-          disease_num = 1;
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
           for (int i = 0; i<diseases.length; i++) {
                if (diseases[i].equals(disease)) {
@@ -153,55 +153,85 @@ public class LabelerMainActivity extends ActionBarActivity {
 
           image_directory = context.getFilesDir() + "/disease_" + disease_num;
 
-          uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
+          // Set Activity title
+          //this.setTitle("Test Labeler: " + disease); // HERE IN TESTZOOM ONLY
+          this.setTitle("Labeler: " + disease); // UNCOMMENT ME IN MAIN
+
+          // Initialize images // TEST ONLY
+          sample_images = initializeImageArray(); // HERE IN TESTZOOM ONLY
+
+
+          /* //UNCOMMENT ME IN MAIN
+
+          // Get image file from folder
+          File[] images = new File(image_directory).listFiles();
+
+          if (images.length == 0) {
+               Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
+               startActivity(intent);
+               progress_file.delete();
+               finish();
+          }
+
+          File image = images[0]; // Gets first image in image_directory
+          current_image = tokenizeImageNum(image);
+          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+
+          */
+
+          current_image = 0; // HERE IN TESTZOOM ONLY
+          BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[0]; // HERE IN TESTZOOM ONLY
+          Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
 
           // Create handler for progress file
           progress_file = new FileHandler(context,disease_num + "-progress.txt", disease, false);
-          if (progress_file.readContents() == "") progress_file.write("0");
+          if (progress_file.readContents() == "") progress_file.write(current_image + "");
 
           // Initialize disease count file
           disease_count_file = new DiseaseCountFile(context);
-
-          // Set Activity title
-          this.setTitle("Labeler: " + disease);
-
-          // Initialize images
-          sample_images = initializeImageArray();
 
           // Load dialog box
           labelDialog = new Dialog(LabelerMainActivity.this);
           labelDialog.setContentView(R.layout.fragment_labeler_dialog);
 
-          // Get image file from folder
-          File srcFile = new File(image_directory);
-          images = srcFile.listFiles();
+          // Initialize uploader
+          uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
-          if (image_ctr >= images.length) {
-               Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
-               startActivity(intent);
-          }
 
-          File image = images[image_ctr];
-          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-
-          current_image = tokenizeImageNum(image);
-
-          // Initialize (turn into AsyncTask)
-          mVisible = true;
-          mContentView = new DrawingView(this);
-          initialize(disease);
-          mContentView.setImageBitmap(imageBitmap);
-          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-          mContentView.setAdjustViewBounds(true);
-          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-          drawable = mContentView.getDrawable();
 
           Display display = getWindowManager().getDefaultDisplay();
           Point size = new Point();
           display.getSize(size);
           screen_width = size.x;
 
+          /*
+          // TEST ZOOM
+          mVisible = true;
+          mContentView = new DrawingView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          mContentView.invalidate();
+          mContentView.setMaxZoom(4f);
+          //drawable = mContentView.getDrawable();
+
+          mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad_test);
+          mDrawingPad.addView(mContentView);
+
           scaleFactor = getScaleFactor(mContentView,screen_width);
+
+          */
+
+
+          // Initialize (turn into AsyncTask)
+          mVisible = true;
+          mContentView = new DrawingView(this);
+          //initializeUI(disease);
+          mContentView.setImageBitmap(imageBitmap);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          drawable = mContentView.getDrawable();
 
           zoomContentView = new ZoomImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           zoomContentView.setMaxZoom(4f);
@@ -223,20 +253,23 @@ public class LabelerMainActivity extends ActionBarActivity {
                          drawable = mContentView.getDrawable();
                          mDrawingPad.addView(zoomContentView);
                          button.setText("Zoom mode");
-                         text.setText(getResources().getText(R.string.zoom_instructions));
+                         text.setText(getString(R.string.zoom_instructions));
                     }
                     else {
                          mode = MODE_PATCH;
                          mDrawingPad.removeView(zoomContentView);
                          mDrawingPad.addView(mContentView);
                          button.setText("Patch mode");
-                         text.setText(getResources().getText(R.string.labeler_instructions));
+                         text.setText(getString(R.string.labeler_instructions));
                     }
                }
           };
 
           button.setOnClickListener(clickListener);
 
+
+          // Initialize UI
+          initializeUI(disease);
 
      }
 
@@ -257,12 +290,16 @@ public class LabelerMainActivity extends ActionBarActivity {
 
      }
 
-     private Bitmap getScaledImage(ImageView view, int boundBoxInDp)
-     {
+     private Bitmap getScaledImage(ImageView view, int boundBoxInDp) {
           // Get the ImageView and its bitmap
           Drawable drawing = view.getDrawable();
           Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
 
+          return getScaledImage(bitmap, boundBoxInDp);
+     }
+
+     private Bitmap getScaledImage(Bitmap bitmap, int boundBoxInDp)
+     {
           // Get current dimensions
           int width = bitmap.getWidth();
           int height = bitmap.getHeight();
@@ -371,7 +408,7 @@ public class LabelerMainActivity extends ActionBarActivity {
           Canvas  mCanvas;
           Paint   mBitmapPaint;
           private float mX, mY;
-          private static final float TOUCH_TOLERANCE = 20;
+          private static final float TOUCH_TOLERANCE = 10;
           float radius = 0;
           float cx = 0;
           float cy = 0;
@@ -379,6 +416,10 @@ public class LabelerMainActivity extends ActionBarActivity {
           int height = 1;
           boolean isPatching = false;
           boolean initialized = false;
+
+          final int CIRCLE_STROKE = 7;
+          final int TEXT_STROKE = 5;
+          final int OFFSET_CONSTANT = 10;
 
           public DrawingView(Context context) {
                super(context);
@@ -388,6 +429,7 @@ public class LabelerMainActivity extends ActionBarActivity {
                mPaint.setStyle(Paint.Style.STROKE);
                mPaint.setShadowLayer(5, 2, 2, Color.BLACK);
                mPaint.setTextSize(50);
+               mPaint.setTextAlign(Paint.Align.CENTER);
                mPaint.setAntiAlias(true);
                mPaint.setColor(Color.WHITE);
 
@@ -395,6 +437,26 @@ public class LabelerMainActivity extends ActionBarActivity {
                mBitmapPaint = new Paint();
                mBitmapPaint.setColor(getResources().getColor(R.color.teal));
           }
+
+          /* // if extending ZoomImageView
+          public DrawingView(Context context, Bitmap bitmap, ViewGroup vg) {
+               super(context,bitmap,vg);
+               mPaint = new Paint();
+               mPaint.setStrokeWidth(10);
+               mPaint.setStyle(Paint.Style.STROKE);
+               mPaint.setShadowLayer(5, 2, 2, Color.BLACK);
+               mPaint.setTextSize(50);
+               mPaint.setTextAlign(Paint.Align.CENTER);
+               mPaint.setAntiAlias(true);
+               mPaint.setColor(Color.WHITE);
+
+               //mPath = new Path();
+               mBitmapPaint = new Paint();
+               mBitmapPaint.setColor(getResources().getColor(R.color.teal));
+          }
+          */
+
+
           @Override
           protected void onSizeChanged(int w, int h, int oldw, int oldh) {
                super.onSizeChanged(w, h, oldw, oldh);
@@ -418,10 +480,12 @@ public class LabelerMainActivity extends ActionBarActivity {
                               mPaint.setColor(getResources().getColor(R.color.green));
                          else mPaint.setColor(getResources().getColor(R.color.red));
 
-                         //mPaint.setStrokeWidth(5);
-                         mCanvas.drawCircle(patch.x*scaleFactor, patch.y*scaleFactor, patch.radius*scaleFactor, mPaint);
-                         //mPaint.setStrokeWidth(3);
-                         mCanvas.drawText((patch.patchno + 1) + "", patch.x*scaleFactor, patch.y*scaleFactor, mPaint);
+                         mPaint.setStrokeWidth(CIRCLE_STROKE);
+                         mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+
+                         String text = (patch.patchno + 1) + "";
+                         mPaint.setStrokeWidth(TEXT_STROKE);
+                         mCanvas.drawText(text, patch.x, patch.y - ((mPaint.descent() + mPaint.ascent()) / 2) , mPaint);
                     }
                     initialized = true;
                }
@@ -440,10 +504,12 @@ public class LabelerMainActivity extends ActionBarActivity {
                          mPaint.setColor(getResources().getColor(R.color.green));
                     else mPaint.setColor(getResources().getColor(R.color.red));
 
-                    mPaint.setStrokeWidth(7);
-                    mCanvas.drawCircle(patch.x*scaleFactor, patch.y*scaleFactor, patch.radius*scaleFactor, mPaint);
-                    mPaint.setStrokeWidth(5);
-                    mCanvas.drawText((patch.patchno+1) + "", patch.x, patch.y, mPaint);
+                    mPaint.setStrokeWidth(CIRCLE_STROKE);
+                    mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+
+                    String text = (patch.patchno + 1) + "";
+                    mPaint.setStrokeWidth(TEXT_STROKE);
+                    mCanvas.drawText(text, patch.x, patch.y - ((mPaint.descent() + mPaint.ascent()) / 2), mPaint);
                }
 
           }
@@ -463,9 +529,10 @@ public class LabelerMainActivity extends ActionBarActivity {
 
                // Check if area is patched. If yes, open dialog box.
                isPatching = true;
+               /*
                for (int i = 0; i<patches.size(); i++) {
                     Patch patch = patches.get(i);
-                    if (isBetween(patch.x*scaleFactor,patch.y*scaleFactor,x,y,patch.radius*scaleFactor)) {
+                    if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
                          current_patch = i;
                          currently_new = false;
                          isPatching = false;
@@ -474,6 +541,7 @@ public class LabelerMainActivity extends ActionBarActivity {
                          break;
                     }
                }
+               */
 
           }
 
@@ -482,7 +550,6 @@ public class LabelerMainActivity extends ActionBarActivity {
                mX = x;
                mY = y;
                radius = getRadius(initX, initY, mX, mY);
-               //Toast.makeText(context, mX + ", " + mY, Toast.LENGTH_SHORT).show();
 
                if (radius > TOUCH_TOLERANCE && isPatching) { //10
 
@@ -490,7 +557,6 @@ public class LabelerMainActivity extends ActionBarActivity {
                     cy = getMidpoint(initY, mY);
                     getDrawBounds();
                     int offset = (getBitmapOffset(false))[0];
-                    //Toast.makeText(context, "Top offset: " + offset + "\nBottom offset: " + (mContentView_bottom-offset), Toast.LENGTH_SHORT).show();
 
                     if ((cy-radius) > offset && (cy+radius) < (mContentView.getHeight()-offset)) {
                          //Toast.makeText(context, "Must create patch!!!", Toast.LENGTH_SHORT).show();
@@ -503,12 +569,14 @@ public class LabelerMainActivity extends ActionBarActivity {
                               mPaint.setColor(getResources().getColor(R.color.green));
                          else mPaint.setColor(getResources().getColor(R.color.red));
 
-                         mPaint.setStrokeWidth(7);
+                         mPaint.setStrokeWidth(CIRCLE_STROKE);
                          mCanvas.drawCircle(cx, cy, radius, mPaint);
-                         mPaint.setStrokeWidth(5);
-                         mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
 
-                         Toast.makeText(context, "Patch created! \\:D/\nX: " + patch.x + "\nY: " + patch.y + "\nRadius: " + patch.radius, Toast.LENGTH_LONG).show();
+                         String text = (current_patch + 1) + "";
+                         mPaint.setStrokeWidth(TEXT_STROKE);
+                         mCanvas.drawText(text, cx, cy - ((mPaint.descent() + mPaint.ascent()) / 2), mPaint);
+
+                         //Toast.makeText(context, "Patch created! \\:D/\nX: " + patch.x + "\nY: " + patch.y + "\nRadius: " + patch.radius, Toast.LENGTH_LONG).show();
 
                          updateProgress();
                     }
@@ -518,11 +586,11 @@ public class LabelerMainActivity extends ActionBarActivity {
                }
 
                else {
-
+                    // Check if within patch area. If yes, open dialog box.
                     int i;
                     for (i = 0; i<patches.size(); i++) {
                          Patch patch = patches.get(i);
-                         if (isBetween(patch.x*scaleFactor,patch.y*scaleFactor,x,y,patch.radius*scaleFactor)) {
+                         if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
                               current_patch = i;
                               currently_new = false;
                               isPatching = false;
@@ -532,10 +600,6 @@ public class LabelerMainActivity extends ActionBarActivity {
                          }
                     }
                }
-
-               //else {
-
-               //}
 
           }
 
@@ -611,7 +675,7 @@ public class LabelerMainActivity extends ActionBarActivity {
           return images;
      }
 
-     public void initialize(String disease) {
+     public void initializeUI(String disease) {
 
           // Load progress file data
           loadProgressFile();
@@ -791,25 +855,39 @@ public class LabelerMainActivity extends ActionBarActivity {
      public void loadNextImage() {
 
           /*
-          image_ctr++;
+          File[] images = (new File(image_directory)).listFiles();
 
 
-          if (image_ctr >= images.length) {
+           // UNCOMMENT ME IN MAIN
+          if (images.length == 0) {
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
                startActivity(intent);
-               return;
+               progress_file.delete();
+               finish();
           }
-          */
 
-          File image = images[image_ctr];
+          File image = images[0]; // Gets first image in image_directory
+          image.delete();
+          image = images[0];
 
-          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
           //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
+          Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
+          */
 
-          //progress_file = new FileHandler(context,"progress.txt", disease, false);
+          current_image++; // HERE IN TESTZOOM ONLY
+          if (current_image == 5) { // HERE IN TESTZOOM ONLY
+               Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class); // HERE IN TESTZOOM ONLY
+               startActivity(intent); // HERE IN TESTZOOM ONLY
+               progress_file.delete(); // HERE IN TESTZOOM ONLY
+               finish(); // HERE IN TESTZOOM ONLY
+          } // HERE IN TESTZOOM ONLY
+
+          BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
+          Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
+
           progress_file.write(current_image + "");
-          initialize(disease);
+          initializeUI(disease);
           mContentView.setImageBitmap(imageBitmap);
           drawable = mContentView.getDrawable();
           mContentView_top = drawable.getBounds().top;
@@ -819,8 +897,32 @@ public class LabelerMainActivity extends ActionBarActivity {
           mContentView.clearDraw();
           updateProgress();
 
-          mContentView.setImageDrawable(sample_images[current_image]);
-          drawable = mContentView.getDrawable();
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          screen_width = size.x;
+
+          /*
+          // TEST ZOOM
+
+
+          mVisible = true;
+          mContentView = new DrawingView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          mContentView.invalidate();
+          mContentView.setMaxZoom(4f);
+
+          mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad_test);
+          mDrawingPad.addView(mContentView);
+
+          scaleFactor = getScaleFactor(mContentView,screen_width);
+          */
+
+          // MAIN
+          //mContentView.setImageDrawable(sample_images[current_image]);
+          //drawable = mContentView.getDrawable();
           mContentView.resetDraw();
           mContentView.invalidate();
 
@@ -835,8 +937,8 @@ public class LabelerMainActivity extends ActionBarActivity {
                mode = MODE_PATCH;
           }
 
-          disease_count_file.incrementCount(disease_num);
 
+          disease_count_file.incrementCount(disease_num);
 
      }
 
@@ -867,9 +969,20 @@ public class LabelerMainActivity extends ActionBarActivity {
           StringTokenizer tokens = new StringTokenizer(contents, "$");
 
           current_image = Integer.parseInt(tokens.nextToken());
-          File image = new File(image_directory + "/img" + current_image + ".png");
+
+
+          /* UNCOMMENT IN MAIN
+
+          File[] images = (new File(image_directory)).listFiles();
+          File image = images[0];
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
           //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+
+          */
+
+          BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
+          Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
+
           mContentView.setImageBitmap(imageBitmap);
 
           while (tokens.hasMoreTokens()) {
@@ -958,7 +1071,7 @@ public class LabelerMainActivity extends ActionBarActivity {
 
      public void createPatch(float x, float y, float radius) {
           final int patchno = patches.size();
-          Patch patch = new Patch(context, current_image, patchno, x/scaleFactor, y/scaleFactor, radius/scaleFactor, disease);
+          Patch patch = new Patch(context, current_image, patchno, x, y, radius, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
@@ -969,6 +1082,7 @@ public class LabelerMainActivity extends ActionBarActivity {
      public void deletePatch() {
 
           if (patches.size() > 0) {
+
                int patchno = current_patch;
                Patch patch = patches.get(patchno);
                patch.delete();
@@ -1021,32 +1135,52 @@ public class LabelerMainActivity extends ActionBarActivity {
      public void confirmSendData(View view) {
 
           // Confirm if send. Return if no, sendData() if yes.
-          DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-               @Override
-               public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                         case DialogInterface.BUTTON_POSITIVE:
-                              sendData();
-                              break;
-                         case DialogInterface.BUTTON_NEGATIVE:
-                              return;
+          if (patches.size() == 0) {
+               DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                         switch (which) {
+                              case DialogInterface.BUTTON_POSITIVE:
+                                   // Send diagnosis
+                                   //sendData(false);
+                                   loadNextImage();
+                                   break;
+                              case DialogInterface.BUTTON_NEGATIVE:
+                                   // Cancel
+                                   break;
+                         }
                     }
-               }
-          };
-          AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMainActivity.this);
-          builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
-                  .setNegativeButton("No", dialogClickListener).show();
+               };
+               AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMainActivity.this);
+               builder.setMessage("Sending a diagnosis without creating any patches would mean this sample is not infected. Are you sure you want to send this diagnosis?").setPositiveButton("Yes", dialogClickListener)
+                       .setNegativeButton("No", dialogClickListener)
+                       .setTitle("Send diagnosis without patches").show();
+          }
+          else {
 
+               DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                         switch (which) {
+                              case DialogInterface.BUTTON_POSITIVE:
+                                   sendData(true);
+                                   break;
+                              case DialogInterface.BUTTON_NEGATIVE:
+                                   return;
+                         }
+                    }
+               };
+               AlertDialog.Builder builder = new AlertDialog.Builder(LabelerMainActivity.this);
+               builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
+                       .setNegativeButton("No", dialogClickListener)
+                       .setTitle("Send diagnosis").show();
+
+          }
      }
 
-     public void sendData() {
+     public void sendData(boolean infected) {
 
           // Check if all patches have enough data. Continue if yes, toast and return if no.
-          if (patches.size() == 0) {
-               Toast.makeText(context, "Image has no diagnosis.", Toast.LENGTH_SHORT).show();
-               return;
-          }
-
           boolean patchDataComplete = true;
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
@@ -1071,7 +1205,6 @@ public class LabelerMainActivity extends ActionBarActivity {
           String zipPath = context.getFilesDir() + "/" + disease + "/img" + patches.get(0).formatImgno() + ".zip";
           uploadZipfile(imageFolder, zipPath); //bring me to life
           //Toast.makeText(context, "SENTTT!!!", Toast.LENGTH_SHORT).show(); //test
-          //uploadXMLFiles();
 
           // Load next image
           loadNextImage();
@@ -1168,8 +1301,8 @@ public class LabelerMainActivity extends ActionBarActivity {
           //Toast.makeText(context, "IP address: " + HTTP_IP_ADDRESS + "\nPort: " + HTTP_PORT + "\nHome: " + HTTP_HOME, Toast.LENGTH_SHORT).show();
      }
 
-     public boolean isBetween(float x1, float y1, float x2, float y2, float radius) {
-          return (getRadius(x1,y1,x2,y2) <= radius);
+     public boolean isBetween(float cx, float cy, float x, float y, float radius) {
+          return (getRadius(cx,cy,x,y) <= radius);
      }
 
      public float getMidpoint(float a, float b) {
@@ -1181,7 +1314,7 @@ public class LabelerMainActivity extends ActionBarActivity {
      }
 
      public float getRadius(float x1, float y1, float x2, float y2) {
-          return (float)(Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))/2);
+          return (float)((Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2))))/2)-10;
      }
 
 
@@ -1196,7 +1329,7 @@ public class LabelerMainActivity extends ActionBarActivity {
 
           @Override
           protected Boolean doInBackground(String... params) {
-               initialize(params[0]);
+               initializeUI(params[0]);
                return true;
           }
 
