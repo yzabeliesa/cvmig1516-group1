@@ -102,7 +102,7 @@ public class LabelerMainActivity extends ActionBarActivity {
      Uploader uploader;
      Drawable drawable;
      DrawingView mContentView;
-     TouchImageView zoomContentView;
+     ZoomImageView zoomContentView;
      LinearLayout mDrawingPad;
      int mContentView_top = 0;
      int mContentView_bottom = 0;
@@ -203,7 +203,7 @@ public class LabelerMainActivity extends ActionBarActivity {
 
           scaleFactor = getScaleFactor(mContentView,screen_width);
 
-          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          zoomContentView = new ZoomImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           zoomContentView.setMaxZoom(4f);
 
           mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad);
@@ -826,7 +826,7 @@ public class LabelerMainActivity extends ActionBarActivity {
 
           scaleFactor = getScaleFactor(mContentView,screen_width);
 
-          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          zoomContentView = new ZoomImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
 
           if (mode == MODE_ZOOM) {

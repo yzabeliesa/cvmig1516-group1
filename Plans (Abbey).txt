@@ -24,9 +24,9 @@ LABELER
 		- with reminder not to share 
 [ ] Fix zoom functionality
 	- huhu how to :(
-[ ] Fix image loading
+[x] Fix image loading
 	- load first image in folder
-[/] Fix patch coordinates
+[x] Fix patch coordinates
 	- Use scale factor calculated in zoom
 	- to test nalang
 

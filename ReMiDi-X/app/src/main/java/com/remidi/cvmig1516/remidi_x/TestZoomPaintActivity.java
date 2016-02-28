@@ -7,14 +7,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -104,7 +101,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
      Uploader uploader;
      Drawable drawable;
      DrawingView mContentView;
-     TouchImageView zoomContentView;
+     ZoomImageView zoomContentView;
      LinearLayout mDrawingPad;
      int mContentView_top = 0;
      int mContentView_bottom = 0;
@@ -199,6 +196,30 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           // Initialize uploader
           uploader = new Uploader(context,myDirectory, disease_num, HTTP_IP_ADDRESS, HTTP_PORT, HTTP_HOME);
 
+          // Load custom display image
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          screen_width = size.x;
+
+          mVisible = true;
+          mContentView = new DrawingView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          mContentView.invalidate();
+          mContentView.setMaxZoom(4f);
+          //drawable = mContentView.getDrawable();
+
+          mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad_test);
+          mDrawingPad.addView(mContentView);
+
+          scaleFactor = getScaleFactor(mContentView,screen_width);
+
+          // Initialize UI
+          initializeUI(disease);
+
+          /*
           // Initialize (turn into AsyncTask)
           mVisible = true;
           mContentView = new DrawingView(this);
@@ -209,14 +230,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
           drawable = mContentView.getDrawable();
 
-          Display display = getWindowManager().getDefaultDisplay();
-          Point size = new Point();
-          display.getSize(size);
-          screen_width = size.x;
-
-          scaleFactor = getScaleFactor(mContentView,screen_width);
-
-          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          zoomContentView = new ZoomImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           zoomContentView.setMaxZoom(4f);
 
           mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad_test);
@@ -249,7 +263,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           };
 
           button.setOnClickListener(clickListener);
-
+          */
 
      }
 
@@ -270,11 +284,11 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
      }
 
-     private Bitmap getScaledImage(ImageView view, int boundBoxInDp)
+     private Bitmap getScaledImage(Bitmap bitmap, int boundBoxInDp)
      {
           // Get the ImageView and its bitmap
-          Drawable drawing = view.getDrawable();
-          Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+          //Drawable drawing = view.getDrawable();
+          //Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
 
           // Get current dimensions
           int width = bitmap.getWidth();
@@ -378,13 +392,13 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
      }
 
-     class DrawingView extends ImageView {
+     class DrawingView extends ZoomImageView {
           Paint       mPaint;
           Bitmap  mBitmap;
           Canvas  mCanvas;
           Paint   mBitmapPaint;
           private float mX, mY;
-          private static final float TOUCH_TOLERANCE = 20;
+          private static final float TOUCH_TOLERANCE = 10;
           float radius = 0;
           float cx = 0;
           float cy = 0;
@@ -413,6 +427,24 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                mBitmapPaint = new Paint();
                mBitmapPaint.setColor(getResources().getColor(R.color.teal));
           }
+
+          public DrawingView(Context context, Bitmap bitmap, ViewGroup vg) {
+               super(context,bitmap,vg);
+               mPaint = new Paint();
+               mPaint.setStrokeWidth(10);
+               mPaint.setStyle(Paint.Style.STROKE);
+               mPaint.setShadowLayer(5, 2, 2, Color.BLACK);
+               mPaint.setTextSize(50);
+               mPaint.setTextAlign(Paint.Align.CENTER);
+               mPaint.setAntiAlias(true);
+               mPaint.setColor(Color.WHITE);
+
+               //mPath = new Path();
+               mBitmapPaint = new Paint();
+               mBitmapPaint.setColor(getResources().getColor(R.color.teal));
+          }
+
+
           @Override
           protected void onSizeChanged(int w, int h, int oldw, int oldh) {
                super.onSizeChanged(w, h, oldw, oldh);
@@ -485,6 +517,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
                // Check if area is patched. If yes, open dialog box.
                isPatching = true;
+               /*
                for (int i = 0; i<patches.size(); i++) {
                     Patch patch = patches.get(i);
                     if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
@@ -496,15 +529,15 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                          break;
                     }
                }
+               */
 
           }
 
           private void touch_up(float x, float y) {
 
-               mX = x - OFFSET_CONSTANT;
-               mY = y - OFFSET_CONSTANT;
+               mX = x;
+               mY = y;
                radius = getRadius(initX, initY, mX, mY);
-               //Toast.makeText(context, mX + ", " + mY, Toast.LENGTH_SHORT).show();
 
                if (radius > TOUCH_TOLERANCE && isPatching) { //10
 
@@ -512,7 +545,6 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                     cy = getMidpoint(initY, mY);
                     getDrawBounds();
                     int offset = (getBitmapOffset(false))[0];
-                    //Toast.makeText(context, "Top offset: " + offset + "\nBottom offset: " + (mContentView_bottom-offset), Toast.LENGTH_SHORT).show();
 
                     if ((cy-radius) > offset && (cy+radius) < (mContentView.getHeight()-offset)) {
                          //Toast.makeText(context, "Must create patch!!!", Toast.LENGTH_SHORT).show();
@@ -532,7 +564,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                          mPaint.setStrokeWidth(TEXT_STROKE);
                          mCanvas.drawText(text, cx, cy - ((mPaint.descent() + mPaint.ascent()) / 2), mPaint);
 
-                         Toast.makeText(context, "Patch created! \\:D/\nX: " + patch.x + "\nY: " + patch.y + "\nRadius: " + patch.radius, Toast.LENGTH_LONG).show();
+                         //Toast.makeText(context, "Patch created! \\:D/\nX: " + patch.x + "\nY: " + patch.y + "\nRadius: " + patch.radius, Toast.LENGTH_LONG).show();
 
                          updateProgress();
                     }
@@ -542,7 +574,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                }
 
                else {
-
+                    // Check if within patch area. If yes, open dialog box.
                     int i;
                     for (i = 0; i<patches.size(); i++) {
                          Patch patch = patches.get(i);
@@ -563,6 +595,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           public boolean onTouchEvent(MotionEvent event) {
                float x = event.getX();
                float y = event.getY();
+               Toast.makeText(context, "TOUCH", Toast.LENGTH_SHORT).show();
 
                switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -829,7 +862,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           */
 
           current_image++; // HERE IN TESTZOOM ONLY
-          if (current_image >= 5) { // HERE IN TESTZOOM ONLY
+          if (current_image == 5) { // HERE IN TESTZOOM ONLY
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class); // HERE IN TESTZOOM ONLY
                startActivity(intent); // HERE IN TESTZOOM ONLY
                progress_file.delete(); // HERE IN TESTZOOM ONLY
@@ -839,7 +872,6 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
           Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
 
-          //progress_file = new FileHandler(context,"progress.txt", disease, false);
           progress_file.write(current_image + "");
           initializeUI(disease);
           mContentView.setImageBitmap(imageBitmap);
@@ -851,6 +883,27 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           mContentView.clearDraw();
           updateProgress();
 
+          // Load custom display image
+          Display display = getWindowManager().getDefaultDisplay();
+          Point size = new Point();
+          display.getSize(size);
+          screen_width = size.x;
+
+          mVisible = true;
+          mContentView = new DrawingView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
+          mContentView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+          mContentView.setAdjustViewBounds(true);
+          mContentView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+          mContentView.invalidate();
+          mContentView.setMaxZoom(4f);
+          //drawable = mContentView.getDrawable();
+
+          mDrawingPad=(LinearLayout)findViewById(R.id.drawing_pad_test);
+          mDrawingPad.addView(mContentView);
+
+          scaleFactor = getScaleFactor(mContentView,screen_width);
+
+          /*
           mContentView.setImageDrawable(sample_images[current_image]);
           drawable = mContentView.getDrawable();
           mContentView.resetDraw();
@@ -858,7 +911,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
           scaleFactor = getScaleFactor(mContentView,screen_width);
 
-          zoomContentView = new TouchImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          zoomContentView = new ZoomImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
           //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
 
           if (mode == MODE_ZOOM) {
@@ -866,9 +919,9 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                mDrawingPad.addView(mContentView);
                mode = MODE_PATCH;
           }
+          */
 
           disease_count_file.incrementCount(disease_num);
-
 
      }
 
@@ -1065,26 +1118,6 @@ public class TestZoomPaintActivity extends ActionBarActivity {
      public void confirmSendData(View view) {
 
           // Confirm if send. Return if no, sendData() if yes.
-          DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-               @Override
-               public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                         case DialogInterface.BUTTON_POSITIVE:
-                              checkForPatches();
-                              break;
-                         case DialogInterface.BUTTON_NEGATIVE:
-                              return;
-                    }
-               }
-          };
-          AlertDialog.Builder builder = new AlertDialog.Builder(TestZoomPaintActivity.this);
-          builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
-                  .setNegativeButton("No", dialogClickListener).show();
-
-     }
-
-     public void checkForPatches() {
-
           if (patches.size() == 0) {
                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
@@ -1092,7 +1125,8 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                          switch (which) {
                               case DialogInterface.BUTTON_POSITIVE:
                                    // Send diagnosis
-                                   sendData(false);
+                                   //sendData(false);
+                                   loadNextImage();
                                    break;
                               case DialogInterface.BUTTON_NEGATIVE:
                                    // Cancel
@@ -1100,18 +1134,36 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                          }
                     }
                };
-               AlertDialog.Builder builder = new AlertDialog.Builder(context);
-               builder.setMessage("Sending without creating any patches would mean this sample is not infected. Are you sure you want to send this diagnosis?").setPositiveButton("Yes", dialogClickListener)
-                       .setNegativeButton("No", dialogClickListener).show();
+               AlertDialog.Builder builder = new AlertDialog.Builder(TestZoomPaintActivity.this);
+               builder.setMessage("Sending a diagnosis without creating any patches would mean this sample is not infected. Are you sure you want to send this diagnosis?").setPositiveButton("Yes", dialogClickListener)
+                       .setNegativeButton("No", dialogClickListener)
+                       .setTitle("Send diagnosis without patches").show();
           }
-          else sendData(true);
+          else {
 
+               DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                         switch (which) {
+                              case DialogInterface.BUTTON_POSITIVE:
+                                   sendData(true);
+                                   break;
+                              case DialogInterface.BUTTON_NEGATIVE:
+                                   return;
+                         }
+                         }
+               };
+               AlertDialog.Builder builder = new AlertDialog.Builder(TestZoomPaintActivity.this);
+               builder.setMessage("Are you sure you want to send the diagnosis?").setPositiveButton("Yes", dialogClickListener)
+                       .setNegativeButton("No", dialogClickListener)
+                       .setTitle("Send diagnosis").show();
+
+          }
      }
 
      public void sendData(boolean infected) {
 
           // Check if all patches have enough data. Continue if yes, toast and return if no.
-
           boolean patchDataComplete = true;
           for (int i = 0; i<patches.size(); i++) {
                Patch patch = patches.get(i);
@@ -1136,7 +1188,6 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           String zipPath = context.getFilesDir() + "/" + disease + "/img" + patches.get(0).formatImgno() + ".zip";
           uploadZipfile(imageFolder, zipPath); //bring me to life
           //Toast.makeText(context, "SENTTT!!!", Toast.LENGTH_SHORT).show(); //test
-          //uploadXMLFiles();
 
           // Load next image
           loadNextImage();
@@ -1233,8 +1284,8 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           //Toast.makeText(context, "IP address: " + HTTP_IP_ADDRESS + "\nPort: " + HTTP_PORT + "\nHome: " + HTTP_HOME, Toast.LENGTH_SHORT).show();
      }
 
-     public boolean isBetween(float x1, float y1, float x2, float y2, float radius) {
-          return (getRadius(x1,y1,x2,y2) <= radius);
+     public boolean isBetween(float cx, float cy, float x, float y, float radius) {
+          return (getRadius(cx,cy,x,y) <= radius);
      }
 
      public float getMidpoint(float a, float b) {
@@ -1246,7 +1297,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
      }
 
      public float getRadius(float x1, float y1, float x2, float y2) {
-          return (float)(Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2)))/2);
+          return (float)((Math.sqrt(((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2))))/2)-10;
      }
 
 
