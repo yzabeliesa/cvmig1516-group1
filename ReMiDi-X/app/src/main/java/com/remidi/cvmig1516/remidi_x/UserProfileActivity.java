@@ -172,10 +172,6 @@ public class UserProfileActivity extends ActionBarActivity
                          toast = Toast.makeText(getApplicationContext(), "Feature unavailable", Toast.LENGTH_SHORT);
                          toast.show();
                          break;
-                    case 3: // Logout
-                         toast = Toast.makeText(getApplicationContext(), "Feature unavailable", Toast.LENGTH_SHORT);
-                         toast.show();
-                         break;
                }
 
           }
@@ -192,20 +188,6 @@ public class UserProfileActivity extends ActionBarActivity
           actionBar.setDisplayShowTitleEnabled(true);
           actionBar.setTitle(mTitle);
      }
-
-     public void viewMessages(View view) {
-          Toast.makeText(getApplicationContext(), "Messages!", Toast.LENGTH_SHORT).show();
-     }
-
-     public void viewLabels(View view) {
-          Toast.makeText(getApplicationContext(), "Labels!", Toast.LENGTH_SHORT).show();
-     }
-
-     public void viewValidation(View view) {
-          Toast.makeText(getApplicationContext(), "Validation!", Toast.LENGTH_SHORT).show();
-     }
-
-
 
 
      /**

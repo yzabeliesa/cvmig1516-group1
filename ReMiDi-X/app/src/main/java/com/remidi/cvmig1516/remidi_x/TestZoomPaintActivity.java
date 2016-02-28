@@ -57,9 +57,9 @@ public class TestZoomPaintActivity extends ActionBarActivity {
      final int PATCH_COMPLETE = 1;
      final int PATCH_INCOMPLETE = 2;
 
-     final int DRAW_CLEAR = 0; // erase all
-     final int DRAW_CURRENT = 1; // new patch
-     final int DRAW_ALL = 2; // delete, patch completion
+     //final int DRAW_CLEAR = 0; // erase all
+     //final int DRAW_CURRENT = 1; // new patch
+     //final int DRAW_ALL = 2; // delete, patch completion
 
      Drawable[] sample_images;
      Dialog labelDialog;
