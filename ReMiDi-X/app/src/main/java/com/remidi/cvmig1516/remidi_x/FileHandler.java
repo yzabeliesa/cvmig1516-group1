@@ -28,6 +28,8 @@ public class FileHandler {
           filefolder = context.getFilesDir().toString();
           filepath =  filefolder + "/" + filename;
           file = new File(filefolder, filename);
+          File folder = new File(filefolder);
+          if (!folder.exists()) folder.mkdir();
           try {
                Log.d("FILE PROCESS", "CHECKING NEW FILE");
                if (!file.exists()) {

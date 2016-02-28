@@ -5,10 +5,44 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/pink"
     tools:context="com.remidi.cvmig1516.remidi_x.TestZoomPaintActivity">
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:id="@+id/button_test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Patch mode"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="50dp"/>
+
+    <LinearLayout
+        android:id="@+id/drawing_pad_test"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/text_instructions_test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/labeler_instructions"
+            android:layout_gravity="center|bottom"
+            android:textAlignment="center"
+            android:textColor="#ffffff"
+            android:layout_marginTop="16dp"
+            />
+
+    </LinearLayout>
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send diagnosis"
+        android:layout_gravity="center|bottom|clip_vertical"
+        android:onClick="confirmSendData"
+        android:backgroundTint="@color/green"/>
 
 </LinearLayout>

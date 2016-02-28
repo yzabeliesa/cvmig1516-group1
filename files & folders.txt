@@ -1,3 +1,4 @@
+=========================
 LEGEND
 =========================
 / - folder
@@ -18,7 +19,7 @@ LEGEND
 		@img<imgno>.zip <-- will be moved to remidiDatabase right after creation
 
 	/disease_<diseasenum>
-		"Directory for received disease images"
+		"Directory for received disease images to be patched"
 		*img<imageno>.png
 
 	/remidiDatabase <-- myDirectory
@@ -28,5 +29,16 @@ LEGEND
 			/<imageno>_<patchno>
 				*textData.xml
 
-	*disease-counter.txt
+	/zipStorage
+		"where the retrieved image zip files are located and then unzip to disease_<diseasenum> folders and then zip files are deleted immediately"
 
+	/labelerInfo
+		"Located here are txt files where the info of labeler is located"
+		validator_id.txt <-- Loop Service needs this
+
+	/patched_<diseasenum>
+		"Should contain images already patched but not yet sent to server (deleted when already sent) [not yet implemented]" 
+		"Should be done by Uploader and LoopService"
+		*img<imageno>.png
+
+	*disease-counter.txt <-- Counts how many images are labeled in each disease category
