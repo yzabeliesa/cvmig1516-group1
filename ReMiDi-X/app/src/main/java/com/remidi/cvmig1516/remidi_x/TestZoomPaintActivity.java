@@ -13,6 +13,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -140,8 +142,8 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                validator = extras.getString("Validator");
           }
           */
-          disease = "Malaria"; //test only, delete me at main
-          validator = "some validator"; //test only, delete me at main
+          disease = "Malaria"; // HERE IN TESTZOOM ONLY
+          validator = "some validator"; // HERE IN TESTZOOM ONLY
 
           // Load uploader
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
@@ -155,7 +157,8 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           image_directory = context.getFilesDir() + "/disease_" + disease_num;
 
           // Set Activity title
-          this.setTitle("Labeler: " + disease);
+          this.setTitle("Test Labeler: " + disease); // HERE IN TESTZOOM ONLY
+          // this.setTitle("Labeler: " + disease); // UNCOMMENT ME IN MAIN
 
           // Initialize images // TEST ONLY
           sample_images = initializeImageArray(); // HERE IN TESTZOOM ONLY
@@ -390,6 +393,10 @@ public class TestZoomPaintActivity extends ActionBarActivity {
           boolean isPatching = false;
           boolean initialized = false;
 
+          final int CIRCLE_STROKE = 7;
+          final int TEXT_STROKE = 5;
+          final int OFFSET_CONSTANT = 10;
+
           public DrawingView(Context context) {
                super(context);
                // TODO Auto-generated constructor stub
@@ -398,6 +405,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                mPaint.setStyle(Paint.Style.STROKE);
                mPaint.setShadowLayer(5, 2, 2, Color.BLACK);
                mPaint.setTextSize(50);
+               mPaint.setTextAlign(Paint.Align.CENTER);
                mPaint.setAntiAlias(true);
                mPaint.setColor(Color.WHITE);
 
@@ -428,10 +436,12 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                               mPaint.setColor(getResources().getColor(R.color.green));
                          else mPaint.setColor(getResources().getColor(R.color.red));
 
-                         //mPaint.setStrokeWidth(5);
-                         mCanvas.drawCircle(patch.x*scaleFactor, patch.y*scaleFactor, patch.radius*scaleFactor, mPaint);
-                         //mPaint.setStrokeWidth(3);
-                         mCanvas.drawText((patch.patchno + 1) + "", patch.x*scaleFactor, patch.y*scaleFactor, mPaint);
+                         mPaint.setStrokeWidth(CIRCLE_STROKE);
+                         mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+
+                         String text = (patch.patchno + 1) + "";
+                         mPaint.setStrokeWidth(TEXT_STROKE);
+                         mCanvas.drawText(text, patch.x, patch.y - ((mPaint.descent() + mPaint.ascent()) / 2) , mPaint);
                     }
                     initialized = true;
                }
@@ -450,10 +460,12 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                          mPaint.setColor(getResources().getColor(R.color.green));
                     else mPaint.setColor(getResources().getColor(R.color.red));
 
-                    mPaint.setStrokeWidth(7);
-                    mCanvas.drawCircle(patch.x*scaleFactor, patch.y*scaleFactor, patch.radius*scaleFactor, mPaint);
-                    mPaint.setStrokeWidth(5);
-                    mCanvas.drawText((patch.patchno+1) + "", patch.x, patch.y, mPaint);
+                    mPaint.setStrokeWidth(CIRCLE_STROKE);
+                    mCanvas.drawCircle(patch.x, patch.y, patch.radius, mPaint);
+
+                    String text = (patch.patchno + 1) + "";
+                    mPaint.setStrokeWidth(TEXT_STROKE);
+                    mCanvas.drawText(text, patch.x, patch.y - ((mPaint.descent() + mPaint.ascent()) / 2), mPaint);
                }
 
           }
@@ -475,7 +487,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                isPatching = true;
                for (int i = 0; i<patches.size(); i++) {
                     Patch patch = patches.get(i);
-                    if (isBetween(patch.x*scaleFactor,patch.y*scaleFactor,x,y,patch.radius*scaleFactor)) {
+                    if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
                          current_patch = i;
                          currently_new = false;
                          isPatching = false;
@@ -489,8 +501,8 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
           private void touch_up(float x, float y) {
 
-               mX = x;
-               mY = y;
+               mX = x - OFFSET_CONSTANT;
+               mY = y - OFFSET_CONSTANT;
                radius = getRadius(initX, initY, mX, mY);
                //Toast.makeText(context, mX + ", " + mY, Toast.LENGTH_SHORT).show();
 
@@ -513,10 +525,12 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                               mPaint.setColor(getResources().getColor(R.color.green));
                          else mPaint.setColor(getResources().getColor(R.color.red));
 
-                         mPaint.setStrokeWidth(7);
+                         mPaint.setStrokeWidth(CIRCLE_STROKE);
                          mCanvas.drawCircle(cx, cy, radius, mPaint);
-                         mPaint.setStrokeWidth(5);
-                         mCanvas.drawText((current_patch + 1) + "", cx, cy, mPaint);
+
+                         String text = (current_patch + 1) + "";
+                         mPaint.setStrokeWidth(TEXT_STROKE);
+                         mCanvas.drawText(text, cx, cy - ((mPaint.descent() + mPaint.ascent()) / 2), mPaint);
 
                          Toast.makeText(context, "Patch created! \\:D/\nX: " + patch.x + "\nY: " + patch.y + "\nRadius: " + patch.radius, Toast.LENGTH_LONG).show();
 
@@ -532,7 +546,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                     int i;
                     for (i = 0; i<patches.size(); i++) {
                          Patch patch = patches.get(i);
-                         if (isBetween(patch.x*scaleFactor,patch.y*scaleFactor,x,y,patch.radius*scaleFactor)) {
+                         if (isBetween(patch.x,patch.y,x,y,patch.radius)) {
                               current_patch = i;
                               currently_new = false;
                               isPatching = false;
@@ -987,7 +1001,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
      public void createPatch(float x, float y, float radius) {
           final int patchno = patches.size();
-          Patch patch = new Patch(context, current_image, patchno, x/scaleFactor, y/scaleFactor, radius/scaleFactor, disease);
+          Patch patch = new Patch(context, current_image, patchno, x, y, radius, disease);
           patches.add(patch);
           currently_new = true;
           current_patch = patchno;
@@ -998,6 +1012,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
      public void deletePatch() {
 
           if (patches.size() > 0) {
+
                int patchno = current_patch;
                Patch patch = patches.get(patchno);
                patch.delete();
@@ -1055,7 +1070,7 @@ public class TestZoomPaintActivity extends ActionBarActivity {
                public void onClick(DialogInterface dialog, int which) {
                     switch (which) {
                          case DialogInterface.BUTTON_POSITIVE:
-                              sendData();
+                              checkForPatches();
                               break;
                          case DialogInterface.BUTTON_NEGATIVE:
                               return;
@@ -1068,13 +1083,34 @@ public class TestZoomPaintActivity extends ActionBarActivity {
 
      }
 
-     public void sendData() {
+     public void checkForPatches() {
+
+          if (patches.size() == 0) {
+               DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                         switch (which) {
+                              case DialogInterface.BUTTON_POSITIVE:
+                                   // Send diagnosis
+                                   sendData(false);
+                                   break;
+                              case DialogInterface.BUTTON_NEGATIVE:
+                                   // Cancel
+                                   break;
+                         }
+                    }
+               };
+               AlertDialog.Builder builder = new AlertDialog.Builder(context);
+               builder.setMessage("Sending without creating any patches would mean this sample is not infected. Are you sure you want to send this diagnosis?").setPositiveButton("Yes", dialogClickListener)
+                       .setNegativeButton("No", dialogClickListener).show();
+          }
+          else sendData(true);
+
+     }
+
+     public void sendData(boolean infected) {
 
           // Check if all patches have enough data. Continue if yes, toast and return if no.
-          if (patches.size() == 0) {
-               Toast.makeText(context, "Image has no diagnosis.", Toast.LENGTH_SHORT).show();
-               return;
-          }
 
           boolean patchDataComplete = true;
           for (int i = 0; i<patches.size(); i++) {
