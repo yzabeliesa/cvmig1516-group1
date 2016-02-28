@@ -1,6 +1,5 @@
 package com.remidi.cvmig1516.remidi_x;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +21,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
 
           context = getApplicationContext();
           findViewById(R.id.new_password).setVisibility(View.GONE);
+          findViewById(R.id.retype_password).setVisibility(View.GONE);
           findViewById(R.id.password_button).setVisibility(View.GONE);
 
           DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -30,6 +30,7 @@ public class ChangePasswordActivity extends ActionBarActivity {
                     switch (which) {
                          case DialogInterface.BUTTON_POSITIVE:
                               findViewById(R.id.new_password).setVisibility(View.VISIBLE);
+                              findViewById(R.id.retype_password).setVisibility(View.VISIBLE);
                               findViewById(R.id.password_button).setVisibility(View.VISIBLE);
                               break;
                          case DialogInterface.BUTTON_NEGATIVE:
@@ -49,6 +50,13 @@ public class ChangePasswordActivity extends ActionBarActivity {
      public void changePassword(View view) {
 
           String newPassword = ((EditText)findViewById(R.id.new_password)).getText().toString();
+          String confirmPassword = ((EditText)findViewById(R.id.retype_password)).getText().toString();
+
+          if (!newPassword.equals(confirmPassword)) {
+               Toast.makeText(context, "Passwords don't match.", Toast.LENGTH_SHORT).show();
+               return;
+          }
+
           Toast.makeText(context, "New password: " + newPassword, Toast.LENGTH_SHORT).show(); // test
 
 
