@@ -38,6 +38,8 @@ public class UserProfileActivity extends ActionBarActivity
      Context context;
      ProgressDialog pd;
 
+     String labeler_name = "some random labeler";
+
      /**
       * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
       */
@@ -55,6 +57,15 @@ public class UserProfileActivity extends ActionBarActivity
           setContentView(R.layout.activity_user_profile);
 
           context = getApplicationContext();
+
+          Bundle extras = getIntent().getExtras();
+
+          if (extras != null) {
+               labeler_name = extras.getString("Username");
+          }
+
+          Intent myIntent = new Intent(getApplicationContext(), LoopService.class);
+          getApplicationContext().startService(myIntent);
 
           pd = new ProgressDialog(this);
           pd.setMessage("Retrieving images");
@@ -86,12 +97,12 @@ public class UserProfileActivity extends ActionBarActivity
                                         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                                         NetworkInfo ani = cm.getActiveNetworkInfo();
                                         if ((ani == null || !ani.isConnected()) && timeElapsed == 2) this.interrupt();
-                                        else timeElapsed += 2;
+                                        else timeElapsed++;
 
-                                        sleep(2000);
+                                        sleep(1000);
                                         Log.d("main" + ".pd.Thread", "sleep");
 
-                                        if (populated == POPULATED_IMAGE_THRESHOLD || (timeElapsed >=20 && populated == 0)) this.interrupt(); //TEST ONLY
+                                        if (populated == POPULATED_IMAGE_THRESHOLD || (timeElapsed >=60 && populated == 0)) this.interrupt(); //TEST ONLY
                                    }
                               } catch (InterruptedException e) {
                                    e.printStackTrace();
@@ -149,7 +160,7 @@ public class UserProfileActivity extends ActionBarActivity
           // update the main content by replacing fragments
           FragmentManager fragmentManager = getSupportFragmentManager();
           fragmentManager.beginTransaction()
-                  .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                  .replace(R.id.container, PlaceholderFragment.newInstance(position + 1,labeler_name))
                   .commit();
 
      }
@@ -201,17 +212,18 @@ public class UserProfileActivity extends ActionBarActivity
 
           private static final String ARG_SECTION_NUMBER = "section_number";
           int DISEASE_COUNT = 18;
-          String labeler_name = "some random labeler";
+          static String labeler_name = "some random labeler";
 
           /**
            * Returns a new instance of this fragment for the given section
            * number.
            */
-          public static PlaceholderFragment newInstance(int sectionNumber) {
+          public static PlaceholderFragment newInstance(int sectionNumber,String name) {
                PlaceholderFragment fragment = new PlaceholderFragment();
                Bundle args = new Bundle();
                args.putInt(ARG_SECTION_NUMBER, sectionNumber);
                fragment.setArguments(args);
+               labeler_name = name;
 
                return fragment;
           }

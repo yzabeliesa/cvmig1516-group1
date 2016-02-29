@@ -10,7 +10,7 @@ import java.io.File;
 
 public class StartAppActivity extends ActionBarActivity {
 
-     final int SECONDS = 5;
+     final int HALF_SECONDS = 6; // 3 seconds
 
      @Override
      protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +28,9 @@ public class StartAppActivity extends ActionBarActivity {
                public void run() {
                     try {
                          int timeElapsed = 0;
-                         while (timeElapsed <= SECONDS) {
-                              sleep(1000);
-                              progressBar.setProgress(timeElapsed*(100/SECONDS));
+                         while (timeElapsed <= HALF_SECONDS) {
+                              sleep(500);
+                              progressBar.setProgress(timeElapsed*(100/(HALF_SECONDS)));
                               timeElapsed+=1;
                          }
                          sleep(500);
