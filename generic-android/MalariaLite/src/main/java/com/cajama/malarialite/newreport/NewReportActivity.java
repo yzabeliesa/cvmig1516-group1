@@ -16,6 +16,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.format.Time;
 import android.util.Log;
@@ -173,22 +174,22 @@ public class NewReportActivity extends SherlockActivity {
 
                 switch (pos) {
                     case 0:
-                        adapter = ArrayAdapter.createFromResource(activity, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.blood_disease_array, R.layout.spinner_text);
                         break;
                     case 1:
-                        adapter = ArrayAdapter.createFromResource(activity, R.array.stool_disease_array, android.R.layout.simple_spinner_item);
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.stool_disease_array, R.layout.spinner_text);
                         break;
                     case 2:
-                        adapter = ArrayAdapter.createFromResource(activity, R.array.sputum_disease_array, android.R.layout.simple_spinner_item);
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.sputum_disease_array, R.layout.spinner_text);
                         break;
                     case 3:
-                        adapter = ArrayAdapter.createFromResource(activity, R.array.skinslit_disease_array, android.R.layout.simple_spinner_item);
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.skinslit_disease_array, R.layout.spinner_text);
                         break;
                     default:
-                        adapter = ArrayAdapter.createFromResource(activity, R.array.reprotract_disease_array, android.R.layout.simple_spinner_item);
+                        adapter = ArrayAdapter.createFromResource(activity, R.array.reprotract_disease_array, R.layout.spinner_text);
                         break;
                 }
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                //adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 disease_spinner.setAdapter(adapter);
             }
 
@@ -199,13 +200,13 @@ public class NewReportActivity extends SherlockActivity {
 
         };
 
-        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.specimen_array, android.R.layout.simple_spinner_item);
-        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this, R.array.specimen_array, R.layout.spinner_text);
+        //adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         specimen_spinner.setAdapter(adapter1);
         specimen_spinner.setOnItemSelectedListener(specimen_listener);
 
-        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.blood_disease_array, android.R.layout.simple_spinner_item);
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this, R.array.blood_disease_array, R.layout.spinner_text);
+        //adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         disease_spinner.setAdapter(adapter2);
 
         // <-- ABBEY'S SHIT ENDS HERE
@@ -815,7 +816,7 @@ public class NewReportActivity extends SherlockActivity {
                 break;
             }
         }
-        entries.add(putEntry("Disease-num",disease_num+""));
+        //entries.add(putEntry("Disease-num",disease_num+"")); //test only -- Abbey
         entryList.add(disease_num + "");
 
         //CheckBox priority = (CheckBox) findViewById(R.id.priority);
@@ -873,7 +874,7 @@ public class NewReportActivity extends SherlockActivity {
         entries.add(putEntry("Municipality", munic));
         entryList.add(munic);
 
-        boolean testFlag = false;//PreferenceManager.getDefaultSharedPreferences(this).getBoolean("test_data_flag", false);
+        boolean testFlag = /*false;*/PreferenceManager.getDefaultSharedPreferences(this).getBoolean("test_data_flag", false);
         entryList.add(String.valueOf(testFlag));
 
         return entries;

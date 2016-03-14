@@ -1204,9 +1204,10 @@ containing a value of this type.
         public static final int spinner_municipality=0x7f030029;
         public static final int spinner_province=0x7f03002a;
         public static final int spinner_region=0x7f03002b;
-        public static final int summary_row=0x7f03002c;
-        public static final int test=0x7f03002d;
-        public static final int upload_progress=0x7f03002e;
+        public static final int spinner_text=0x7f03002c;
+        public static final int summary_row=0x7f03002d;
+        public static final int test=0x7f03002e;
+        public static final int upload_progress=0x7f03002f;
     }
     public static final class menu {
         public static final int fullscreen_photo=0x7f0d0000;
