@@ -31,14 +31,14 @@ import java.util.ArrayList;
 public class UserProfileActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-     int DISEASE_COUNT = 18;
+     int DISEASE_COUNT = 19;
      int DISEASE_IMAGE_THRESHOLD = 0;
      int POPULATED_IMAGE_THRESHOLD = 1;
      Activity activity;
      Context context;
      ProgressDialog pd;
 
-     String labeler_name = "some random labeler";
+     String labeler_name = "";
 
      /**
       * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -160,7 +160,7 @@ public class UserProfileActivity extends ActionBarActivity
           // update the main content by replacing fragments
           FragmentManager fragmentManager = getSupportFragmentManager();
           fragmentManager.beginTransaction()
-                  .replace(R.id.container, PlaceholderFragment.newInstance(position + 1,labeler_name))
+                  .replace(R.id.container, PlaceholderFragment.newInstance(position + 1,labeler_name,context))
                   .commit();
 
      }
@@ -211,19 +211,21 @@ public class UserProfileActivity extends ActionBarActivity
            */
 
           private static final String ARG_SECTION_NUMBER = "section_number";
-          int DISEASE_COUNT = 18;
-          static String labeler_name = "some random labeler";
+          int DISEASE_COUNT = 19;
+          static String labeler_name = "";
+          private static Context context;
 
           /**
            * Returns a new instance of this fragment for the given section
            * number.
            */
-          public static PlaceholderFragment newInstance(int sectionNumber,String name) {
+          public static PlaceholderFragment newInstance(int sectionNumber,String name,Context c) {
                PlaceholderFragment fragment = new PlaceholderFragment();
                Bundle args = new Bundle();
                args.putInt(ARG_SECTION_NUMBER, sectionNumber);
                fragment.setArguments(args);
                labeler_name = name;
+               context = c;
 
                return fragment;
           }
@@ -242,7 +244,6 @@ public class UserProfileActivity extends ActionBarActivity
                // Setup count info
                final LinearLayout root = (LinearLayout) rootView.findViewById(R.id.profile_layout);
                Activity activity = getActivity();
-
                DiseaseCountFile diseaseCountFile = new DiseaseCountFile(activity);
                ArrayList<Integer> counts = diseaseCountFile.disease_counts;
                String[] diseases = getResources().getStringArray(R.array.all_diseases);

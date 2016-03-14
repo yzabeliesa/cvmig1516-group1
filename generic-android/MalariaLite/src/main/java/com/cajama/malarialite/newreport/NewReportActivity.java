@@ -803,18 +803,19 @@ public class NewReportActivity extends SherlockActivity {
         //Disease  -- by Abbey
         Spinner disease = (Spinner) findViewById(R.id.disease_spinner);
         String dis = checkEmpty(disease.getSelectedItem().toString());
-        entries.add(putEntry("Disease", dis));
+        //entries.add(putEntry("Disease", dis)); //test
         entryList.add(dis);
 
         //Disease Number  -- by Abbey (not included in summary)
         int disease_num = 1;
         String[] diseases = getResources().getStringArray(R.array.all_diseases);
         for (int i = 0; i<diseases.length; i++) {
-            if (diseases[i].equals(disease)) {
+            if (diseases[i].equals(dis)) {
                 disease_num = i+1;
                 break;
             }
         }
+        entries.add(putEntry("Disease-num",disease_num+""));
         entryList.add(disease_num + "");
 
         //CheckBox priority = (CheckBox) findViewById(R.id.priority);

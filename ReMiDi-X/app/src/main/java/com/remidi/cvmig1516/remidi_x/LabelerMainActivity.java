@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -131,16 +132,16 @@ public class LabelerMainActivity extends ActionBarActivity {
           }
 
           // Get intent data
-          /* // UNCOMMENT ME WHEN NO LONGER TESTING
+          ///* // UNCOMMENT ME WHEN NO LONGER TESTING
           Bundle extras = getIntent().getExtras();
 
           if (extras != null) {
                disease = extras.getString("Disease");
                validator = extras.getString("Validator");
           }
-          */
-          disease = "Malaria"; // HERE IN TESTZOOM ONLY
-          validator = "some validator"; // HERE IN TESTZOOM ONLY
+          //*/
+          //disease = "Malaria"; // HERE IN TESTZOOM ONLY
+          //validator = "some validator"; // HERE IN TESTZOOM ONLY
 
           // Load uploader
           String[] diseases = getResources().getStringArray(R.array.all_diseases);
@@ -158,10 +159,10 @@ public class LabelerMainActivity extends ActionBarActivity {
           this.setTitle("Labeler: " + disease); // UNCOMMENT ME IN MAIN
 
           // Initialize images // TEST ONLY
-          sample_images = initializeImageArray(); // HERE IN TESTZOOM ONLY
+          //sample_images = initializeImageArray(); // HERE IN TESTZOOM ONLY
 
 
-          /* //UNCOMMENT ME IN MAIN
+          ///* //UNCOMMENT ME IN MAIN
 
           // Get image file from folder
           File[] images = new File(image_directory).listFiles();
@@ -177,11 +178,11 @@ public class LabelerMainActivity extends ActionBarActivity {
           current_image = tokenizeImageNum(image);
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
 
-          */
+          //*/
 
-          current_image = 0; // HERE IN TESTZOOM ONLY
-          BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[0]; // HERE IN TESTZOOM ONLY
-          Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
+          //current_image = 0; // HERE IN TESTZOOM ONLY
+          //BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[0]; // HERE IN TESTZOOM ONLY
+          //Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
 
           // Create handler for progress file
           progress_file = new FileHandler(context,disease_num + "-progress.txt", disease, false);
@@ -716,6 +717,9 @@ public class LabelerMainActivity extends ActionBarActivity {
                case "Capillariasis":
                     species = getResources().getStringArray(R.array.capillariasis_species);
                     break;
+               case "Amoebiasis":
+                    species = getResources().getStringArray(R.array.amoebiasis_species);
+                    break;
                case "Giardiasis":
                     species = getResources().getStringArray(R.array.giardiasis_species);
                     break;
@@ -844,21 +848,37 @@ public class LabelerMainActivity extends ActionBarActivity {
 
           String[] image_file_types = getResources().getStringArray(R.array.image_file_types);
           StringTokenizer token2 = token1;
+          String str = token1.nextToken();
+          /*
           for (int i = 0; i<image_file_types.length; i++) {
                String file_type = image_file_types[i];
-               if (file_type.contains(file_type)) token2 = new StringTokenizer(token1.nextToken(), "." + file_type);
+               if (str.contains(file_type)) {
+                    token2 = new StringTokenizer(str, "." + file_type);
+                    break;
+               }
           }
+          */
+          token2 = new StringTokenizer(str, ".jpg");
 
-          return Integer.parseInt(token2.nextToken());
+          String str2 = token2.nextToken();
+
+          Log.d("Str1", str);
+          Log.d("Str2", str2);
+
+          return Integer.parseInt(str2);
      }
 
      public void loadNextImage() {
 
-          /*
+          ///*
           File[] images = (new File(image_directory)).listFiles();
 
+          File image = images[0]; // Gets first image in image_directory
+          image.delete();
 
-           // UNCOMMENT ME IN MAIN
+          images = (new File(image_directory)).listFiles();
+
+          // UNCOMMENT ME IN MAIN
           if (images.length == 0) {
                Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class);
                startActivity(intent);
@@ -866,25 +886,24 @@ public class LabelerMainActivity extends ActionBarActivity {
                finish();
           }
 
-          File image = images[0]; // Gets first image in image_directory
-          image.delete();
           image = images[0];
-
-          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
           current_image = tokenizeImageNum(image);
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
-          */
 
-          current_image++; // HERE IN TESTZOOM ONLY
-          if (current_image == 5) { // HERE IN TESTZOOM ONLY
-               Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class); // HERE IN TESTZOOM ONLY
-               startActivity(intent); // HERE IN TESTZOOM ONLY
-               progress_file.delete(); // HERE IN TESTZOOM ONLY
-               finish(); // HERE IN TESTZOOM ONLY
-          } // HERE IN TESTZOOM ONLY
+          //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
-          BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
-          Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
+          //*/
+
+          //current_image++; // HERE IN TESTZOOM ONLY
+          //if (current_image == 5) { // HERE IN TESTZOOM ONLY
+          //     Intent intent = new Intent(getApplicationContext(), NoImagesActivity.class); // HERE IN TESTZOOM ONLY
+          //     startActivity(intent); // HERE IN TESTZOOM ONLY
+          //     progress_file.delete(); // HERE IN TESTZOOM ONLY
+          //     finish(); // HERE IN TESTZOOM ONLY
+          //} // HERE IN TESTZOOM ONLY
+
+          //BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
+          //Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
 
           progress_file.write(current_image + "");
           initializeUI(disease);
@@ -918,17 +937,18 @@ public class LabelerMainActivity extends ActionBarActivity {
           mDrawingPad.addView(mContentView);
 
           scaleFactor = getScaleFactor(mContentView,screen_width);
+          //mContentView.setImageDrawable(sample_images[current_image]);
+          //drawable = mContentView.getDrawable();
           */
 
           // MAIN
-          //mContentView.setImageDrawable(sample_images[current_image]);
-          //drawable = mContentView.getDrawable();
+
           mContentView.resetDraw();
           mContentView.invalidate();
 
-          scaleFactor = getScaleFactor(mContentView,screen_width);
+          //scaleFactor = getScaleFactor(mContentView,screen_width);
 
-          zoomContentView = new ZoomImageView(this, getScaledImage(mContentView,screen_width), mDrawingPad);
+          zoomContentView = new ZoomImageView(this, getScaledImage(imageBitmap,screen_width), mDrawingPad);
           //zoomContentView.setImageBitmap(getScaledImage(mContentView,screen_width));
 
           if (mode == MODE_ZOOM) {
@@ -971,17 +991,17 @@ public class LabelerMainActivity extends ActionBarActivity {
           current_image = Integer.parseInt(tokens.nextToken());
 
 
-          /* UNCOMMENT IN MAIN
+          ///* UNCOMMENT IN MAIN
 
           File[] images = (new File(image_directory)).listFiles();
           File image = images[0];
           Bitmap imageBitmap = BitmapFactory.decodeFile(image.getAbsolutePath());
           //Toast.makeText(context, "Retrieved image: " + image.getAbsolutePath(), Toast.LENGTH_SHORT).show();
 
-          */
+          //*/
 
-          BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
-          Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
+          //BitmapDrawable bitmapDrawable = (BitmapDrawable)sample_images[current_image]; // HERE IN TESTZOOM ONLY
+          //Bitmap imageBitmap = bitmapDrawable.getBitmap(); // HERE IN TESTZOOM ONLY
 
           mContentView.setImageBitmap(imageBitmap);
 

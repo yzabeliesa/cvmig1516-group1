@@ -63,7 +63,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
      public String HTTP_HOME = ""; // Retrieved upon start
      public int HTTP_PORT = 80;
      public File myUserDirectory;
-
+     public String error_message = "";
      private static final String[] DUMMY_CREDENTIALS = new String[]{
              "foo@example.com:hello", "bar@example.com:world"
      };
@@ -313,7 +313,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                     }
                }*/
 
-               String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + "/labeler_login/";
+               String urlstr = "http://" + HTTP_HOST + ":" + HTTP_PORT + "/api/labeler/login/";
                return verify_account(mEmail, mPassword, urlstr);
 
                // TODO: register the new account here.
@@ -330,17 +330,26 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                     FileHandler fh = new FileHandler(myUserDirectory.getAbsolutePath(), "labeler_id.txt");
                     fh.write("" + VALIDATOR_ID);
 
+                    FileHandler fh1 = new FileHandler(myUserDirectory.getAbsolutePath(), "labeler_username.txt");
+                    fh1.write("" + mEmail);
+
+                    FileHandler fh2 = new FileHandler(myUserDirectory.getAbsolutePath(), "labeler_password.txt");
+                    fh2.write("" + mPassword);
+
                     /*
                     Intent myIntent = new Intent(getApplicationContext(), LoopService.class);
                     getApplicationContext().startService(myIntent);
                     */
 
-                    Intent intent = new Intent(getApplicationContext(), /*UserProfileActivity.class*/ChangePasswordActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class/*ChangePasswordActivity.class*/);
                     intent.putExtra("Username",mEmail);
                     startActivity(intent);
+
+                    finish();
+
                } else {
-                    mPasswordView.setError("Password not matched with Username");
-                    //mPasswordView.setError("labeler id: " + VALIDATOR_ID);
+                    //mPasswordView.setError("Password not matched with Username");
+                    mPasswordView.setError("labeler id: " + VALIDATOR_ID);
                     mPasswordView.requestFocus();
                }
           }

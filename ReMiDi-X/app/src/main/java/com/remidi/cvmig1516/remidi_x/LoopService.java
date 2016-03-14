@@ -74,7 +74,7 @@ public class LoopService extends Service {
      public int IMAGE_COUNTS = 5;
      public int VALIDATOR_ID;
      public String RESPONDED = "";
-     public int DISEASE_COUNT = 18;
+     public int DISEASE_COUNT = 19;
      public int DISEASE_IMAGE_THRESHOLD = 10;
 
      public int no_more_img = 0;
@@ -204,7 +204,7 @@ public class LoopService extends Service {
                          // after scanning through the disease folders, check if either no more space in all folder
                          // or no more pictures to retrieve in all disease,
                          // if yes then,
-                         if (no_more_img >= 18 || no_more_disease_space >= 18) {
+                         if (no_more_img >= DISEASE_COUNT || no_more_disease_space >= DISEASE_COUNT) {
                               Thread.sleep(1000 * 60 * 60); // 1 hour
                          }
                     } catch(Exception e) {

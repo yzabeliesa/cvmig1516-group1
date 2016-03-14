@@ -25,6 +25,7 @@
         <item>Paragonimiasis</item>
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
+        <item>Amoebiasis</item>
         <item>Giardiasis</item>
         <item>Unspecified Infection (Stool parasite)</item>
         <item>Tuberculosis</item>
@@ -58,6 +59,7 @@
         <item>Paragonimiasis</item>
         <item>Echinostomiasis</item>
         <item>Capillariasis</item>
+        <item>Amoebiasis</item>
         <item>Giardiasis</item>
         <item>Unspecified Infection (Stool parasite)</item>
     </string-array>

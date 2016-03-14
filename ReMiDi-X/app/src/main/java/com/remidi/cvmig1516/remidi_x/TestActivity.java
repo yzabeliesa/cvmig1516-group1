@@ -117,7 +117,7 @@ public class TestActivity extends ActionBarActivity {
      public long ave_getting_time = 0;
 
      public int disease_count_id = 1;
-     public int DISEASE_COUNT = 18;
+     public int DISEASE_COUNT = 19;
      public int DISEASE_IMAGE_THRESHOLD = 10;
 
 
@@ -218,7 +218,7 @@ public class TestActivity extends ActionBarActivity {
                          // after scanning through the disease folders, check if either no more space in all folder
                          // or no more pictures to retrieve in all disease,
                          // if yes then,
-                         if (no_more_img >= 18 || no_more_disease_space >= 18) {
+                         if (no_more_img >= DISEASE_COUNT || no_more_disease_space >= DISEASE_COUNT) {
                               //Thread.sleep(1000 * 60 * 60); // 1 hour
                          }
                     } catch(Exception e) {
